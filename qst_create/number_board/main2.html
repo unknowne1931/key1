@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Indian Vehicle Number Plate Quiz</title>
+<style>
+  body {
+    background: #121212;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding: 30px;
+  }
+  h1 {
+    margin-bottom: 20px;
+    color: #f39c12;
+  }
+  #question {
+    font-size: 1.4em;
+    margin-bottom: 25px;
+  }
+  .option-btn {
+    background: #222;
+    border: 2px solid #444;
+    color: #eee;
+    padding: 12px 24px;
+    margin: 12px auto;
+    width: 300px;
+    max-width: 90vw;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+  }
+  .option-btn:hover {
+    background: #f39c12;
+    border-color: #f39c12;
+    color: #121212;
+  }
+  #feedback {
+    margin-top: 30px;
+    font-weight: 700;
+    font-size: 1.2em;
+    min-height: 32px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Indian Vehicle Number Plate Quiz</h1>
+<div id="question">Loading question...</div>
+<div id="options-container"></div>
+<div id="feedback" aria-live="polite"></div>
+
+<script>
+  // Expanded quiz data: Indian states and UT vehicle codes
+  const quizData = [
+    {code: 'AP', state: 'Andhra Pradesh'},
+    {code: 'AR', state: 'Arunachal Pradesh'},
+    {code: 'AS', state: 'Assam'},
+    {code: 'BR', state: 'Bihar'},
+    {code: 'CG', state: 'Chhattisgarh'},
+    {code: 'DL', state: 'Delhi'},
+    {code: 'GA', state: 'Goa'},
+    {code: 'GJ', state: 'Gujarat'},
+    {code: 'HR', state: 'Haryana'},
+    {code: 'HP', state: 'Himachal Pradesh'},
+    {code: 'JK', state: 'Jammu and Kashmir'},
+    {code: 'JH', state: 'Jharkhand'},
+    {code: 'KA', state: 'Karnataka'},
+    {code: 'KL', state: 'Kerala'},
+    {code: 'MP', state: 'Madhya Pradesh'},
+    {code: 'MH', state: 'Maharashtra'},
+    {code: 'MN', state: 'Manipur'},
+    {code: 'ML', state: 'Meghalaya'},
+    {code: 'MZ', state: 'Mizoram'},
+    {code: 'NL', state: 'Nagaland'},
+    {code: 'OD', state: 'Odisha'},
+    {code: 'PB', state: 'Punjab'},
+    {code: 'RJ', state: 'Rajasthan'},
+    {code: 'SK', state: 'Sikkim'},
+    {code: 'TN', state: 'Tamil Nadu'},
+    {code: 'TS', state: 'Telangana'},
+    {code: 'TR', state: 'Tripura'},
+    {code: 'UK', state: 'Uttarakhand'},
+    {code: 'UP', state: 'Uttar Pradesh'},
+    {code: 'WB', state: 'West Bengal'},
+    // Union Territories
+    {code: 'AN', state: 'Andaman and Nicobar Islands'},
+    {code: 'CH', state: 'Chandigarh'},
+    {code: 'DN', state: 'Dadra and Nagar Haveli and Daman and Diu'},
+    {code: 'LD', state: 'Lakshadweep'},
+    {code: 'PY', state: 'Puducherry'},
+  ];
+
+  // Helper: randomly misspell a word by swapping two letters
+  function misspell(word) {
+    if (word.length < 4) return word; // small words no change
+    let arr = word.split('');
+    let i = Math.floor(Math.random() * (arr.length - 1));
+    [arr[i], arr[i+1]] = [arr[i+1], arr[i]];
+    return arr.join('');
+  }
+
+  function shuffle(array) {
+    for(let i = array.length - 1; i > 0; i--){
+      let j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function generateOptions(correctObj) {
+    let options = [];
+    const includeNone = Math.random() < 0.4; // 40% chance to include None of the above
+    const misspellCorrect = includeNone && Math.random() < 0.7; // 70% chance to misspell correct if None included
+
+    let correctOption = misspellCorrect ? misspell(correctObj.state) : correctObj.state;
+    if (!includeNone) {
+      correctOption = correctObj.state; // no misspell if no None of above
+    }
+
+    options.push(correctOption);
+
+    // Pick 3 wrong options randomly
+    let wrongs = quizData.filter(q => q.state !== correctObj.state);
+    shuffle(wrongs);
+
+    while (options.length < 4 && wrongs.length) {
+      let wrongOpt = wrongs.pop().state;
+
+      // Sometimes misspell wrong options for confusion (30% chance)
+      if (Math.random() < 0.3) {
+        wrongOpt = misspell(wrongOpt);
+      }
+
+      options.push(wrongOpt);
+    }
+
+    // If None of the above included, replace a random wrong option with it
+    if (includeNone) {
+      let idx = Math.floor(Math.random() * 3) + 1; // index 1,2 or 3
+      options[idx] = "None of the above";
+    }
+
+    return shuffle(options);
+  }
+
+  // Show question and options
+  function showQuestion() {
+    const idx = Math.floor(Math.random() * quizData.length);
+    const correct = quizData[idx];
+    const questionDiv = document.getElementById('question');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackDiv = document.getElementById('feedback');
+
+    questionDiv.textContent = `Which state/UT uses the vehicle number code "${correct.code}"?`;
+    feedbackDiv.textContent = '';
+    optionsContainer.innerHTML = '';
+
+    const options = generateOptions(correct);
+
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        let isCorrect;
+        if (opt === "None of the above") {
+          isCorrect = !options.includes(correct.state);
+        } else {
+          isCorrect = (opt === correct.state);
+        }
+
+        if (isCorrect) {
+          feedbackDiv.textContent = "✅ Correct!";
+          feedbackDiv.style.color = "#4caf50";
+        } else {
+          feedbackDiv.textContent = `❌ Wrong! Correct answer: ${correct.state}`;
+          feedbackDiv.style.color = "#e74c3c";
+        }
+
+        setTimeout(showQuestion, 3000);
+      };
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+  // Start quiz
+  showQuestion();
+</script>
+
+</body>
+</html>

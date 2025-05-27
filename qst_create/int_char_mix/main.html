@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Character Count Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #stringBox {
+      font-size: 22px;
+      padding: 10px;
+      background: #f0f0f0;
+      border: 2px dashed #555;
+      width: fit-content;
+      margin-bottom: 20px;
+    }
+
+    .option {
+      display: block;
+      padding: 10px 15px;
+      margin: 5px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #eee;
+      width: fit-content;
+    }
+
+    .option:hover {
+      background-color: #ddd;
+    }
+
+    .correct {
+      background-color: #c8f7c5 !important;
+    }
+
+    .wrong {
+      background-color: #f8c5c5 !important;
+    }
+
+    .disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    #answerReveal {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Count the Characters Quiz</h2>
+
+<div id="stringBox"></div>
+<p id="questionText"></p>
+<div id="options"></div>
+<p id="answerReveal"></p>
+
+<script>
+  function getRandomString(length = 25) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let str = '';
+    for (let i = 0; i < length; i++) {
+      str += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return str;
+  }
+
+  function countLetters(str) {
+    return str.replace(/[^a-zA-Z]/g, '').length;
+  }
+
+  function countNumbers(str) {
+    return str.replace(/[^0-9]/g, '').length;
+  }
+
+  function generateQuiz() {
+  const str = getRandomString();
+  const mode = Math.random() < 0.5 ? 'numbers' : 'letters';
+  const correctAnswer = mode === 'numbers' ? countNumbers(str) : countLetters(str);
+  const includeNone = Math.random() < 0.5;
+
+  document.getElementById('stringBox').textContent = str;
+
+  const estimatedTime = (correctAnswer / 2.5).toFixed(1);
+  document.getElementById('questionText').textContent =
+    `How many ${mode} are in the string above? ⏱ Estimated time: ~${estimatedTime} sec`;
+
+  document.getElementById('answerReveal').textContent = "";
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = '';
+
+  const optionSet = new Set();
+
+  if (includeNone) {
+    while (optionSet.size < 3) {
+      const wrong = Math.floor(Math.random() * 30);
+      if (wrong !== correctAnswer) optionSet.add(wrong);
+    }
+  } else {
+    optionSet.add(correctAnswer);
+    while (optionSet.size < 4) {
+      const wrong = Math.floor(Math.random() * 30);
+      optionSet.add(wrong);
+    }
+  }
+
+  const optionArray = Array.from(optionSet).sort(() => Math.random() - 0.5);
+  let optionNumber = 1;
+
+  optionArray.forEach(opt => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.textContent = `${optionNumber++}) ${opt}`;
+    btn.onclick = () => handleAnswer(opt === correctAnswer, btn, correctAnswer);
+    optionsDiv.appendChild(btn);
+  });
+
+  if (includeNone) {
+    const noneBtn = document.createElement('div');
+    noneBtn.className = 'option';
+    noneBtn.textContent = `${optionNumber}) None of the above`;
+    noneBtn.onclick = () => handleAnswer(true, noneBtn, correctAnswer, true);
+    optionsDiv.appendChild(noneBtn);
+  }
+}
+
+
+  function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
+    const allOptions = document.querySelectorAll('.option');
+    allOptions.forEach(opt => {
+      opt.classList.add('disabled');
+
+      if (!isNone && opt.textContent.includes(`) ${correctAnswer}`)) {
+        opt.classList.add('correct');
+      }
+
+      if (isNone && opt.textContent.includes('None of the above')) {
+        opt.classList.add('correct');
+      }
+    });
+
+    if (!isCorrect) clickedBtn.classList.add('wrong');
+
+    document.getElementById('answerReveal').textContent = `Correct Answer: ${correctAnswer}`;
+  }
+
+  generateQuiz();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+<!-- Note -->
+
+<!-- 3 seconds to read questions -->
+<!-- 10 seconds to count questions -->
+<!-- total 13 seconds -->
+

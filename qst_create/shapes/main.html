@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shape Counter Quiz</title>
+  <style>
+
+    body{
+        width: 100%;
+        height: 100vh;
+        background-color: #444;
+    }
+
+    h2{
+        text-align: center;
+        color: #ffffff;
+        
+    }
+
+    #container {
+      width: 500px;
+      height: 300px;
+      border: 2px solid #333;
+      position: relative;
+      overflow: hidden;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      margin: auto;
+    }
+
+    .shape {
+      position: absolute;
+    }
+
+    .circle {
+      border-radius: 50%;
+    }
+
+    .square {}
+
+    .triangle {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 35px solid red;
+    }
+
+    .option {
+      padding: 10px 15px;
+      margin:auto;
+      border: 1px solid #444;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #eee;      
+      width: 120px;
+      background: linear-gradient(90deg, rgb(2, 142, 223), rgb(0, 38, 255));
+      color: #c8f7c5;
+      text-align: center;
+      font-weight: 600;
+    }
+
+
+
+    .option:hover {
+      background-color: #ddd;
+    }
+
+    .correct {
+      background-color: #c8f7c5 !important;
+    }
+
+    .wrong {
+      background-color: #f8c5c5 !important;
+    }
+
+    .disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    #answerReveal {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .question{
+        text-align: center;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+
+  </style>
+</head>
+<body>
+
+<h2>Guess the Shape Count!</h2>
+<div id="container"></div>
+
+<p id="question" class="question"></p>
+<div id="options"></div>
+<p id="answerReveal"></p>
+
+<script>
+  const container = document.getElementById('container');
+  const shapes = ['circle', 'square', 'triangle'];
+  const shapeCounts = { circle: 0, square: 0, triangle: 0 };
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  function getRandomColor() {
+    return `hsl(${Math.random() * 360}, 70%, 60%)`;
+  }
+
+  function createShape() {
+    const shapeType = shapes[getRandomInt(0, shapes.length)];
+    const size = getRandomInt(20, 50);
+    const shape = document.createElement('div');
+    shape.classList.add('shape', shapeType);
+
+    if (shapeType !== 'triangle') {
+      shape.style.width = size + 'px';
+      shape.style.height = size + 'px';
+      shape.style.backgroundColor = getRandomColor();
+    }
+
+    shape.style.left = getRandomInt(0, 500 - size) + 'px';
+    shape.style.top = getRandomInt(0, 300 - size) + 'px';
+
+    shapeCounts[shapeType]++;
+    container.appendChild(shape);
+  }
+
+  function generateShapes(count = 15) {
+    container.innerHTML = '';
+    Object.keys(shapeCounts).forEach(k => shapeCounts[k] = 0);
+    for (let i = 0; i < count; i++) {
+      createShape();
+    }
+  }
+
+  function generateQuestion() {
+    const targetShape = shapes[getRandomInt(0, shapes.length)];
+    const correctAnswer = shapeCounts[targetShape];
+    const questionText = `How many ${targetShape}s are there?`;
+    document.getElementById('question').textContent = questionText;
+    document.getElementById('answerReveal').textContent = "";
+
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '';
+
+    const includeNoneOfTheAbove = Math.random() < 0.5; // 50% chance
+
+    let optionSet = new Set();
+
+    if (includeNoneOfTheAbove) {
+      // Generate 3 wrong answers only
+      while (optionSet.size < 3) {
+        const wrong = getRandomInt(0, 10);
+        if (wrong !== correctAnswer) {
+          optionSet.add(wrong);
+        }
+      }
+    } else {
+      // Include the correct answer
+      optionSet.add(correctAnswer);
+      while (optionSet.size < 4) {
+        optionSet.add(getRandomInt(0, 10));
+      }
+    }
+
+    let shuffled = Array.from(optionSet).sort(() => Math.random() - 0.5);
+
+    // Render options
+    shuffled.forEach(answer => {
+      const btn = document.createElement('div');
+      btn.textContent = answer;
+      btn.className = 'option';
+      btn.onclick = () => handleAnswer(answer === correctAnswer, btn, correctAnswer);
+      optionsDiv.appendChild(btn);
+    });
+
+    if (includeNoneOfTheAbove) {
+      const noneBtn = document.createElement('div');
+      noneBtn.textContent = "None of the above";
+      noneBtn.className = 'option';
+      noneBtn.onclick = () => handleAnswer(true, noneBtn, correctAnswer, true);
+      optionsDiv.appendChild(noneBtn);
+    }
+  }
+
+  function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
+    const allOptions = document.querySelectorAll('.option');
+    allOptions.forEach(option => {
+      option.classList.add('disabled');
+
+      const val = option.textContent;
+      if (!isNone && val === correctAnswer.toString()) {
+        option.classList.add('correct');
+      }
+      if (isNone && val === "None of the above") {
+        option.classList.add('correct');
+      }
+    });
+
+    if (!isCorrect) {
+      clickedBtn.classList.add('wrong');
+    }
+
+    document.getElementById('answerReveal').textContent = `Correct Answer: ${correctAnswer}`;
+  }
+
+  // Run on load
+  generateShapes();
+  generateQuestion();
+</script>
+
+</body>
+</html>

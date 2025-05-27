@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Exact Color Match MCQ - 5x5 Grid</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 30px;
+    text-align: center;
+    background: #fafafa;
+  }
+  .boxes-container {
+    display: grid;
+    grid-template-columns: repeat(5, 60px);
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+
+  .color-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 2px;
+    /* border: 1.5px solid #ccc; */
+    transition: background-color 0.3s ease;
+  }
+  #clueColorBox {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    border: 3px solid #333;
+    border-radius: 8px;
+  }
+  #questionText {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  .option {
+    display: inline-block;
+    background: #eee;
+    padding: 10px 16px;
+    margin: 8px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 40px;
+  }
+  .option:hover {
+    background: #ddd;
+  }
+  .correct {
+    background-color: #a4d8a4 !important;
+  }
+  .wrong {
+    background-color: #e49a9a !important;
+  }
+  .disabled {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  button {
+    margin-top: 30px;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h2>Count Boxes with Exact Clue Color</h2>
+
+<div class="boxes-container" id="boxesContainer"></div>
+
+<div id="clueColorBox" title="Clue Color"></div>
+
+<p id="questionText"></p>
+<div id="options"></div>
+<p id="answerReveal"></p>
+<button onclick="generateQuiz()">Generate New</button>
+<script>
+  // Generate a random rgb color string
+  function getRandomColor() {
+    
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function generateQuiz() {
+    const boxesContainer = document.getElementById('boxesContainer');
+    const clueColorBox = document.getElementById('clueColorBox');
+    const questionText = document.getElementById('questionText');
+    const optionsDiv = document.getElementById('options');
+    const answerReveal = document.getElementById('answerReveal');
+
+    boxesContainer.innerHTML = '';
+    optionsDiv.innerHTML = '';
+    answerReveal.textContent = '';
+    questionText.textContent = '';
+
+    const totalBoxes = 25; // 5x5 grid
+    let colors = [];
+
+    // Step 1: Generate ~10 unique colors
+    const uniqueColorsCount = 10;
+    const uniqueColors = [];
+    for(let i=0; i<uniqueColorsCount; i++) {
+      uniqueColors.push(getRandomColor());
+    }
+
+    // Step 2: Fill colors array by randomly picking colors from uniqueColors, allowing duplicates
+    for(let i=0; i<totalBoxes; i++) {
+      const pickIndex = Math.floor(Math.random() * uniqueColorsCount);
+      colors.push(uniqueColors[pickIndex]);
+    }
+
+    // Step 3: Render boxes
+    colors.forEach(color => {
+      const box = document.createElement('div');
+      box.className = 'color-box';
+      box.style.backgroundColor = color;
+      boxesContainer.appendChild(box);
+    });
+
+    // Step 4: Pick clue color randomly from boxes (so duplicates can exist)
+    const clueIndex = Math.floor(Math.random() * totalBoxes);
+    const clueColor = colors[clueIndex];
+    clueColorBox.style.backgroundColor = clueColor;
+
+    // Step 5: Count exact matches of clue color
+    const exactCount = colors.filter(c => c === clueColor).length;
+
+    questionText.textContent = `How many boxes have exactly the same color as the clue color?`;
+
+    // Step 6: Prepare options
+    const correctAnswer = exactCount;
+    const optionSet = new Set();
+    optionSet.add(correctAnswer);
+
+    // Randomly decide if "None of the above" should be added (50% chance)
+    const includeNone = Math.random() < 0.5;
+
+    // Fill options to always have 4 options
+    // If includeNone is true: 3 number options + 1 none option
+    // Else: 4 number options total
+
+    // Add wrong answers near correct answer but not equal
+    while (optionSet.size < (includeNone ? 3 : 4)) {
+      let wrongOpt = correctAnswer + (Math.floor(Math.random() * 5) - 2); // -2 to +2
+      if (wrongOpt < 0) wrongOpt = 0;
+      if (wrongOpt > totalBoxes) wrongOpt = totalBoxes;
+      if (wrongOpt !== correctAnswer) optionSet.add(wrongOpt);
+    }
+
+    let optionArray = Array.from(optionSet).sort((a,b) => a - b);
+
+    // Add options to DOM
+    let optionNumber = 1;
+    optionArray.forEach(opt => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.textContent = `${optionNumber++}) ${opt}`;
+      div.onclick = () => handleAnswer(opt === correctAnswer, div, correctAnswer, false);
+      optionsDiv.appendChild(div);
+    });
+
+    // Add "None of the above" if included
+    if (includeNone) {
+      const noneBtn = document.createElement('div');
+      noneBtn.className = 'option';
+      noneBtn.textContent = `${optionNumber}) None of the above`;
+      noneBtn.onclick = () => handleAnswer(false, noneBtn, correctAnswer, true);
+      optionsDiv.appendChild(noneBtn);
+    }
+  }
+
+  function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
+    const options = document.querySelectorAll('.option');
+    options.forEach(opt => {
+      opt.classList.add('disabled');
+      if (!isNone && opt.textContent.includes(correctAnswer)) {
+        opt.classList.add('correct');
+      }
+      if (isNone && opt.textContent.includes('None of the above')) {
+        opt.classList.add('correct');
+      }
+    });
+    if (!isCorrect) clickedBtn.classList.add('wrong');
+
+    document.getElementById('answerReveal').textContent = `Correct answer: ${correctAnswer}`;
+  }
+
+  generateQuiz();
+</script>
+
+</body>
+</html>

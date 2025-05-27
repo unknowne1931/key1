@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Count the Numbers Quiz</title>
+  <style>
+    #container {
+      width: 500px;
+      height: 300px;
+      border: 2px solid #ffffff;
+      position: relative;
+      overflow: hidden;
+      background-color: #3a3636;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      margin: auto;
+    }
+
+    body{
+        background-color: #3c3d3f;
+        text-align: center;
+    }
+
+    h2{
+        text-align: center;
+        color: white;
+    }
+
+    .number {
+      position: absolute;
+      font-size: 22px;
+      font-weight: bold;
+      user-select: none;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .option {
+      display: block;
+      padding: 10px 15px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      cursor: pointer;
+      background: linear-gradient(90deg, rgb(255, 60, 0), orange);
+      width: fit-content;
+      margin: auto;
+      min-width: 150px;
+      max-height: auto;
+      color: white;
+    }
+
+    .option:hover {
+      background-color: #ddd;
+    }
+
+    .correct {
+      background-color: #c8f7c5 !important;
+    }
+
+    .wrong {
+      background-color: #f8c5c5 !important;
+    }
+
+    .disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    #answerReveal {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .question{
+        color: white;
+        
+    }
+
+
+  </style>
+</head>
+<body>
+
+<h2>Count the Numbers!</h2>
+<div id="container"></div>
+
+<p id="question" class="question"></p>
+<div id="options"></div>
+<p id="answerReveal"></p>
+
+<script>
+  const container = document.getElementById('container');
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  function getRandomColor() {
+    return `hsl(${Math.random() * 360}, 80%, 50%)`; // bright random color
+  }
+
+  function placeNumbers(total = 30, target = 48) {
+    container.innerHTML = '';
+    let targetCount = 0;
+
+    for (let i = 0; i < total; i++) {
+      const numberDiv = document.createElement('div');
+      numberDiv.className = 'number';
+
+      const isTarget = Math.random() < 0.2; // ~20% chance to be target
+      const number = isTarget ? target : getRandomInt(10, 100);
+      if (number === target) targetCount++;
+
+      numberDiv.textContent = number;
+      numberDiv.style.left = getRandomInt(0, 470) + 'px';
+      numberDiv.style.top = getRandomInt(0, 270) + 'px';
+      numberDiv.style.color = getRandomColor();
+
+      container.appendChild(numberDiv);
+    }
+
+    return targetCount;
+  }
+
+  function generateQuestion() {
+    const targetNumber = getRandomInt(10, 99);
+    const count = placeNumbers(30, targetNumber);
+    const includeNone = Math.random() < 0.5;
+
+    document.getElementById('question').textContent =
+      `How many times does the number "${targetNumber}" appear?`;
+    document.getElementById('answerReveal').textContent = "";
+
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '';
+
+    let optionSet = new Set();
+
+    if (includeNone) {
+      // Only wrong options
+      while (optionSet.size < 3) {
+        const wrong = getRandomInt(0, 10);
+        if (wrong !== count) optionSet.add(wrong);
+      }
+    } else {
+      optionSet.add(count);
+      while (optionSet.size < 4) {
+        optionSet.add(getRandomInt(0, 10));
+      }
+    }
+
+    const optionsArray = Array.from(optionSet).sort(() => Math.random() - 0.5);
+    let optionIndex = 1;
+
+    optionsArray.forEach(optionValue => {
+      const btn = document.createElement('div');
+      btn.className = 'option';
+      btn.textContent = `${optionIndex++}) ${optionValue}`;
+      btn.onclick = () => handleAnswer(optionValue === count, btn, count);
+      optionsDiv.appendChild(btn);
+    });
+
+    if (includeNone) {
+      const noneBtn = document.createElement('div');
+      noneBtn.className = 'option';
+      noneBtn.textContent = `${optionIndex}) None of the above`;
+      noneBtn.onclick = () => handleAnswer(true, noneBtn, count, true);
+      optionsDiv.appendChild(noneBtn);
+    }
+  }
+
+  function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
+    const allOptions = document.querySelectorAll('.option');
+    allOptions.forEach(option => {
+      option.classList.add('disabled');
+
+      if (!isNone && option.textContent.includes(correctAnswer.toString())) {
+        option.classList.add('correct');
+      }
+      if (isNone && option.textContent.includes('None of the above')) {
+        option.classList.add('correct');
+      }
+    });
+
+    if (!isCorrect) clickedBtn.classList.add('wrong');
+
+    document.getElementById('answerReveal').textContent =
+      `Correct Answer: ${correctAnswer}`;
+  }
+
+  // Start the quiz
+  generateQuestion();
+</script>
+
+</body>
+</html>

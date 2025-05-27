@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spelling Mistake Counter</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .story-box {
+      background-color: #292929;
+      width: 500px;
+      height: 200px;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      align-content: center;
+      margin: auto;
+      font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .options label {
+      display: block;
+      margin: 10px 0;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    input {
+        padding: 10px;
+        width: 100px;
+        background: linear-gradient(90deg, blue, rgb(0, 174, 255));
+        border: 1px solid;
+        border-radius: 10px;
+        color: #ffffff;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔤 Count the Spelling Mistakes!</h1>
+  <div class="story-box" id="storyBox"></div>
+  <div class="options" id="optionsBox"></div>
+  <button onclick="checkAnswer()">Submit</button>
+  <div id="result"></div>
+
+  <p id="ans"></p>
+
+  <script>
+
+    const storyLines = [
+  "The cat jumped over the fence and landed softly.",
+  "She picked some flowers in the garden, smelling them one by one.",
+  "They walked slowly through the forest, listening to the birds chirping.",
+  "A rainbow appeared in the sky after the storm passed.",
+  "He played the guitar beautifully, his fingers dancing on the strings.",
+  "The children ran towards the playground, excited for the swings.",
+  "She wrote a poem in her notebook, feeling inspired by the sunset.",
+  "The boat sailed across the lake, the water sparkling under the sun.",
+  "Birds were chirping early in the morning, welcoming the new day.",
+  "They enjoyed a peaceful afternoon, lying on the grass and watching the clouds.",
+  "The sun set behind the mountains, painting the sky with vibrant colors.",
+  "The dog barked loudly at the gate, alerting everyone nearby.",
+  "She drank her tea by the window, gazing at the passing clouds.",
+  "The wind whispered through the trees, rustling the leaves.",
+  "They danced under the stars, feeling free and joyful.",
+  "The snow fell gently on the ground, covering everything in a soft blanket.",
+  "He painted a picture of the beach, capturing the beauty of the waves.",
+  "The kids built a sandcastle at the shore, their hands covered in sand.",
+  "She wore her favorite red dress, feeling confident and happy.",
+  "The candles flickered in the dark room, casting shadows on the walls.",
+  "The phone rang loudly in the silence, breaking the peace.",
+  "He read a book by the fire, enjoying the warmth of the flames.",
+  "The rain poured down in heavy sheets, drenching everything outside.",
+  "They had a picnic on the grass, laughing and sharing stories.",
+  "The car zoomed down the highway, speeding towards their destination.",
+  "She baked cookies in the kitchen, the aroma filling the house.",
+  "The clock ticked slowly in the quiet room, each second dragging by.",
+  "They planted trees in the backyard, hoping for a better future.",
+  "The music echoed through the halls, filling the air with rhythm.",
+  "He tied his shoes and ran outside, ready for the day’s adventure.",
+  "The owl hooted in the distance, its call echoing through the forest.",
+  "She wore sunglasses on a bright day, protecting her eyes from the sun.",
+  "The baby giggled as she played with toys, her joy contagious.",
+  "The flowers bloomed in vibrant colors, adding beauty to the garden.",
+  "He carved a pumpkin for Halloween, carefully cutting out the face.",
+  "The butterfly fluttered by the flowers, its wings shimmering in the light.",
+  "They went for a long walk in the park, enjoying the fresh air.",
+  "The ice cream melted in the sun, dripping down the cone.",
+  "She swam in the pool on a hot day, feeling refreshed in the cool water.",
+  "The stars twinkled in the night sky, like tiny diamonds scattered across the dark velvet.",
+  "He kicked the ball into the goal, scoring the winning point.",
+  "The puppy wagged its tail happily, eager for attention.",
+  "They sat on the porch, watching the sunset, feeling at peace.",
+  "The airplane flew high above the clouds, heading towards its destination.",
+  "She tied the knot on the ribbon, finishing her craft project.",
+  "The fire crackled in the fireplace, casting a warm glow in the room.",
+  "He took a deep breath and jumped, feeling the rush of excitement.",
+  "The moon rose slowly above the horizon, casting a silver glow on the earth.",
+  "They shared a blanket on a chilly evening, keeping warm by each other’s side.",
+  "The horse galloped across the field, its mane flowing in the wind.",
+  "The flowers smelled sweet in the garden, filling the air with fragrance.",
+  "He caught a fish in the river, his patience finally paying off.",
+  "She played chess with her grandmother, learning new strategies.",
+  "The leaves rustled in the autumn breeze, falling gently to the ground.",
+  "The kids rode their bikes down the hill, feeling the wind on their faces.",
+  "The cat purred softly on her lap, content and peaceful.",
+  "They sang songs around the campfire, their voices blending with the crackling flames.",
+  "He built a fort out of pillows and blankets, creating a cozy hideaway.",
+  "The squirrel ran up the tree, quick and agile.",
+  "She played with her dolls in the living room, creating imaginary stories.",
+  "The waves crashed against the rocks, the sound echoing in the air.",
+  "He filled the bird feeder with seeds, hoping to attract more birds.",
+  "The butterfly landed on the flower, its wings gently brushing the petals.",
+  "They watched the fireworks light up the sky, oohing and aahing at each burst.",
+  "She drew a picture of a castle, imagining it to be real.",
+  "The wind blew the leaves across the street, making the ground look like a golden carpet.",
+  "He cooked dinner for his family, making their favorite meal.",
+  "The train chugged down the tracks, heading towards the station.",
+  "They rode horses along the trail, the sound of hooves echoing in the valley.",
+  "The dog chased the ball across the yard, full of energy.",
+  "She went to the market to buy bread, walking through the crowded aisles.",
+  "The sun rose early in the morning, painting the sky in shades of pink and orange.",
+  "He played soccer with his friends, scoring goals and having fun.",
+  "The ice skater spun across the rink, her movements graceful and fluid.",
+  "They laughed as they played in the snow, throwing snowballs at each other.",
+  "The chef prepared a delicious meal, filling the kitchen with wonderful smells.",
+  "She danced to the rhythm of the music, her feet moving to the beat.",
+  "The children played in the sandbox, building castles and digging tunnels.",
+  "The turtle slowly crawled across the ground, taking its time.",
+  "He climbed the mountain with great effort, determined to reach the top.",
+  "The rain stopped and the sun came out, creating a beautiful rainbow.",
+  "She picked up seashells on the beach, collecting them in her bag.",
+  "The birds flew south for the winter, heading towards warmer climates.",
+  "He played the drums with excitement, his rhythm steady and strong.",
+  "The fireflies blinked in the twilight, lighting up the night.",
+  "They walked hand in hand along the shore, the water gently lapping at their feet.",
+  "The boat drifted slowly across the lake, the oars making soft splashing sounds.",
+  "She wore a crown of flowers in her hair, feeling like a queen.",
+  "The kids jumped into the swimming pool, splashing water everywhere.",
+  "The car stopped at the red light, waiting for it to turn green.",
+  "He walked his dog every morning, enjoying the quiet of the early hours.",
+  "The baby slept soundly in the crib, wrapped in a soft blanket.",
+  "The snowflakes danced in the breeze, each one unique and beautiful.",
+  "She made a wish upon a star, hoping it would come true.",
+  "The fisherman cast his line into the water, waiting for a bite.",
+  "They ran through the sprinkler on a hot day, laughing and cooling off.",
+  "The bird perched on the windowsill, looking out at the world.",
+  "He drew a picture of a mountain range, imagining the snow-covered peaks.",
+  "The monkey swung from tree to tree, its tail wrapping around the branches.",
+  "She watched the sunset from the balcony, feeling at peace with the world."
+];
+
+
+    function shuffle(arr) {
+      return arr.sort(() => Math.random() - 0.5);
+    }
+
+    function introduceRemovals(sentence) {
+      const words = sentence.split(" ");
+      let mistakes = 0;
+
+      for (let i = 0; i < words.length; i++) {
+        if (words[i].length > 4 && Math.random() < 0.4) {
+          const index = Math.floor(Math.random() * (words[i].length - 1));
+          words[i] = words[i].slice(0, index) + words[i].slice(index + 1);
+          mistakes++;
+        }
+      }
+
+      return { text: words.join(" "), mistakes };
+    }
+
+    let correctMistakes = 0;
+
+    function generateQuiz() {
+      const selected = shuffle(storyLines).slice(0, 2);
+      const first = introduceRemovals(selected[0]);
+      const second = introduceRemovals(selected[1]);
+
+      correctMistakes = first.mistakes + second.mistakes;
+
+      document.getElementById("storyBox").innerHTML = `
+        <p>${first.text}</p>
+        <p>${second.text}</p>
+      `;
+
+      const options = new Set();
+      options.add(correctMistakes);
+      while (options.size < 4) {
+        const variation = correctMistakes + Math.floor(Math.random() * 5) - 2;
+        if (variation >= 0 && variation !== correctMistakes) {
+          options.add(variation);
+        }
+      }
+
+      document.getElementById('ans').innerText = `Ans : ${correctMistakes}`
+
+      const shuffled = shuffle([...options]);
+      const optionsBox = document.getElementById("optionsBox");
+      optionsBox.innerHTML = "";
+      shuffled.forEach(opt => {
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="button" name="answer" value="${opt}">`;
+
+        optionsBox.appendChild(label);
+      });
+
+      document.getElementById("result").textContent = "";
+    }
+
+    function checkAnswer() {
+      const selected = document.querySelector('input[name="answer"]:checked');
+      const resultBox = document.getElementById("result");
+
+      if (!selected) {
+        resultBox.textContent = "Please select an answer.";
+        resultBox.style.color = "orange";
+        return;
+      }
+
+      if (parseInt(selected.value) === correctMistakes) {
+        resultBox.textContent = "Correct! 🎉";
+        resultBox.style.color = "lightgreen";
+      } else {
+        resultBox.textContent = `Wrong. The correct answer is ${correctMistakes}.`;
+        resultBox.style.color = "red";
+      }
+    }
+
+    // Initialize
+    generateQuiz();
+  </script>
+
+</body>
+</html>

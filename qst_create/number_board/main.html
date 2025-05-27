@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vehicle State Quiz - Mind Game Edition</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 50px;
+    }
+    .plate {
+      font-size: 32px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      background: #fff;
+      color: #000;
+      padding: 10px 30px;
+      border-radius: 10px;
+    }
+    .option-btn {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 320px;
+      max-width: 90vw;
+    }
+    .option-btn:hover {
+      background: #555;
+    }
+    #feedback {
+      font-size: 20px;
+      margin-top: 20px;
+      min-height: 28px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="plate" id="number-plate">AP 29 BM 1234</div>
+  <div id="options-container"></div>
+  <div id="feedback"></div>
+
+  <script>
+    const stateCodes = {
+  'AP': 'Andhra Pradesh',
+  'AR': 'Arunachal Pradesh',
+  'AS': 'Assam',
+  'BR': 'Bihar',
+  'CG': 'Chhattisgarh',
+  'CH': 'Chandigarh',
+  'DD': 'Dadra and Nagar Haveli and Daman and Diu',
+  'DL': 'Delhi',
+  'GA': 'Goa',
+  'GJ': 'Gujarat',
+  'HR': 'Haryana',
+  'HP': 'Himachal Pradesh',
+  'JK': 'Jammu and Kashmir',
+  'JH': 'Jharkhand',
+  'KA': 'Karnataka',
+  'KL': 'Kerala',
+  'LD': 'Lakshadweep',
+  'MP': 'Madhya Pradesh',
+  'MH': 'Maharashtra',
+  'MN': 'Manipur',
+  'ML': 'Meghalaya',
+  'MZ': 'Mizoram',
+  'NL': 'Nagaland',
+  'OD': 'Odisha',
+  'PB': 'Punjab',
+  'PY': 'Puducherry',
+  'RJ': 'Rajasthan',
+  'SK': 'Sikkim',
+  'TN': 'Tamil Nadu',
+  'TS': 'Telangana',
+  'TR': 'Tripura',
+  'UK': 'Uttarakhand',
+  'UP': 'Uttar Pradesh',
+  'WB': 'West Bengal',
+};
+
+
+    const allCodes = Object.keys(stateCodes);
+
+    function getRandomPlate() {
+      const code = allCodes[Math.floor(Math.random() * allCodes.length)];
+      const district = Math.floor(Math.random() * 99 + 1).toString().padStart(2, '0');
+      const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) +
+                      String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      const number = Math.floor(Math.random() * 9000 + 1000);
+      return { plate: `${code} ${district} ${letters} ${number}`, code };
+    }
+
+    function makeSpellingMistake(str) {
+      if (str.length <= 4) return str;
+      const index = Math.floor(Math.random() * (str.length - 1));
+      const wrongChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+      return str.substring(0, index) + wrongChar + str.substring(index + 1);
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function generateOptions(correctCode) {
+      const correct = stateCodes[correctCode];
+      const mode = Math.random();
+
+      const used = new Set();
+      let options = [];
+      let correctAnswer = correct;
+
+      if (mode < 0.3) {
+        // 🤫 DECEPTIVE: misspelled correct + "None of the above"
+        const misspelled = makeSpellingMistake(correct);
+        used.add(misspelled);
+        options.push(misspelled);
+        while (options.length < 3) {
+          const rand = stateCodes[allCodes[Math.floor(Math.random() * allCodes.length)]];
+          if (rand === correct || used.has(rand)) continue;
+          used.add(rand);
+          options.push(Math.random() < 0.5 ? makeSpellingMistake(rand) : rand);
+        }
+        options.push("None of the above");
+        correctAnswer = "None of the above";
+
+      } else if (mode < 0.6) {
+        // 🎭 FUN TRICK: correct + 2 wrongs + "None of the above" (just to confuse)
+        used.add(correct);
+        options.push(correct);
+        while (options.length < 3) {
+          const rand = stateCodes[allCodes[Math.floor(Math.random() * allCodes.length)]];
+          if (rand === correct || used.has(rand)) continue;
+          used.add(rand);
+          options.push(Math.random() < 0.5 ? makeSpellingMistake(rand) : rand);
+        }
+        options.push("None of the above");
+      } else {
+        // ✅ NORMAL: correct + 3 wrongs
+        used.add(correct);
+        options.push(correct);
+        while (options.length < 4) {
+          const rand = stateCodes[allCodes[Math.floor(Math.random() * allCodes.length)]];
+          if (rand === correct || used.has(rand)) continue;
+          used.add(rand);
+          options.push(Math.random() < 0.5 ? makeSpellingMistake(rand) : rand);
+        }
+      }
+
+      return { options: shuffle(options), correctAnswer, actualCorrect: correct };
+    }
+
+    function showQuiz() {
+      const { plate, code } = getRandomPlate();
+      const { options, correctAnswer, actualCorrect } = generateOptions(code);
+
+      document.getElementById('number-plate').textContent = plate;
+      const container = document.getElementById('options-container');
+      const feedback = document.getElementById('feedback');
+      container.innerHTML = '';
+      feedback.textContent = '';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.onclick = () => {
+          const isCorrect = opt === correctAnswer;
+          feedback.textContent = isCorrect
+            ? '✅ Correct!'
+            : `❌ Wrong! Correct: ${actualCorrect}`;
+          setTimeout(showQuiz, 2500);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    showQuiz();
+  </script>
+</body>
+</html>

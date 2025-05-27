@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guess the X</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            text-align: center;
+            background-color: #252323;
+            color: white;
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .day {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            height: 40px;
+            font-weight: bold;
+            color: white;
+        }
+        .header {
+            font-weight: bold;
+            background-color: #555;
+            color: white;
+            align-content: center;
+            text-align: center;
+            justify-content: center;
+        }
+        .sun {
+            background-color: rgb(255, 51, 0);
+            border-radius: 10px;
+            border: 1px solid;
+            color: #ffffff;
+            align-content: center;
+        }
+        .options {
+            margin-top: 20px;
+        }
+        .options label {
+            display: block;
+            margin: 5px 0;
+        }
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 20px;
+            font-size: 16px;
+        }
+
+        p{
+            font-weight: 600;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .p1{
+            font-size: 20px;
+            color: rgb(9, 224, 9);
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <h1>Which date is marked with 'X'?</h1>
+    <select id="monthSelect">
+        <option value="">-- Select Month --</option>
+    </select>
+
+    <div id="calendarContainer"></div>
+
+    <div class="options" id="mcqContainer"></div>
+    <div id="result"></div>
+
+    <p id="ans" class="p1"></p>
+
+    <script>
+    function getRandomDay(maxDay) {
+        return Math.floor(Math.random() * maxDay) + 1;
+    }
+
+    function getShuffledOptions(correct, maxDay) {
+        const options = new Set();
+        options.add(correct);
+        while (options.size < 4) {
+            const rand = getRandomDay(maxDay);
+            options.add(rand);
+        }
+        return Array.from(options).sort(() => Math.random() - 0.5);
+    }
+
+    const monthSelect = document.getElementById("monthSelect");
+    const calendarContainer = document.getElementById("calendarContainer");
+    const mcqContainer = document.getElementById("mcqContainer");
+    const resultBox = document.getElementById("result");
+
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    months.forEach((month, index) => {
+        const opt = document.createElement("option");
+        opt.value = index;
+        opt.textContent = month;
+        monthSelect.appendChild(opt);
+    });
+
+    monthSelect.addEventListener("change", () => {
+        const monthIndex = parseInt(monthSelect.value);
+        const year = 2024;
+        calendarContainer.innerHTML = "";
+        mcqContainer.innerHTML = "";
+        resultBox.textContent = "";
+
+        const calendar = document.createElement("div");
+        calendar.className = "calendar";
+
+        // Add headers
+        days.forEach(d => {
+            const header = document.createElement("div");
+            header.className = "day header";
+            header.textContent = d;
+            if (d === "Sun") {
+                header.className = "sun";
+            } else {
+                header.style.backgroundColor = "green";
+                header.style.color = "white";
+            }
+            calendar.appendChild(header);
+        });
+
+        const firstDay = new Date(year, monthIndex, 1).getDay();
+        const totalDays = new Date(year, monthIndex + 1, 0).getDate();
+        const randomDay = getRandomDay(totalDays);
+
+        // Pick a hint date (not equal to X)
+        let hintDay;
+        do {
+            hintDay = getRandomDay(totalDays);
+        } while (hintDay === randomDay);
+
+        document.getElementById("ans").innerText = `Ans : ${randomDay}`
+
+        // Show hint text
+
+        // Add empty slots before first day
+        for (let i = 0; i < firstDay; i++) {
+            const empty = document.createElement("div");
+            empty.className = "day";
+            calendar.appendChild(empty);
+        }
+
+        // Render days
+        for (let i = 1; i <= totalDays; i++) {
+            const cell = document.createElement("div");
+            cell.className = "day";
+
+            if (i === randomDay) {
+                cell.textContent = "X";
+                cell.style.backgroundColor = "#FF4136";
+                cell.style.alignContent = "center"
+            } else if (i === hintDay) {
+                cell.textContent = `${hintDay}`; // Or show number: `${hintDay}`
+                cell.style.backgroundColor = "blue";
+                cell.style.color = "white";
+                cell.style.alignContent = "center";
+            } else {
+                cell.textContent = "";
+            }
+
+            calendar.appendChild(cell);
+        }
+
+        calendarContainer.appendChild(calendar);
+
+        // Create MCQ
+        const options = getShuffledOptions(randomDay, totalDays);
+        const question = document.createElement("p");
+        question.textContent = "Which date is marked with 'X'?";
+        mcqContainer.appendChild(question);
+
+        options.forEach(opt => {
+            const label = document.createElement("label")
+            const radio = document.createElement("input");
+            radio.type = "button";
+            radio.name = "answer";
+            radio.style.minWidth = "120px";
+            radio.style.maxWidth = "200px";
+            radio.style.height = "40px";
+            radio.value = opt;
+            label.appendChild(radio);
+            // label.appendChild(document.createTextNode(` ${opt}`));
+            mcqContainer.appendChild(label);
+        });
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "Submit";
+        submitBtn.onclick = () => {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (!selected) {
+                resultBox.textContent = "Please select an answer.";
+                resultBox.style.color = "yellow";
+            } else if (parseInt(selected.value) === randomDay) {
+                resultBox.textContent = "Correct!";
+                resultBox.style.color = "lightgreen";
+            } else {
+                resultBox.textContent = `Incorrect! The correct answer was ${randomDay}.`;
+                resultBox.style.color = "red";
+            }
+        };
+    });
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,373 @@
+<!-- 1931 -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Guess the X</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            text-align: center;
+            background-color: #252323;
+            color: white;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            background-color: #252323;
+            padding: 30px 150px 30px 150px;
+            margin: 0 auto;
+        }
+
+        .cal_cont {
+            border: 1px solid none;
+            border-radius: 10px;
+            background-color: rgb(27, 26, 26); 
+            width: auto;
+            padding: 20px;
+        }
+
+
+        .day {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            height: 40px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .header {
+            font-weight: bold;
+            background-color: #555;
+            color: white;
+            align-content: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .sun {
+            background-color: rgb(255, 51, 0);
+            border-radius: 10px;
+            border: 1px solid;
+            color: #ffffff;
+            align-content: center;
+        }
+
+        .options {
+            margin-top: 20px;
+        }
+
+        .options label {
+            display: block;
+            margin: 5px 0;
+        }
+
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        button {
+            width: 120px;
+            height: 50px;
+            margin-top: 10px;
+            padding: 8px 20px;
+            font-size: 16px;
+            border: 1px solid gray;
+            cursor: pointer;
+            border-radius: 10px;
+            background: linear-gradient(90deg, blue, rgb(3, 47, 114));
+            color: #ffffff;
+        }
+
+        p {
+            font-weight: 600;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .p1 {
+            font-size: 20px;
+            color: rgb(9, 224, 9);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Which date is marked with 'X'?</h1>
+    <select id="monthSelect">
+        <option value="">-- Select Month --</option>
+    </select>
+
+    <div class="cal_cont" id="calendarContainer"></div>
+
+    <div class="options" id="mcqContainer"></div>
+    <div id="result"></div>
+    <div id="previewContainer"></div>
+
+    <p id="ans" class="p1"></p>
+
+
+    
+    <select id="tough_level">
+        <option value="">select Tough level</option>
+        <option value="Too Easy">Too Easy</option>
+        <option value="Easy">Easy</option>
+        <option value="Medium">Medium</option>
+        <option value="Tough">Tough</option>
+        <option value="Too Tough">Too Tough</option>
+    </select><br/>
+
+
+    <button id="btnCapture">Submit</button>
+    <button id="btnUpload" disabled>Upload</button>
+
+    <script>
+
+
+
+        let opt = []
+        let ans;
+
+        let capturedBlob = null;
+
+
+
+        document.getElementById("btnCapture").addEventListener("click", function () {
+            const element = document.getElementById("calendar");
+
+            html2canvas(element).then(canvas => {
+                canvas.toBlob(blob => {
+                    capturedBlob = blob;
+
+                    // Preview image
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+
+                    // Enable upload
+                    document.getElementById("btnUpload").disabled = false;
+                }, 'image/png');
+            });
+        });
+
+        // capture screen shot
+        document.getElementById("btnUpload").addEventListener("click", function () {
+            if (!capturedBlob) return alert("No screenshot captured!");
+
+            const formData = new FormData();
+            formData.append("screenshot", capturedBlob, "screenshot.png");
+
+            fetch("https://backend.stawro.com/stawro/upload.php", {
+                method: "POST",
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+                    return res.json();
+                })
+                .then(res => {
+                    if (res.status) {
+                        alert(`✅ ${res.status}\n📁 Path: https://backend.stawro.com/stawro/${res.path}`);
+                        post(res.path)
+                    } else {
+                        alert("Upload succeeded.");
+                        window.location.reload()
+                    }
+                })
+                .catch(err => {
+                    console.error("Upload error:", err);
+                    alert("❌ Upload error.");
+                });
+        });
+
+
+
+
+
+
+        function getRandomDay(maxDay) {
+            return Math.floor(Math.random() * maxDay) + 1;
+        }
+
+        function getShuffledOptions(correct, maxDay) {
+            const options = new Set();
+
+            options.add(correct);
+            while (options.size < 4) {
+                const rand = getRandomDay(maxDay);
+                options.add(rand);
+            }
+            return Array.from(options).sort(() => Math.random() - 0.5);
+        }
+
+        const monthSelect = document.getElementById("monthSelect");
+        const calendarContainer = document.getElementById("calendarContainer");
+        const mcqContainer = document.getElementById("mcqContainer");
+        const resultBox = document.getElementById("result");
+
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        months.forEach((month, index) => {
+            const opt = document.createElement("option");
+            opt.value = index;
+            opt.textContent = month;
+            monthSelect.appendChild(opt);
+        });
+
+        monthSelect.addEventListener("change", () => {
+            const monthIndex = parseInt(monthSelect.value);
+            const year = 2024;
+            calendarContainer.innerHTML = "";
+            mcqContainer.innerHTML = "";
+            resultBox.textContent = "";
+
+            const calendar = document.createElement("div");
+            calendar.className = "calendar";
+            calendar.id = "calendar"
+
+            // Add headers
+            days.forEach(d => {
+                const header = document.createElement("div");
+                header.className = "day header";
+                header.textContent = d;
+                if (d === "Sun") {
+                    header.className = "sun";
+                } else {
+                    header.style.backgroundColor = "green";
+                    header.style.color = "white";
+                }
+                calendar.appendChild(header);
+            });
+
+            const firstDay = new Date(year, monthIndex, 1).getDay();
+            const totalDays = new Date(year, monthIndex + 1, 0).getDate();
+            const randomDay = getRandomDay(totalDays);
+
+            // Pick a hint date (not equal to X)
+            let hintDay;
+            do {
+                hintDay = getRandomDay(totalDays);
+            } while (hintDay === randomDay);
+            ans = randomDay;
+
+            document.getElementById("ans").innerText = `Ans : ${randomDay}`
+
+            // Show hint text
+
+            // Add empty slots before first day
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement("div");
+                empty.className = "day";
+                calendar.appendChild(empty);
+            }
+
+            // Render days
+            for (let i = 1; i <= totalDays; i++) {
+                const cell = document.createElement("div");
+                cell.className = "day";
+
+                if (i === randomDay) {
+                    cell.textContent = "X";
+                    cell.style.backgroundColor = "#FF4136";
+                    cell.style.alignContent = "center"
+                } else if (i === hintDay) {
+                    cell.textContent = `${hintDay}`; // Or show number: `${hintDay}`
+                    cell.style.backgroundColor = "blue";
+                    cell.style.color = "white";
+                    cell.style.alignContent = "center";
+                } else {
+                    cell.textContent = "";
+                }
+
+                calendar.appendChild(cell);
+            }
+
+            calendarContainer.appendChild(calendar);
+
+            // Create MCQ
+            const options = getShuffledOptions(randomDay, totalDays);
+            opt = options;
+            const question = document.createElement("p");
+            question.textContent = "Which date is marked with 'X'?";
+            mcqContainer.appendChild(question);
+
+            options.forEach(opt => {
+                const label = document.createElement("label")
+                const radio = document.createElement("input");
+                radio.type = "button";
+                radio.name = "answer";
+                radio.style.minWidth = "120px";
+                radio.style.maxWidth = "200px";
+                radio.style.height = "40px";
+                radio.value = opt;
+                label.appendChild(radio);
+                // label.appendChild(document.createTextNode(` ${opt}`));
+                mcqContainer.appendChild(label);
+            });
+
+        });
+
+
+        function post(path) {
+
+            fetch("http://localhost/api/question", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    question: "Which date is marked with 'X'?",
+                    answer: ans,
+                    a: opt[0],
+                    b: opt[1],
+                    c: opt[2],
+                    d: opt[3],
+                    language: "English",
+                    category: "calender",
+                    difficulty: document.getElementById("tough_level").value,
+                    type: "Mental Ability",
+                    image: `https://backend.stawro.com/stawro/${path}`,
+                    seconds: 10
+                })
+            })
+                .then(res => {
+                    if (res) {
+                        alert(res.status)
+                          window.location.reload()
+                    } else {
+                        alert("Something went wrong")
+                        window.location.reload()
+                    }
+                })
+                .catch(error => {
+                    console.error("Error posting question:", error);
+                    alert("Error posting question.");
+                });
+        }
+
+    </script>
+
+
+</body>
+
+</html>

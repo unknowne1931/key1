@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sudoku MCQ Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #363333;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .sudoku {
+      display: grid;
+      grid-template-columns: repeat(9, 50px);
+      gap: 2px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 50px;
+      height: 50px;
+      border: 1px solid #5c5858;
+      background: linear-gradient(to bottom, #4ca8e6, #002c6d);
+      font-weight: bold;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      font-size: 20px;
+      color: #ffffff;
+      align-content: center;
+      border-radius: 4px;
+    }
+
+    .cell.empty {
+      background: linear-gradient(to bottom, #4ca8e6, #002c6d);
+      color: #888;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    .options button {
+      margin: 5px 0;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background: #e4dfdf;
+    }
+
+    .options button:hover {
+      background: #ddd;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+  </style>
+</head>
+<body>
+  <h2>🧩 Sudoku Puzzle Challenge</h2>
+  <div id="grid" class="sudoku"></div>
+  <div id="question">What number goes in the yellow cell?</div>
+  <div class="options" id="options"></div>
+  <div id="result"></div>
+
+  <script>
+    const sudokuBase = [
+      [5, 3, 4, 6, 7, 8, 9, 1, 2],
+      [6, 7, 2, 1, 9, 5, 3, 4, 8],
+      [1, 9, 8, 3, 4, 2, 5, 6, 7],
+      [8, 5, 9, 7, 6, 1, 4, 2, 3],
+      [4, 2, 6, 8, 5, 3, 7, 9, 1],
+      [7, 1, 3, 9, 2, 4, 8, 5, 6],
+      [9, 6, 1, 5, 3, 7, 2, 8, 4],
+      [2, 8, 7, 4, 1, 9, 6, 3, 5],
+      [3, 4, 5, 2, 8, 6, 1, 7, 9]
+    ];
+
+    let emptyRow = 0;
+    let emptyCol = 0;
+    let correctAnswer = 0;
+
+    function generatePuzzle() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      // Clone the base grid
+      const puzzle = sudokuBase.map(row => [...row]);
+
+      // Choose a random cell to hide
+      emptyRow = Math.floor(Math.random() * 9);
+      emptyCol = Math.floor(Math.random() * 9);
+      correctAnswer = puzzle[emptyRow][emptyCol];
+      puzzle[emptyRow][emptyCol] = null;
+
+      // Draw grid
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (puzzle[r][c] === null ? ' empty' : '');
+          cell.textContent = puzzle[r][c] || '';
+          grid.appendChild(cell);
+        }
+      }
+
+      // Generate options
+      const options = [correctAnswer];
+      while (options.length < 4) {
+        const num = Math.floor(Math.random() * 9) + 1;
+        if (!options.includes(num)) {
+          options.push(num);
+        }
+      }
+
+      // Shuffle options
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(opt);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected) {
+      const result = document.getElementById('result');
+      if (selected === correctAnswer) {
+        result.textContent = '✅ Correct!';
+      } else {
+        result.textContent = `❌ Wrong! Correct was ${correctAnswer}`;
+      }
+      setTimeout(generatePuzzle, 3000);
+    }
+
+    generatePuzzle();
+  </script>
+</body>
+</html>
+

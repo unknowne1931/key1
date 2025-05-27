@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Challenging Number Range Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #c0f0ff, #ffffff);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .quiz-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    .quiz-card h2 {
+      font-size: 26px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .range-list {
+      margin: 15px 0;
+      font-size: 18px;
+      color: #555;
+      max-height: 180px;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .question {
+      font-size: 20px;
+      margin: 20px 0;
+      font-weight: bold;
+      color: #222;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+
+    .btn.yes { background-color: #4CAF50; color: white; }
+    .btn.no  { background-color: #f44336; color: white; }
+    .btn.next { background-color: #2196F3; color: white; display: none; }
+
+    .result {
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .correct { color: green; }
+    .wrong { color: red; }
+
+    .score {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .timer {
+      font-weight: bold;
+      color: #ff9800;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-card">
+  <h2>💡 Tough Number Range Challenge</h2>
+
+  <div id="timer" class="timer"></div>
+  <div id="ranges" class="range-list"></div>
+  <div id="question" class="question"></div>
+
+  <button class="btn yes" onclick="checkAnswer(true)">Yes</button>
+  <button class="btn no" onclick="checkAnswer(false)">No</button>
+
+  <div id="result" class="result"></div>
+  <div class="score" id="scoreboard">Score: 0 / 0</div>
+
+  <button id="nextBtn" class="btn next" onclick="setupQuestion()">Next Question</button>
+</div>
+
+<script>
+  let correctAnswer = false;
+  let totalQuestions = 0;
+  let correctCount = 0;
+  let timer;
+  let timeLeft = 10;
+
+  const useTimer = false; // set true if you want countdown timer
+
+  function getRandomRange(min, max) {
+    const start = Math.floor(Math.random() * (max - min)) + min;
+    const end = start + Math.floor(Math.random() * 60) + 10; // longer ranges
+    return [start, end];
+  }
+
+  function generateQuestion() {
+    const rangeCount = 5; // Tougher: More ranges
+    const ranges = Array.from({ length: rangeCount }, () => getRandomRange(10, 500));
+    const min = Math.min(...ranges.map(r => r[0]));
+    const max = Math.max(...ranges.map(r => r[1]));
+
+    let numberToCheck;
+    const trick = Math.random() < 0.5;
+
+    if (trick) {
+      // Try to trick user: choose number outside the ranges slightly
+      const outlier = ranges[Math.floor(Math.random() * ranges.length)];
+      const before = outlier[0] - Math.floor(Math.random() * 3 + 1);
+      const after = outlier[1] + Math.floor(Math.random() * 3 + 1);
+      numberToCheck = Math.random() < 0.5 ? before : after;
+    } else {
+      numberToCheck = Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    correctAnswer = ranges.some(([start, end]) => numberToCheck >= start && numberToCheck <= end);
+
+    return { ranges, numberToCheck };
+  }
+
+  function setupQuestion() {
+    clearInterval(timer);
+    document.getElementById('result').textContent = '';
+    document.getElementById('result').className = 'result';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('timer').textContent = '';
+
+    const { ranges, numberToCheck } = generateQuestion();
+
+    totalQuestions++;
+    updateScore();
+
+    // Display ranges
+    const rangesDiv = document.getElementById('ranges');
+    rangesDiv.innerHTML = '';
+    ranges.forEach(([start, end], i) => {
+      const p = document.createElement('p');
+      p.textContent = `Range ${i + 1}: ${start} - ${end}`;
+      rangesDiv.appendChild(p);
+    });
+
+    document.getElementById('question').textContent = `Does the number ${numberToCheck} exist in any of the above ranges?`;
+
+    if (useTimer) {
+      timeLeft = 10;
+      document.getElementById('timer').textContent = `⏳ Time left: ${timeLeft}s`;
+      timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          checkAnswer(null); // time over = no answer
+        } else {
+          document.getElementById('timer').textContent = `⏳ Time left: ${timeLeft}s`;
+        }
+      }, 1000);
+    }
+  }
+
+  function checkAnswer(userAnswer) {
+    clearInterval(timer);
+
+    const resultDiv = document.getElementById('result');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (userAnswer === null) {
+      resultDiv.textContent = `⏱️ Time's up! The correct answer is "${correctAnswer ? 'Yes' : 'No'}".`;
+      resultDiv.className = "result wrong";
+    } else if (userAnswer === correctAnswer) {
+      resultDiv.textContent = "✅ Correct!";
+      resultDiv.className = "result correct";
+      correctCount++;
+    } else {
+      resultDiv.textContent = `❌ Wrong! The correct answer is "${correctAnswer ? 'Yes' : 'No'}".`;
+      resultDiv.className = "result wrong";
+    }
+
+    updateScore();
+    nextBtn.style.display = 'inline-block';
+  }
+
+  function updateScore() {
+    document.getElementById('scoreboard').textContent = `Score: ${correctCount} / ${totalQuestions}`;
+  }
+
+  setupQuestion();
+</script>
+
+</body>
+</html>
+

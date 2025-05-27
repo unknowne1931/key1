@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spelling Puzzle - 4 Smart Options</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fdfcf7;
+      text-align: center;
+      padding: 40px;
+    }
+    .puzzle {
+      font-size: 36px;
+      margin-bottom: 25px;
+      letter-spacing: 10px;
+      border: 1px solid #ccc;
+      height: 200px;
+      width: 400px;
+      margin: auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 600;
+      align-content: center;
+      border-radius: 10px;
+    }
+    .options button {
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 24px;
+      font-size: 20px;
+      cursor: pointer;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+    .options button:hover {
+      background: #f0f0ff;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔠 Spelling Puzzle - 4 Options Only</h2>
+  <div class="puzzle" id="maskedWord"></div>
+  <div class="options" id="options"></div>
+  <div id="result"></div>
+
+  <script>
+    const words = [
+      "cat", "cow", "pig", "goat", "sheep", "hen", "duck", "horse", "frog", "ant",
+  "bee", "fox", "bat", "monkey", "bear", "wolf", "deer", "mouse", "panda", "whale",
+  "dolphin", "crab", "shark", "snail", "camel", "turtle", "owl", "parrot", "rabbit", "kangaroo"
+    ];
+// ... and you can add more or get full lists from open sources
+
+    let currentIndex = 0;
+
+    function maskWord(word) {
+      const count = Math.min(4, Math.max(2, Math.floor(word.length / 3)));
+      const indexes = [];
+      while (indexes.length < count) {
+        const i = Math.floor(Math.random() * word.length);
+        if (!indexes.includes(i)) indexes.push(i);
+      }
+      indexes.sort((a, b) => a - b);
+      const masked = word.split("").map((ch, i) => indexes.includes(i) ? "_" : ch).join("");
+      const correctFill = indexes.map(i => word[i]).join("");
+      return { masked, correctFill, indexes };
+    }
+
+    function generateSimilarOptions(correct, count) {
+      const options = new Set();
+      const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+      while (options.size < count) {
+        let chars = correct.split("");
+        const type = Math.floor(Math.random() * 3);
+
+        if (type === 0 && chars.length > 1) {
+          const i = Math.floor(Math.random() * (chars.length - 1));
+          [chars[i], chars[i + 1]] = [chars[i + 1], chars[i]];
+        } else {
+          const i = Math.floor(Math.random() * chars.length);
+          chars[i] = alphabet[Math.floor(Math.random() * 26)];
+        }
+
+        const variant = chars.join("");
+        if (variant !== correct) options.add(variant);
+      }
+
+      return [...options];
+    }
+
+    function createPuzzle(word) {
+      const { masked, correctFill } = maskWord(word);
+      const fakeOptions = generateSimilarOptions(correctFill, 3);
+
+      const includeCorrect = Math.random() < 0.5; // 50% chance
+      let options = [];
+
+      if (includeCorrect) {
+        options = [...fakeOptions];
+        const replaceIndex = Math.floor(Math.random() * 3);
+        options[replaceIndex] = correctFill;
+        options.push("None of the above");
+      } else {
+        options = [...fakeOptions];
+        options.push("None of the above");
+      }
+
+      const isCorrectAnswer = (selected) => {
+        if (selected === "None of the above") {
+          return !options.includes(correctFill);
+        } else {
+          return selected === correctFill;
+        }
+      };
+
+      return {
+        maskedWord: masked,
+        correctFill,
+        options: options.sort(() => Math.random() - 0.5).slice(0, 4),
+        isCorrectAnswer
+      };
+    }
+
+    function loadPuzzle() {
+      const word = words[currentIndex];
+      const puzzle = createPuzzle(word);
+
+      document.getElementById("maskedWord").textContent = puzzle.maskedWord;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      puzzle.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(opt, puzzle.isCorrectAnswer);
+        optionsDiv.appendChild(btn);
+      });
+
+      document.getElementById("result").textContent = "";
+    }
+
+    function checkAnswer(selected, isCorrectFn) {
+      const result = document.getElementById("result");
+      if (isCorrectFn(selected)) {
+        result.textContent = "✅ Correct!";
+      } else {
+        result.textContent = "❌ Wrong!";
+      }
+
+      setTimeout(() => {
+        currentIndex = (currentIndex + 1) % words.length;
+        loadPuzzle();
+      }, 3000);
+    }
+
+    loadPuzzle();
+  </script>
+</body>
+</html>
