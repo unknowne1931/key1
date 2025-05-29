@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <meta charset="UTF-8">
   <title>Count the Numbers Quiz</title>
   <style>
+    body {
+      background-color: #3c3d3f;
+      text-align: center;
+    }
+
     #container {
       width: 500px;
       height: 300px;
@@ -11,19 +18,13 @@
       position: relative;
       overflow: hidden;
       background-color: #3a3636;
-      margin-bottom: 20px;
-      border-radius: 10px;
       margin: auto;
+      border-radius: 10px;
+      margin-bottom: 20px;
     }
 
-    body{
-        background-color: #3c3d3f;
-        text-align: center;
-    }
-
-    h2{
-        text-align: center;
-        color: white;
+    h2 {
+      color: white;
     }
 
     .number {
@@ -43,8 +44,6 @@
       background: linear-gradient(90deg, rgb(255, 60, 0), orange);
       width: fit-content;
       margin: auto;
-      min-width: 150px;
-      max-height: auto;
       color: white;
     }
 
@@ -68,11 +67,32 @@
     #answerReveal {
       font-weight: bold;
       margin-top: 10px;
+      color: white;
     }
 
-    .question{
-        color: white;
-        
+    .question {
+      color: white;
+    }
+
+    #btnCapture, #btnUpload {
+      margin: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    #previewContainer img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+
+    #difficultySelect {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
 
@@ -81,21 +101,36 @@
 <body>
 
 <h2>Count the Numbers!</h2>
-<div id="container"></div>
 
+<select id="difficultySelect">
+  <option value="" selected disabled>Choose Difficulty</option>
+  <option value="Too Easy">Too Easy</option>
+  <option value="Easy">Easy</option>
+  <option value="Medium">Medium</option>
+  <option value="Tough">Tough</option>
+  <option value="Too Tough">Too Tough</option>
+</select>
+
+<div class="cnt_an" id="container"></div>
 <p id="question" class="question"></p>
 <div id="options"></div>
 <p id="answerReveal"></p>
 
+<button id="btnCapture">📸 Capture Screenshot</button>
+<button id="btnUpload" disabled>⬆️ Upload</button>
+<div id="previewContainer"></div>
+
 <script>
   const container = document.getElementById('container');
+  let capturedBlob;
+  let quizData = {};
 
   function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
   }
 
   function getRandomColor() {
-    return `hsl(${Math.random() * 360}, 80%, 50%)`; // bright random color
+    return `hsl(${Math.random() * 360}, 80%, 50%)`;
   }
 
   function placeNumbers(total = 30, target = 48) {
@@ -106,7 +141,7 @@
       const numberDiv = document.createElement('div');
       numberDiv.className = 'number';
 
-      const isTarget = Math.random() < 0.2; // ~20% chance to be target
+      const isTarget = Math.random() < 0.2;
       const number = isTarget ? target : getRandomInt(10, 100);
       if (number === target) targetCount++;
 
@@ -126,17 +161,16 @@
     const count = placeNumbers(30, targetNumber);
     const includeNone = Math.random() < 0.5;
 
-    document.getElementById('question').textContent =
-      `How many times does the number "${targetNumber}" appear?`;
-    document.getElementById('answerReveal').textContent = "";
+    quizData.question = `How many times does the number "${targetNumber}" appear?`;
+    quizData.answer = count;
 
+    document.getElementById('question').textContent = quizData.question;
+    document.getElementById('answerReveal').textContent = "";
     const optionsDiv = document.getElementById('options');
     optionsDiv.innerHTML = '';
 
     let optionSet = new Set();
-
     if (includeNone) {
-      // Only wrong options
       while (optionSet.size < 3) {
         const wrong = getRandomInt(0, 10);
         if (wrong !== count) optionSet.add(wrong);
@@ -150,6 +184,8 @@
 
     const optionsArray = Array.from(optionSet).sort(() => Math.random() - 0.5);
     let optionIndex = 1;
+
+    quizData.options = optionsArray.map(opt => `${opt}`);
 
     optionsArray.forEach(optionValue => {
       const btn = document.createElement('div');
@@ -172,7 +208,6 @@
     const allOptions = document.querySelectorAll('.option');
     allOptions.forEach(option => {
       option.classList.add('disabled');
-
       if (!isNone && option.textContent.includes(correctAnswer.toString())) {
         option.classList.add('correct');
       }
@@ -182,13 +217,84 @@
     });
 
     if (!isCorrect) clickedBtn.classList.add('wrong');
-
-    document.getElementById('answerReveal').textContent =
-      `Correct Answer: ${correctAnswer}`;
+    document.getElementById('answerReveal').textContent = `Correct Answer: ${correctAnswer}`;
   }
 
-  // Start the quiz
   generateQuestion();
+
+document.getElementById("btnCapture").addEventListener("click", function () {
+      const element = document.querySelector(".cnt_an");
+      html2canvas(element).then(canvas => {
+        canvas.toBlob(blob => {
+          capturedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+          document.getElementById("btnUpload").disabled = false;
+        }, 'image/png');
+      });
+    });
+
+    document.getElementById("btnUpload").addEventListener("click", function () {
+      if (!capturedBlob) return alert("No screenshot captured!");
+
+      const formData = new FormData();
+      formData.append("screenshot", capturedBlob, "screenshot.png");
+
+      fetch("https://backend.stawro.com/stawro/upload.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status) {
+          post(res.path);
+          alert(`✅ ${res.status}\n📁 Path: https://backend.stawro.com/stawro/${res.path}`);
+        } else {
+          alert("Upload succeeded.");
+          window.location.reload();
+        }
+      })
+      .catch(err => {
+        console.error("Upload error:", err);
+        alert("❌ Upload error.");
+      });
+    });
+
+  function post(imagePath) {
+    const difficulty = document.getElementById("difficultySelect").value || "Medium";
+
+    fetch("http://localhost/api/question", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        question: quizData.question,
+        answer: quizData.answer,
+        a: quizData.options[0] || "",
+        b: quizData.options[1] || "",
+        c: quizData.options[2] || "",
+        d: quizData.options[3] || "",
+        language: "English",
+        category: "Counting",
+        difficulty: difficulty,
+        type: "Number Count",
+        image: `https://backend.stawro.com/stawro/${imagePath}`,
+        seconds: "10"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert("✅ Question posted successfully!");
+      generateQuestion();
+    })
+    .catch(error => {
+      console.error("❌ Error posting question:", error);
+      alert("❌ Error posting question. Check CORS and endpoint path.");
+    });
+  }
+
+  
 </script>
 
 </body>
