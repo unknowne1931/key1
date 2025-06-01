@@ -132,9 +132,97 @@
 
 
 
+# from pymongo import MongoClient
+# import os
+# import ctypes
+
+# # Clear the console
+# os.system('cls' if os.name == 'nt' else 'clear')
+
+# # MongoDB connection
+# client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
+# db = client["test"]
+# qno_counts_collection = db["qno_counts"]
+# qno_list_collection = db["question datas"]
+
+# # Get unique categories with English language
+# categories = []
+# for doc in qno_list_collection.find({"language": "English"}):
+#     if doc['category'] not in categories:
+#         categories.append(doc['category'])
+
+# # Count number of questions per category
+# category_lengths = []
+# for category in categories:
+#     count = qno_list_collection.count_documents({"category": category, "language": "English"})
+#     category_lengths.append({"category": category, "length": count})
+
+# er_01 = []
+
+# # Compare lengths
+# if category_lengths:
+#     base_length = category_lengths[1]['length'] or category_lengths[0]['length']
+#     for cat in category_lengths:
+#         if cat['length'] != base_length:
+#             print(f"\033[93mCategory '{cat['category']}' has length {cat['length']} (not equal to {base_length})\033[0m")
+#             print(f"\033[91mSome questions are missing {cat['category']} length Questions not Enough \033[0m")
+#             er_01.append(cat['category'])
+            
+#             # ctypes.windll.user32.MessageBoxW(0, f"Some questions are missing IN : {cat['category']}", "Missing Questions Alert", 1)
+            
+#         elif int(cat['length'])  > int(base_length):
+#             print(f"\033[93mThe length of {cat['category']} is High in Length {cat['length']}\033[0m")
+            
+#         else:
+#             print(f"\033[92mCategory '{cat['category']}' has length {cat['length']} (equal to {base_length})\033[0m")
+
+
+# if len(er_01) > 0:
+#     for er in er_01:
+#         print(f"\033[91m make fix this {er} length Increase or Decrease to continue \033[0m")
+#         # exit()
+
+# else:
+#     print("\033[92mSelected Category Questions have same length\033[0m")
+#     print("add function and make contine frome here")
+
+# if len(category_lengths) == 10:
+#     print("\033[92mAll category is ok\033[0m")
+# else:
+#     print("\033[91msome category questions are missing\033[0m")
+#     print(f"\033[91mI Found {len(category_lengths)} Questions Types Only\033[0m")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from pymongo import MongoClient
 import os
-import ctypes
+import time
+
+# Optional: Only use ctypes if you're on Windows and want to show a popup
+# import ctypes
+
+
+
 
 # Clear the console
 os.system('cls' if os.name == 'nt' else 'clear')
@@ -142,14 +230,44 @@ os.system('cls' if os.name == 'nt' else 'clear')
 # MongoDB connection
 client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
 db = client["test"]
-qno_counts_collection = db["qno_counts"]
 qno_list_collection = db["question datas"]
 
+final_arry = []
+
+
+type_difi = [ 'Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough' , 'Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough']
+
+
+def get_all_qno_to_bal(expected_category_count, cat_gr_len, len):
+    time.sleep(2)
+    # os.system('cls' if os.name == 'nt' else 'clear')
+    print("--------------------------------------------------------------------------------------------")
+    all_cat = []
+    print(f"Found Category of Questions are : {expected_category_count}")
+    print(f"\033[92mFound Category: {cat_gr_len['category']}\033[0m")
+    print(f"Estimated Groups or Ways are : {len}")
+
+    for dif in type_difi:
+        data = qno_list_collection.find({"category" : cat_gr_len['category'],"difficulty" : dif })
+        if data:
+            print(data['difficulty'])
+        else:
+            print(f"{dif} not exist in {dat['category']}")
+    for dat in data:
+        print(dat['difficulty'], dat['category'])
+
+        
+
+    
+    
+
+
+
+
 # Get unique categories with English language
-categories = []
+categories = set()
 for doc in qno_list_collection.find({"language": "English"}):
-    if doc['category'] not in categories:
-        categories.append(doc['category'])
+    categories.add(doc['category'])
 
 # Count number of questions per category
 category_lengths = []
@@ -157,41 +275,63 @@ for category in categories:
     count = qno_list_collection.count_documents({"category": category, "language": "English"})
     category_lengths.append({"category": category, "length": count})
 
+# Error tracking
 er_01 = []
+category_lengths_list = 0
 
 # Compare lengths
 if category_lengths:
-    base_length = category_lengths[1]['length'] or category_lengths[0]['length']
+    # Choose the least length as base for comparison
+    base_length = min([c['length'] for c in category_lengths])
+    lengths = [c['length'] for c in category_lengths]
+    category_lengths_list = base_length
+    base_length = max(set(lengths), key=lengths.count)  # Most common length
+
+    print(f"\nBase length chosen for comparison: {base_length}\n")
+
     for cat in category_lengths:
-        if cat['length'] != base_length:
-            print(f"\033[93mCategory '{cat['category']}' has length {cat['length']} (not equal to {base_length})\033[0m")
-            print(f"\033[91mSome questions are missing {cat['category']} length Questions not Enough \033[0m")
-            er_01.append(cat['category'])
-            
-            # ctypes.windll.user32.MessageBoxW(0, f"Some questions are missing IN : {cat['category']}", "Missing Questions Alert", 1)
-            
-            
+        cat_name = cat['category']
+        cat_len = cat['length']
+        if cat_len < base_length:
+            print(f"\033[93mCategory '{cat_name}' has only {cat_len} questions. Expected: {base_length}\033[0m")
+            print(f"\033[91mSome questions are missing in category '{cat_name}'. Please add more.\033[0m")
+            er_01.append(cat_name)
+
+            # Optional popup alert (Windows only)
+            # ctypes.windll.user32.MessageBoxW(0, f"Missing questions in: {cat_name}", "Alert", 1)
+
+        elif cat_len > base_length:
+            print(f"\033[93mCategory '{cat_name}' has extra questions: {cat_len} > {base_length}\033[0m")
         else:
-            print(f"\033[92mCategory '{cat['category']}' has length {cat['length']} (equal to {base_length})\033[0m")
+            print(f"\033[92mCategory '{cat_name}' has correct number of questions: {cat_len}\033[0m")
+
+# Summary
+print("\n" + "-"*50)
+
+if er_01:
+    for cat in er_01:
+        print(f"\033[91m❌ Fix required: Adjust number of questions in '{cat}' to match others.\033[0m")
+    # Optional: exit after error
+    # exit(1)
+else:
+    print("\033[92m✅ All selected category questions have the same length.\033[0m")
+    print("🔁 You can proceed with the next step here...")
 
 
-if len(er_01) > 0:
-    for er in er_01:
-        print(f"\033[91m make fix this {er} length Increase or Decrease to continue \033[0m")
-        # exit()
+for i in range(category_lengths_list):
+    final_arry.append([])
+
+
+# Final check for number of categories
+# make chage it to 10 after to add 10 questions
+expected_category_count = 6
+if len(category_lengths) == expected_category_count:
+    print(f"\033[92m✅ All {expected_category_count} categories are present.\033[0m")
+    for cat_gr_len in category_lengths:
+        get_all_qno_to_bal(expected_category_count, cat_gr_len, category_lengths_list)
 
 else:
-    print("\033[92mSelected Category Questions have same length\033[0m")
-    print("add function and make contine frome here")
-
-if len(category_lengths) == 10:
-    print("\033[92mAll category is ok\033[0m")
-else:
-    print("\033[91msome category questions are missing\033[0m")
-    print(f"\033[91mI Found {len(category_lengths)} Questions Types Only\033[0m")
-
-
-
+    print(f"\033[91m⚠️ Expected {expected_category_count} categories but found {len(category_lengths)}.\033[0m")
 
 
 
