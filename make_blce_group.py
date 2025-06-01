@@ -132,10 +132,12 @@
 
 
 
-
 from pymongo import MongoClient
 import os
-import time
+import ctypes
+
+# Clear the console
+os.system('cls' if os.name == 'nt' else 'clear')
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
@@ -143,26 +145,54 @@ db = client["test"]
 qno_counts_collection = db["qno_counts"]
 qno_list_collection = db["question datas"]
 
-
-os.system('cls' if os.name == 'nt' else 'clear')
-
-cat =[]
-
-
+# Get unique categories with English language
+categories = []
 for doc in qno_list_collection.find({"language": "English"}):
-    if doc['category'] not in cat:
-        cat.append(doc['category'])
-print("Categories found:", cat)
+    if doc['category'] not in categories:
+        categories.append(doc['category'])
+
+# Count number of questions per category
+category_lengths = []
+for category in categories:
+    count = qno_list_collection.count_documents({"category": category, "language": "English"})
+    category_lengths.append({"category": category, "length": count})
+
+er_01 = []
+
+# Compare lengths
+if category_lengths:
+    base_length = category_lengths[1]['length'] or category_lengths[0]['length']
+    for cat in category_lengths:
+        if cat['length'] != base_length:
+            print(f"\033[93mCategory '{cat['category']}' has length {cat['length']} (not equal to {base_length})\033[0m")
+            print(f"\033[91mSome questions are missing {cat['category']} length Questions not Enough \033[0m")
+            er_01.append(cat['category'])
+            
+            # ctypes.windll.user32.MessageBoxW(0, f"Some questions are missing IN : {cat['category']}", "Missing Questions Alert", 1)
+            
+            
+        else:
+            print(f"\033[92mCategory '{cat['category']}' has length {cat['length']} (equal to {base_length})\033[0m")
 
 
-cat_len = []
+if len(er_01) > 0:
+    for er in er_01:
+        print(f"\033[91m make fix this {er} length Increase or Decrease to continue \033[0m")
+        # exit()
 
-for category in cat:
-    data_len = qno_list_collection.count_documents({"category": category, "language": "English"})
-    cat_len.append({"len" : data_len, "cat" : category})
-print("Category lengths:", cat_len)
+else:
+    print("\033[92mSelected Category Questions have same length\033[0m")
+    print("add function and make contine frome here")
 
-for catlen in cat_len:
-      if catlen["len"] != cat_len[0]["len"]:
-        print(f"Category '{catlen['cat']}' has length {catlen['len']} (not equal to {cat_len[0]['len']})")
+if len(category_lengths) == 10:
+    print("\033[92mAll category is ok\033[0m")
+else:
+    print("\033[91msome category questions are missing\033[0m")
+    print(f"\033[91mI Found {len(category_lengths)} Questions Types Only\033[0m")
+
+
+
+
+
+
 

@@ -13,6 +13,12 @@
       text-align: center;
       padding: 40px;
     }
+    .answer {
+      font-size: 20px;
+      font-weight: bold;
+      color: green;
+      margin-bottom: 10px;
+    }
     .puzzle {
       font-size: 36px;
       margin-bottom: 25px;
@@ -48,20 +54,18 @@
       font-size: 22px;
       font-weight: bold;
     }
-
-    button,
-    select {
+    button, select {
       margin-top: 20px;
       padding: 10px 15px;
       font-weight: bold;
       font-size: 16px;
       cursor: pointer;
     }
-
   </style>
 </head>
 <body>
   <h2>🔠 Spelling Puzzle - 4 Options Only</h2>
+  <div id="showAnswer" class="answer"></div>
   <div class="puzzle" id="maskedWord"></div>
   <div class="options" id="options"></div>
   <div id="result"></div>
@@ -87,9 +91,10 @@
       "dolphin", "crab", "shark", "snail", "camel", "turtle", "owl", "parrot", "rabbit", "kangaroo"
     ];
 
-    let currentIndex = 0;
+    let currentIndex = Math.floor(Math.random() * words.length);
     let currentPuzzle = null;
     let capturedBlob = null;
+    let ans = null;
 
     function maskWord(word) {
       const count = Math.min(4, Math.max(2, Math.floor(word.length / 3)));
@@ -101,7 +106,7 @@
       indexes.sort((a, b) => a - b);
       const masked = word.split("").map((ch, i) => indexes.includes(i) ? "_" : ch).join("");
       const correctFill = indexes.map(i => word[i]).join("");
-      return { masked, correctFill, indexes };
+      return { masked, correctFill };
     }
 
     function generateSimilarOptions(correct, count) {
@@ -111,7 +116,6 @@
       while (options.size < count) {
         let chars = correct.split("");
         const type = Math.floor(Math.random() * 3);
-
         if (type === 0 && chars.length > 1) {
           const i = Math.floor(Math.random() * (chars.length - 1));
           [chars[i], chars[i + 1]] = [chars[i + 1], chars[i]];
@@ -119,7 +123,6 @@
           const i = Math.floor(Math.random() * chars.length);
           chars[i] = alphabet[Math.floor(Math.random() * 26)];
         }
-
         const variant = chars.join("");
         if (variant !== correct) options.add(variant);
       }
@@ -129,31 +132,48 @@
 
     function createPuzzle(word) {
       const { masked, correctFill } = maskWord(word);
-      const fakeOptions = generateSimilarOptions(correctFill, 3);
-      let options = [...fakeOptions];
-      const includeCorrect = Math.random() < 0.5;
+      const fakeOptions = generateSimilarOptions(correctFill, 10);
+      let options = [];
+      let isAnswerNoneOfTheAbove = false;
 
-      if (includeCorrect) {
-        const replaceIndex = Math.floor(Math.random() * 3);
-        options[replaceIndex] = correctFill;
+      const includeNoneOption = Math.random() < 0.5;
+
+      if (includeNoneOption) {
+        const includeCorrect = Math.random() < 0.5;
+        if (includeCorrect) {
+          options = fakeOptions.slice(0, 2);
+          options.push(correctFill);
+          isAnswerNoneOfTheAbove = false;
+        } else {
+          options = fakeOptions.slice(0, 3);
+          isAnswerNoneOfTheAbove = true;
+        }
         options.push("None of the above");
       } else {
-        options.push("None of the above");
+        options = fakeOptions.slice(0, 3);
+        const insertIndex = Math.floor(Math.random() * 4);
+        options.splice(insertIndex, 0, correctFill);
+        isAnswerNoneOfTheAbove = false;
       }
+
+      options = options.sort(() => Math.random() - 0.5);
+      ans = correctFill;
 
       const isCorrectAnswer = (selected) => {
         if (selected === "None of the above") {
-          return !options.includes(correctFill);
+          ans = "None of the above"
+          return isAnswerNoneOfTheAbove;
         } else {
-          return selected === correctFill;
+          return selected === correctFill && !isAnswerNoneOfTheAbove;
         }
       };
 
       return {
         maskedWord: masked,
         correctFill,
-        options: options.sort(() => Math.random() - 0.5).slice(0, 4),
-        isCorrectAnswer
+        options,
+        isCorrectAnswer,
+        isAnswerNoneOfTheAbove
       };
     }
 
@@ -162,6 +182,9 @@
       currentPuzzle = createPuzzle(word);
 
       document.getElementById("maskedWord").textContent = currentPuzzle.maskedWord;
+      document.getElementById("showAnswer").innerHTML =
+        `<span style="color:blue; font-weight:bold;">Answer: ${currentPuzzle.correctFill}</span>`;
+
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
 
@@ -177,10 +200,19 @@
 
     function checkAnswer(selected, isCorrectFn) {
       const result = document.getElementById("result");
-      if (isCorrectFn(selected)) {
-        result.textContent = "✅ Correct!";
+      const isCorrect = isCorrectFn(selected);
+
+      if (isCorrect) {
+        if (selected === "None of the above") {
+          result.innerHTML =
+            `✅ Correct!<br><span style="color:blue; font-weight:bold;">Answer: None of the above (Real: ${currentPuzzle.correctFill})</span>`;
+        } else {
+          ans = currentPuzzle.correctFill;
+          result.innerHTML =
+            `✅ Correct!<br><span style="color:blue; font-weight:bold;">Answer: ${currentPuzzle.correctFill}</span>`;
+        }
       } else {
-        result.textContent = "❌ Wrong!";
+        result.innerHTML = `❌ Wrong!<br><span style="color:blue; font-weight:bold;">Answer: ${currentPuzzle.correctFill}</span>`;
       }
 
       setTimeout(() => {
@@ -188,8 +220,6 @@
         loadPuzzle();
       }, 3000);
     }
-
-
 
     document.getElementById("btnCapture").addEventListener("click", function () {
       const element = document.querySelector(".puzzle");
@@ -229,27 +259,31 @@
       });
     });
 
-    
     function post(imagePath) {
+      let an = '';
+
+      if((currentPuzzle.options).includes(ans)){
+        an = ans
+      }else{
+        an = "None of the above"
+      }
       if (!currentPuzzle) return alert("No puzzle loaded.");
 
       const difficulty = document.getElementById("tough_level").value || "Medium";
 
       fetch("http://localhost/api/question", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: `Fill in the blanks: ${currentPuzzle.maskedWord}`,
-          answer: currentPuzzle.correctFill,
+          answer: an,
           a: currentPuzzle.options[0],
           b: currentPuzzle.options[1],
           c: currentPuzzle.options[2],
           d: currentPuzzle.options[3],
           language: "English",
           category: "Spelling",
-          difficulty: difficulty,
+          difficulty,
           type: "Mental Ability",
           image: `https://backend.stawro.com/stawro/${imagePath}`,
           seconds: "10"
@@ -257,6 +291,7 @@
       })
       .then(res => res.json())
       .then(data => {
+        loadPuzzle();
         alert("✅ Question posted successfully!");
       })
       .catch(error => {
@@ -264,8 +299,6 @@
         alert("❌ Error posting question. Check CORS and endpoint path.");
       });
     }
-
-
 
     loadPuzzle();
   </script>
