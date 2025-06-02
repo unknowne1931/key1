@@ -222,8 +222,6 @@ import time
 # import ctypes
 
 
-
-
 # Clear the console
 os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -233,9 +231,13 @@ db = client["test"]
 qno_list_collection = db["question datas"]
 
 final_arry = []
+# make chage it to 10 after to add 10 questions
+expected_category_count = 6
+
+type_difi = [ 'Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough']
 
 
-type_difi = [ 'Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough' , 'Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough']
+
 
 
 def get_all_qno_to_bal(expected_category_count, cat_gr_len, len):
@@ -249,12 +251,14 @@ def get_all_qno_to_bal(expected_category_count, cat_gr_len, len):
 
     for dif in type_difi:
         data = qno_list_collection.find({"category" : cat_gr_len['category'],"difficulty" : dif })
-        if data:
-            print(data['difficulty'])
-        else:
-            print(f"{dif} not exist in {dat['category']}")
-    for dat in data:
-        print(dat['difficulty'], dat['category'])
+        for dat in data:
+            if dat:
+                print(dat['difficulty'])
+            else:
+                print(f"{dif} not exist in {dat['category']}")
+
+    # for dat in data:
+    #     print(dat['difficulty'], dat['category'])
 
         
 
@@ -318,20 +322,43 @@ else:
     print("🔁 You can proceed with the next step here...")
 
 
-for i in range(category_lengths_list):
-    final_arry.append([])
+
+total_qno_len = qno_list_collection.count_documents({})
+
+sum = total_qno_len - expected_category_count
+specific_num = []
+
+i = sum
+
+while i > 0:
+    specific_num.append(i)
+    i-=expected_category_count
+
+print(f"I Found {len(specific_num)} Groups")
 
 
-# Final check for number of categories
-# make chage it to 10 after to add 10 questions
-expected_category_count = 6
-if len(category_lengths) == expected_category_count:
-    print(f"\033[92m✅ All {expected_category_count} categories are present.\033[0m")
-    for cat_gr_len in category_lengths:
-        get_all_qno_to_bal(expected_category_count, cat_gr_len, category_lengths_list)
 
-else:
-    print(f"\033[91m⚠️ Expected {expected_category_count} categories but found {len(category_lengths)}.\033[0m")
+
+
+
+
+# for i in range(category_lengths_list):
+#     final_arry.append([])
+
+
+
+
+
+
+# # Final check for number of categories
+
+# if len(category_lengths) == expected_category_count:
+#     print(f"\033[92m✅ All {expected_category_count} categories are present.\033[0m")
+#     for cat_gr_len in category_lengths:
+#         get_all_qno_to_bal(expected_category_count, cat_gr_len, category_lengths_list)
+
+# else:
+#     print(f"\033[91m⚠️ Expected {expected_category_count} categories but found {len(category_lengths)}.\033[0m")
 
 
 
