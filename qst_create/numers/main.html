@@ -164,6 +164,13 @@
     quizData.question = `How many times does the number "${targetNumber}" appear?`;
     quizData.answer = count;
 
+
+    
+
+
+
+    
+
     document.getElementById('question').textContent = quizData.question;
     document.getElementById('answerReveal').textContent = "";
     const optionsDiv = document.getElementById('options');
@@ -261,38 +268,54 @@ document.getElementById("btnCapture").addEventListener("click", function () {
     });
 
   function post(imagePath) {
-    const difficulty = document.getElementById("difficultySelect").value || "Medium";
+  const difficulty = document.getElementById("difficultySelect").value || "Medium";
+  let ans = '';
+  let d = '';
 
-    fetch("http://localhost/api/question", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        question: quizData.question,
-        answer: quizData.answer,
-        a: quizData.options[0] || "",
-        b: quizData.options[1] || "",
-        c: quizData.options[2] || "",
-        d: quizData.options[3] || "",
-        language: "English",
-        category: "Counting",
-        difficulty: difficulty,
-        type: "Mental Ability",
-        image: `https://backend.stawro.com/stawro/${imagePath}`,
-        seconds: "10"
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert("✅ Question posted successfully!");
-      generateQuestion();
-    })
-    .catch(error => {
-      console.error("❌ Error posting question:", error);
-      alert("❌ Error posting question. Check CORS and endpoint path.");
-    });
+  const answerStr = quizData.answer.toString();
+  const options = quizData.options.map(opt => opt.toString());
+
+  const isNoneCorrect = !options.includes(answerStr);
+
+  if (isNoneCorrect) {
+    ans = "None of the above";
+    d = "None of the above";
+  } else {
+    ans = answerStr;
+    d = options[3] || "";
   }
+
+  fetch("http://localhost/api/question", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      question: quizData.question,
+      answer: ans,
+      a: options[0] || "",
+      b: options[1] || "",
+      c: options[2] || "",
+      d: d,
+      language: "English",
+      category: "Counting",
+      difficulty: difficulty,
+      type: "Mental Ability",
+      image: `https://backend.stawro.com/stawro/${imagePath}`,
+      seconds: "10"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("✅ Question posted successfully!");
+    generateQuestion();
+  })
+  .catch(error => {
+    console.error("❌ Error posting question:", error);
+    alert("❌ Error posting question. Check CORS and endpoint path.");
+  });
+}
+
 
 
 </script>

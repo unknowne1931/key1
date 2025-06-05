@@ -423,20 +423,578 @@
 
 # print(f"\033[92mGroups from {specific_num} , Expected Group : {len(specific_num)}\033[0m")
 
+import os
+
+os.system('cls')
+
+ary1 = []
+ary2 = []
+ary3 = []
 
 
-too_easy = te
-easy = e
-medium = m
-tough = t
-too_tough = tt
+data = [
+  {
+    "_id": {
+      "$numberInt": "1"
+    },
+    "language": "English",
+    "category": "calend",
+    "difficulty": "Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:01Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:01Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "2"
+    },
+    "language": "English",
+    "category": "colo",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:02Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:02Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "3"
+    },
+    "language": "English",
+    "category": "spel",
+    "difficulty": "Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:03Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:03Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "4"
+    },
+    "language": "English",
+    "category": "int_text",
+    "difficulty": "Too Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:04Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:04Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "5"
+    },
+    "language": "English",
+    "category": "sudoku",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:05Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:05Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "6"
+    },
+    "language": "English",
+    "category": "gk",
+    "difficulty": "Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:06Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:06Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "7"
+    },
+    "language": "English",
+    "category": "img_smlr",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:07Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:07Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "8"
+    },
+    "language": "English",
+    "category": "sent",
+    "difficulty": "Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:08Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:08Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "9"
+    },
+    "language": "English",
+    "category": "msng_ltr",
+    "difficulty": "Too Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:09Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:09Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "10"
+    },
+    "language": "English",
+    "category": "shape",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:10Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:10Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "11"
+    },
+    "language": "English",
+    "category": "calend",
+    "difficulty": "Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:11Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:11Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "12"
+    },
+    "language": "English",
+    "category": "colo",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:12Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:12Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "13"
+    },
+    "language": "English",
+    "category": "spel",
+    "difficulty": "Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:13Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:13Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "14"
+    },
+    "language": "English",
+    "category": "int_text",
+    "difficulty": "Too Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:14Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:14Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "15"
+    },
+    "language": "English",
+    "category": "sudoku",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:15Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:15Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "16"
+    },
+    "language": "English",
+    "category": "gk",
+    "difficulty": "Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:16Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:16Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "17"
+    },
+    "language": "English",
+    "category": "img_smlr",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:17Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:17Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "18"
+    },
+    "language": "English",
+    "category": "sent",
+    "difficulty": "Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:18Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:18Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "19"
+    },
+    "language": "English",
+    "category": "msng_ltr",
+    "difficulty": "Too Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:19Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:19Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "20"
+    },
+    "language": "English",
+    "category": "shape",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:20Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:20Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "21"
+    },
+    "language": "English",
+    "category": "calend",
+    "difficulty": "Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:21Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:21Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "22"
+    },
+    "language": "English",
+    "category": "colo",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:22Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:22Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "23"
+    },
+    "language": "English",
+    "category": "spel",
+    "difficulty": "Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:23Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:23Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "24"
+    },
+    "language": "English",
+    "category": "int_text",
+    "difficulty": "Too Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:24Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:24Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "25"
+    },
+    "language": "English",
+    "category": "sudoku",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:25Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:25Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "26"
+    },
+    "language": "English",
+    "category": "gk",
+    "difficulty": "Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:26Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:26Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "27"
+    },
+    "language": "English",
+    "category": "img_smlr",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:27Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:27Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "28"
+    },
+    "language": "English",
+    "category": "sent",
+    "difficulty": "Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:28Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:28Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "29"
+    },
+    "language": "English",
+    "category": "msng_ltr",
+    "difficulty": "Too Tough",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:29Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:29Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "30"
+    },
+    "language": "English",
+    "category": "shape",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:30Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:30Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "31"
+    },
+    "language": "English",
+    "category": "calend",
+    "difficulty": "Too Easy",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:31Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:31Z"
+    }
+  },
+  {
+    "_id": {
+      "$numberInt": "32"
+    },
+    "language": "English",
+    "category": "colo",
+    "difficulty": "Medium",
+    "type": "Mental Ability",
+    "createdAt": {
+      "$date": "2025-06-02T06:45:32Z"
+    },
+    "updatedAt": {
+      "$date": "2025-06-02T06:45:32Z"
+    }
+  }
+]
 
-te = 1
-e = 1
-m = 1
-t = 1
-tt = 1
+# Create a dictionary to hold groups by (category, difficulty)
 
-sum_q = 2 * (te, e, m, t, tt)
 
-print(sum_q)
+# Print all categories and all difficulties found in the data
+categories = sorted(set(d['category'] for d in data))
+difficulties = sorted(set(d['difficulty'] for d in data))
+print("Categories:", categories)
+print("Difficulties:", difficulties)
+print()
+grouped = {}
+
+
+
+expected_category_count = 10
+data_len = len(data) - expected_category_count
+
+
+i = data_len
+specific_num = []
+
+
+while i > 0:
+    specific_num.append(i)
+    i-=expected_category_count
+
+
+#tough calculus
+need_qn_ln = len(specific_num)*2
+
+
+print(f"\033[92m{len(specific_num)} Groups Possible\033[0m")
+
+
+
+# Fill the dictionary
+for dat in data:
+    cat = dat['category']
+    dif = dat['difficulty']
+    key = (cat, dif)
+    if key not in grouped:
+        grouped[key] = []
+    grouped[key].append(dat)
+
+# Print required count for each (category, difficulty) and show if enough exist
+print("\nRequired per (category, difficulty):", len(specific_num))
+print("Summary of all categories and all difficulties:\n")
+for cat in categories:
+    for dif in difficulties:
+        key = (cat, dif)
+        count = len(grouped.get(key, []))
+        enough = count >= len(specific_num)
+        status = "✅ Enough" if enough else "❌ Not enough"
+        color = "\033[92m" if enough else "\033[91m"
+        print(f"{color}Category: {cat:10} | Difficulty: {dif:9} | Count: {count:2} | {status}\033[0m")
+print()
+
+
+# Create groups of 10 questions, as many as len(specific_num)
+groups = []
+for group_idx in range(len(specific_num)):
+    group = []
+    for cat in categories:
+        for dif in difficulties:
+            key = (cat, dif)
+            # Only add if there are enough questions for this group
+            if len(grouped.get(key, [])) > group_idx:
+                group.append(grouped[key][group_idx])
+            # Stop if group reaches 10 questions
+            if len(group) == 10:
+                break
+        if len(group) == 10:
+            break
+    if len(group) == 10:
+        groups.append(group)
+
+# Print the groups
+for idx, group in enumerate(groups, 1):
+    print(f"\n\033[96mGroup {idx}:\033[0m")
+    for q in group:
+        print(f"  ID: {q['_id']['$numberInt']}, Category: {q['category']}, Difficulty: {q['difficulty']}")
+
+
+
