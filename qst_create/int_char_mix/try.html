@@ -103,12 +103,23 @@
       font-family: 'Courier New', Courier, monospace;
       font-weight: 700;
     }
+
+    #ans{
+      color: #02a528;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 600;
+      font-size: large;
+    }
+
+
   </style>
 </head>
 
 <body>
 
   <h2>Count the Characters Quiz</h2>
+
+  <p id="ans"></p>
 
   <div class="quiz-container">
     <div class="string_cnt" id="stringBox"></div>
@@ -163,6 +174,10 @@
     const str = getRandomString();
     const mode = Math.random() < 0.5 ? 'numbers' : 'letters';
     correctAnswer = mode === 'numbers' ? countNumbers(str) : countLetters(str);
+
+    document.getElementById('ans').innerText = `Answer : ${correctAnswer}`
+
+
     const includeNone = Math.random() < 0.5;
 
     document.getElementById('stringBox').textContent = str;
@@ -210,6 +225,7 @@
     }
   }
 
+
   function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
     const allOptions = document.querySelectorAll('.option');
     allOptions.forEach(opt => {
@@ -224,6 +240,8 @@
     if (!isCorrect) clickedBtn.classList.add('wrong');
     document.getElementById('answerReveal').textContent = `Correct Answer: ${correctAnswer}`;
   }
+
+
 
   generateQuiz();
 
