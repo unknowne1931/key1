@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guess the Code Challenge</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .code-box {
+      font-size: 24px;
+      background-color: #000;   
+      color: #ffffff;
+      padding: 15px 25px;
+      margin: 20px auto;
+      display: inline-block;
+      border: 2px solid #444;
+      border-radius: 10px;
+      letter-spacing: 2px;
+      height: 180px;
+      min-width: 300px;
+      max-width: auto;
+      align-content: center;
+    }
+
+    .options {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .option {
+      font-weight: bold;
+      background: #333;
+      padding: 12px 20px;
+      border: 2px solid #555;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .option:hover {
+      background-color: #444;
+    }
+
+    .correct {
+      border: 2px solid #2ecc71 !important;
+      background-color: #2ecc71;
+      color: #000;
+    }
+
+    .wrong {
+      background-color: #e74c3c !important;
+      border-color: #e74c3c;
+      color: #fff;
+    }
+
+    #nextBtn {
+      margin-top: 25px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #nextBtn:hover {
+      background-color: #2980b9;
+    }
+
+    select{
+      width: 180px;
+      height: 40px;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 10px;
+
+    }
+
+    .submit_btn{
+      width: 180px;
+      height: 40px;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 600;
+      background-color: #2980b9;
+      border: 1px solid;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <h1>Guess the Correct Code</h1>
+  <div class="code-box" id="code">Loading...</div>
+  <div class="options" id="options"></div>
+  <br/>
+
+  <select id="select_val" required>
+    <option value="" selected >select</option>
+    <option value="Too Easy" >Too Easy</option>
+    <option value="Easy" >Easy</option>
+    <option value="Medium" >Medium</option>
+    <option value="Tough" >Tough</option>
+    <option value="Too Tough" >Too Tough</option>
+  </select>
+
+  <button id="btnCapture" class="submit_btn">Capture Screenshot</button>
+  <button id="btnUpload" class="submit_btn" disabled>Upload Screenshot</button>
+
+  <div id="previewContainer"></div>
+
+
+  <button id="nextBtn" onclick="nextRound()">Next</button>
+
+  <script>
+    const codeDisplay = document.getElementById('code');
+    const optionsContainer = document.getElementById('options');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let correctCode = '';
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+
+    function getRandomCode(length = 18) {
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return result;
+    }
+
+    function mutateTwoLetters(original) {
+      let arr = original.split('');
+      let firstIndex = Math.floor(Math.random() * arr.length);
+      let secondIndex;
+      do {
+        secondIndex = Math.floor(Math.random() * arr.length);
+      } while (secondIndex === firstIndex);
+
+      const newChar1 = getNewChar(arr[firstIndex]);
+      const newChar2 = getNewChar(arr[secondIndex]);
+
+      arr[firstIndex] = newChar1;
+      arr[secondIndex] = newChar2;
+
+      return arr.join('');
+    }
+
+    function getNewChar(exclude) {
+      let ch;
+      do {
+        ch = chars[Math.floor(Math.random() * chars.length)];
+      } while (ch === exclude);
+      return ch;
+    }
+
+    function generateOptions(correct) {
+      const options = [correct];
+      while (options.length < 4) {
+        let mutated = mutateTwoLetters(correct);
+        if (!options.includes(mutated)) options.push(mutated);
+      }
+      return options.sort(() => Math.random() - 0.5);
+    }
+
+    function revealAnswer(selected = null) {
+      const options = document.querySelectorAll('.option');
+      options.forEach(btn => {
+        btn.removeEventListener('click', handleClick);
+        if (btn.textContent === correctCode) {
+          btn.classList.add('correct');
+        } else if (btn === selected) {
+          btn.classList.add('wrong');
+        }
+      });
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function handleClick(e) {
+      const selected = e.target;
+      revealAnswer(selected);
+    }
+
+    function setupRound() {
+      correctCode = getRandomCode();
+      codeDisplay.textContent = correctCode;
+      const allOptions = generateOptions(correctCode);
+      console.log(codeDisplay.textContent)
+
+      optionsContainer.innerHTML = '';
+      allOptions.forEach(opt => {
+        const div = document.createElement('div');
+        div.classList.add('option');
+        div.textContent = opt;
+        div.addEventListener('click', handleClick);
+        optionsContainer.appendChild(div);
+      });
+
+      nextBtn.style.display = 'none';
+    }
+
+
+
+    function nextRound() {
+      setupRound();
+    }
+
+    setupRound();
+
+
+    let capturedBlob = null;
+
+    document.getElementById("btnCapture").addEventListener("click", function () {
+      const element = document.querySelector(".code-box");
+      html2canvas(element).then(canvas => {
+        canvas.toBlob(blob => {
+          capturedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+          document.getElementById("btnUpload").disabled = false;
+        }, 'image/png');
+      });
+    });
+
+    document.getElementById("btnUpload").addEventListener("click", function () {
+      if (!capturedBlob) return alert("No screenshot captured!");
+
+      const formData = new FormData();
+      formData.append("screenshot", capturedBlob, "screenshot.png");
+
+      fetch("https://backend.stawro.com/stawro/upload.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status) {
+          post(res.filename);
+          alert(`✅ ${res.status}\n📁 Path: https://backend.stawro.com/stawro/${res.path}`);
+        } else {
+          alert("Upload succeeded.");
+          window.location.reload();
+        }
+      })
+      .catch(err => {
+        console.error("Upload error:", err);
+        alert("❌ Upload error.");
+      });
+    });
+
+
+    function post(path) {
+  const difficulty = document.getElementById("select_val").value || "Medium";
+
+  const answer = correctCode;
+  const options = Array.from(document.querySelectorAll('.option')).map(opt => opt.textContent);
+
+  if (options.length < 4) {
+    alert("❌ Not enough options to post.");
+    return;
+  }
+
+  fetch("http://localhost/api/question", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      question: "Guess the correct code",
+      answer: answer,
+      a: options[0],
+      b: options[1],
+      c: options[2],
+      d: options[3],
+      language: "English",
+      category: "Code Guessing",
+      difficulty: difficulty,
+      type: "Mental Ability",
+      image: `https://backend.stawro.com/stawro/uploads/${path}`,
+      seconds: "15"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("✅ Question posted successfully!");
+    window.location.reload(); // or call setupRound();
+  })
+  .catch(error => {
+    console.error("❌ Error posting question:", error);
+    alert("❌ Error posting question. Check CORS and endpoint path.");
+  });
+}
+
+
+  </script>
+</body>
+</html>

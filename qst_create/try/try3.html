@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Candy Crush Mini</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+    }
+
+    h1 {
+      margin: 20px;
+    }
+
+    #game {
+      display: grid;
+      grid-template-columns: repeat(8, 50px);
+      grid-template-rows: repeat(8, 50px);
+      gap: 2px;
+      justify-content: center;
+      margin: auto;
+    }
+
+    .cell {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background-size: cover;
+      background-position: center;
+      background-color: rgb(47, 86, 131);
+      cursor: pointer;
+    }
+
+    .score {
+      font-size: 18px;
+      margin: 10px;
+    }
+
+    
+  </style>
+</head>
+<body>
+
+<h1>Candy Crush 🍬</h1>
+<div class="score">Score: <span id="score">0</span></div>
+<div id="game"></div>
+
+<script>
+  const grid = document.getElementById('game');
+  const width = 8;
+  const cells = [];
+  const scoreDisplay = document.getElementById('score');
+  let score = 0;
+
+  const candyColors = [
+    'url(one.png)',   // red
+    'url(two.png)',   // yellow
+    'url(three.png)', // green
+    'url(four.png)',  // blue
+    'url(five.png)',  // purple
+    'url(six.png)'    // orange
+  ];
+
+  function createBoard() {
+    for (let i = 0; i < width * width; i++) {
+      const cell = document.createElement('div');
+      cell.setAttribute('draggable', true);
+      cell.setAttribute('id', i);
+      cell.classList.add('cell');
+      let randomColor = Math.floor(Math.random() * candyColors.length);
+      cell.style.backgroundImage = candyColors[randomColor];
+      grid.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+
+  createBoard();
+
+  let colorBeingDragged, colorBeingReplaced;
+  let cellIdBeingDragged, cellIdBeingReplaced;
+
+  cells.forEach(cell => {
+    cell.addEventListener('dragstart', dragStart);
+    cell.addEventListener('dragover', e => e.preventDefault());
+    cell.addEventListener('dragenter', e => e.preventDefault());
+    cell.addEventListener('dragleave', () => {});
+    cell.addEventListener('drop', dragDrop);
+    cell.addEventListener('dragend', dragEnd);
+  });
+
+  function dragStart() {
+    colorBeingDragged = this.style.backgroundImage;
+    cellIdBeingDragged = parseInt(this.id);
+  }
+
+  function dragDrop() {
+    colorBeingReplaced = this.style.backgroundImage;
+    cellIdBeingReplaced = parseInt(this.id);
+
+    cells[cellIdBeingDragged].style.backgroundImage = colorBeingReplaced;
+    cells[cellIdBeingReplaced].style.backgroundImage = colorBeingDragged;
+  }
+
+  function dragEnd() {
+    const validMoves = [
+      cellIdBeingDragged - 1,
+      cellIdBeingDragged + 1,
+      cellIdBeingDragged - width,
+      cellIdBeingDragged + width
+    ];
+
+    const validMove = validMoves.includes(cellIdBeingReplaced);
+
+    if (cellIdBeingReplaced && validMove) {
+      cellIdBeingReplaced = null;
+    } else if (cellIdBeingReplaced && !validMove) {
+      cells[cellIdBeingDragged].style.backgroundImage = colorBeingDragged;
+      cells[cellIdBeingReplaced].style.backgroundImage = colorBeingReplaced;
+    }
+  }
+
+  function checkRowForThree() {
+    for (let i = 0; i < 62; i++) {
+      const rowOfThree = [i, i + 1, i + 2];
+      const decidedColor = cells[i].style.backgroundImage;
+      const isBlank = decidedColor === '';
+
+      const notValid = [6, 7, 14, 15, 22, 23, 30, 31,
+                        38, 39, 46, 47, 54, 55, 62, 63];
+      if (notValid.includes(i)) continue;
+
+      if (rowOfThree.every(index => cells[index].style.backgroundImage === decidedColor && !isBlank)) {
+        rowOfThree.forEach(index => cells[index].style.backgroundImage = '');
+        score += 3;
+        scoreDisplay.textContent = score;
+      }
+    }
+  }
+
+  function checkColumnForThree() {
+    for (let i = 0; i < 47; i++) {
+      const columnOfThree = [i, i + width, i + width * 2];
+      const decidedColor = cells[i].style.backgroundImage;
+      const isBlank = decidedColor === '';
+
+      if (columnOfThree.every(index => cells[index].style.backgroundImage === decidedColor && !isBlank)) {
+        columnOfThree.forEach(index => cells[index].style.backgroundImage = '');
+        score += 3;
+        scoreDisplay.textContent = score;
+      }
+    }
+  }
+
+  function moveDown() {
+    for (let i = 0; i < 56; i++) {
+      if (cells[i + width].style.backgroundImage === '') {
+        cells[i + width].style.backgroundImage = cells[i].style.backgroundImage;
+        cells[i].style.backgroundImage = '';
+      }
+
+      const firstRow = [0,1,2,3,4,5,6,7];
+      const isFirstRow = firstRow.includes(i);
+      if (isFirstRow && cells[i].style.backgroundImage === '') {
+        const randomColor = Math.floor(Math.random() * candyColors.length);
+        cells[i].style.backgroundImage = candyColors[randomColor];
+      }
+    }
+  }
+
+  setInterval(() => {
+    checkRowForThree();
+    checkColumnForThree();
+    moveDown();
+  }, 100);
+</script>
+
+</body>
+</html>

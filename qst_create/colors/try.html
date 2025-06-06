@@ -88,6 +88,13 @@
       font-size: 16px;
       cursor: pointer;
     }
+
+    #ansr{
+      color: rgb(21, 117, 21);
+      font-weight: 600;
+    }
+
+
   </style>
 </head>
 
@@ -107,6 +114,8 @@
   <p id="questionText"></p>
   <div id="options"></div>
   <p id="answerReveal"></p>
+
+  <p id="ansr"></p>
 
   <select id="tough_level">
     <option value="" selected disabled>Choose an option</option>
@@ -197,6 +206,10 @@
       questionText.textContent = `How many boxes match the clue color exactly?`;
       const correctAnswer = clueColorCount;
       ans = correctAnswer;
+
+      document.getElementById("ansr").innerText = `Correct Answer : ${correctAnswer} `
+
+      console.log(correctAnswer)
 
       const optionSet = new Set();
       optionSet.add(correctAnswer);
@@ -302,7 +315,7 @@
           difficulty: difficulty,
           type: "Mental Ability",
           image: `https://backend.stawro.com/stawro/uploads/${path}`,
-          seconds: "10"
+          seconds: "15"
         })
       })
       .then(res => res.json())
