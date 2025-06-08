@@ -95,12 +95,20 @@
       cursor: pointer;
     }
 
+    #ans{
+      color: rgb(5, 212, 5);
+    }
+
 
   </style>
 </head>
 <body>
 
 <h2>Count the Numbers!</h2>
+
+<br/>
+
+<h2 id="ans"></h2>
 
 <select id="difficultySelect">
   <option value="" selected disabled>Choose Difficulty</option>
@@ -124,6 +132,7 @@
   const container = document.getElementById('container');
   let capturedBlob;
   let quizData = {};
+
 
   function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
@@ -229,6 +238,9 @@
 
   generateQuestion();
 
+
+  document.getElementById('ans').innerText = `Answer : ${quizData.answer}`
+
 document.getElementById("btnCapture").addEventListener("click", function () {
       const element = document.querySelector(".cnt_an");
       html2canvas(element).then(canvas => {
@@ -276,6 +288,7 @@ document.getElementById("btnCapture").addEventListener("click", function () {
   const options = quizData.options.map(opt => opt.toString());
 
   const isNoneCorrect = !options.includes(answerStr);
+
 
   if (isNoneCorrect) {
     ans = "None of the above";

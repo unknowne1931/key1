@@ -171,59 +171,45 @@
   }
 
   function generateQuiz() {
-    const str = getRandomString();
-    const mode = Math.random() < 0.5 ? 'numbers' : 'letters';
-    correctAnswer = mode === 'numbers' ? countNumbers(str) : countLetters(str);
+  const str = getRandomString();
+  const mode = Math.random() < 0.5 ? 'numbers' : 'letters';
+  correctAnswer = mode === 'numbers' ? countNumbers(str) : countLetters(str);
+  document.getElementById('ans').innerText = `Answer : ${correctAnswer}`;
 
-    document.getElementById('ans').innerText = `Answer : ${correctAnswer}`
+  document.getElementById('stringBox').textContent = str;
+  currentQuestion = `How many ${mode} are in the string above?`;
+  document.getElementById('questionText').textContent = currentQuestion;
 
+  document.getElementById('answerReveal').textContent = "";
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = '';
 
-    const includeNone = Math.random() < 0.5;
+  const optionSet = new Set();
+  optionSet.add(correctAnswer);
 
-    document.getElementById('stringBox').textContent = str;
+  while (optionSet.size < 4) {
+    let offset = Math.floor(Math.random() * 4) - 2; // -2, -1, 0, +1
+    let wrong = correctAnswer + offset;
 
-    const estimatedTime = (correctAnswer / 2.5).toFixed(1);
-    currentQuestion = `How many ${mode} are in the string above?`;
-    document.getElementById('questionText').textContent = currentQuestion;
-
-    document.getElementById('answerReveal').textContent = "";
-    const optionsDiv = document.getElementById('options');
-    optionsDiv.innerHTML = '';
-
-    const optionSet = new Set();
-    if (includeNone) {
-      while (optionSet.size < 3) {
-        const wrong = Math.floor(Math.random() * 30);
-        if (wrong !== correctAnswer) optionSet.add(wrong);
-      }
-    } else {
-      optionSet.add(correctAnswer);
-      while (optionSet.size < 4) {
-        const wrong = Math.floor(Math.random() * 30);
-        optionSet.add(wrong);
-      }
-    }
-
-    optionsArray = Array.from(optionSet).sort(() => Math.random() - 0.5);
-    let optionNumber = 1;
-
-    optionsArray.forEach(opt => {
-      const btn = document.createElement('div');
-      btn.className = 'option';
-      btn.textContent = `${optionNumber++}) ${opt}`;
-      btn.onclick = () => handleAnswer(opt === correctAnswer, btn, correctAnswer);
-      optionsDiv.appendChild(btn);
-    });
-
-    if (includeNone) {
-      const noneBtn = document.createElement('div');
-      noneBtn.className = 'option';
-      noneBtn.textContent = `${optionNumber}) None of the above`;
-      noneBtn.onclick = () => handleAnswer(true, noneBtn, correctAnswer, true);
-      optionsArray.push("None of the above");
-      optionsDiv.appendChild(noneBtn);
+    if (wrong !== correctAnswer && wrong >= 0 && wrong <= 99) {
+      optionSet.add(wrong);
     }
   }
+
+  optionsArray = Array.from(optionSet).sort(() => Math.random() - 0.5);
+  let optionNumber = 1;
+
+  optionsArray.forEach(opt => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.style.fontWeight = 'bold';
+    if (opt === correctAnswer) btn.style.border = '2px solid green';
+    btn.textContent = `${optionNumber++}) ${opt}`;
+    btn.onclick = () => handleAnswer(opt === correctAnswer, btn, correctAnswer);
+    optionsDiv.appendChild(btn);
+  });
+}
+
 
 
   function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
