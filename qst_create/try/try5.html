@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <title>Maze Game - Reach the Center Challenge</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    canvas {
+      border: 2px solid black;
+      background: white;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .options button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      min-height: 24px;
+    }
+
+    .cntt{
+      width: 60%;
+      height: auto;
+      padding: 20px;
+      margin: auto;
+      border: 1px solid;
+    }
+
+    button{
+      width: 120px;
+      min-height: 40px;
+      max-height: auto;
+      background-color: rgb(17, 80, 253);    
+      color: #f4f4f4;
+      border: 1px solid;
+      border-radius: 10px;
+      cursor: pointer;  
+
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <h2>🌀 Maze Game - Can you reach the center?</h2>
+  <div class="cntt">
+      <canvas id="mazeCanvas" width="500" height="500"></canvas>
+  </div>
+  <div id="question">Can the man reach the center?</div>
+   <div style="margin-top: 20px;">
+    <label for="difficultySelect">Difficulty:</label>
+    <select id="difficultySelect">
+
+      <option value="">--Select--</option>
+      <option value="Too Easy">Too Easy</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Tough">Tough</option>
+      <option value="Too Tough">Too Tough</option>
+    </select>
+  </div>
+
+  
+  <div class="options">
+    <button onclick="checkAnswer('Yes')">Yes</button>
+    <button onclick="checkAnswer('No')">No</button>
+  </div>
+
+
+  <div id="result"></div>
+
+  <br />
+  <button id="btnCapture">📸 Capture Screenshot</button>
+  <button id="btnUpload" disabled>⬆️ Upload</button>
+  <div id="previewContainer"></div>
+
+  <script>
+    const canvas = document.getElementById("mazeCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const cols = 21;
+    const rows = 21;
+    const cellSize = canvas.width / cols;
+
+    const grid = [];
+    const stack = [];
+
+    class Cell {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.walls = [true, true, true, true]; // top, right, bottom, left
+        this.visited = false;
+      }
+
+      draw() {
+        const x = this.x * cellSize;
+        const y = this.y * cellSize;
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+
+        // Draw walls as lines
+        if (this.walls[0]) { // top
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + cellSize, y);
+          ctx.stroke();
+        }
+        if (this.walls[1]) { // right
+          ctx.beginPath();
+          ctx.moveTo(x + cellSize, y);
+          ctx.lineTo(x + cellSize, y + cellSize);
+          ctx.stroke();
+        }
+        if (this.walls[2]) { // bottom
+          ctx.beginPath();
+          ctx.moveTo(x + cellSize, y + cellSize);
+          ctx.lineTo(x, y + cellSize);
+          ctx.stroke();
+        }
+        if (this.walls[3]) { // left
+          ctx.beginPath();
+          ctx.moveTo(x, y + cellSize);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function index(x, y) {
+      if (x < 0 || y < 0 || x >= cols || y >= rows) return -1;
+      return y * cols + x;
+    }
+
+    function generateMaze() {
+      // Initialize grid
+      grid.length = 0;
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          grid.push(new Cell(x, y));
+        }
+      }
+
+      // Recursive backtracker maze generation
+      const stack = [];
+      const startCell = grid[0];
+      startCell.visited = true;
+      stack.push(startCell);
+
+      while (stack.length > 0) {
+        const current = stack[stack.length - 1];
+        const neighbors = [];
+
+        // Check neighbors that are not visited
+        const directions = [
+          [0, -1, 0, 2], // top neighbor and direction walls to remove
+          [1, 0, 1, 3],  // right
+          [0, 1, 2, 0],  // bottom
+          [-1, 0, 3, 1]  // left
+        ];
+
+        for (let [dx, dy, wallDir, oppWallDir] of directions) {
+          const nx = current.x + dx;
+          const ny = current.y + dy;
+          const neighborIndex = index(nx, ny);
+          if (neighborIndex !== -1) {
+            const neighbor = grid[neighborIndex];
+            if (!neighbor.visited) {
+              neighbors.push({ neighbor, wallDir, oppWallDir });
+            }
+          }
+        }
+
+        if (neighbors.length > 0) {
+          const { neighbor, wallDir, oppWallDir } = neighbors[Math.floor(Math.random() * neighbors.length)];
+          current.walls[wallDir] = false;
+          neighbor.walls[oppWallDir] = false;
+          neighbor.visited = true;
+          stack.push(neighbor);
+        } else {
+          stack.pop();
+        }
+      }
+    }
+
+    // Player and Goal setup
+    let player = { x: 0, y: 0 };
+    const goal = { x: Math.floor(cols / 2), y: Math.floor(rows / 2) };
+
+    // Draw maze and entities
+    function drawMaze() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw all cells
+      for (const cell of grid) {
+        cell.draw();
+      }
+
+      // Draw goal (red square) — always visible
+      ctx.fillStyle = "red";
+      ctx.fillRect(
+        goal.x * cellSize + 4,
+        goal.y * cellSize + 4,
+        cellSize - 8,
+        cellSize - 8
+      );
+
+      // Draw player (blue circle)
+      ctx.fillStyle = "blue";
+      ctx.beginPath();
+      ctx.arc(
+        player.x * cellSize + cellSize / 2,
+        player.y * cellSize + cellSize / 2,
+        cellSize / 3,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+
+      // If gate is closed, draw gate wall in black
+      if (gate) {
+        drawGateWall(gate);
+      }
+    }
+
+    // Movement check helper
+    function canMoveTo(x, y) {
+      return x >= 0 && y >= 0 && x < cols && y < rows;
+    }
+
+    // Handle keypress for player movement
+    document.addEventListener("keydown", (e) => {
+      const currentCell = grid[index(player.x, player.y)];
+      let moved = false;
+
+      if (e.key === "ArrowUp") {
+        // Check walls and gate
+        if (
+          !currentCell.walls[0] &&
+          canMoveTo(player.x, player.y - 1) &&
+          !isGateBlocking(player.x, player.y, player.x, player.y - 1)
+        ) {
+          player.y--;
+          moved = true;
+        }
+      } else if (e.key === "ArrowRight") {
+        if (
+          !currentCell.walls[1] &&
+          canMoveTo(player.x + 1, player.y) &&
+          !isGateBlocking(player.x, player.y, player.x + 1, player.y)
+        ) {
+          player.x++;
+          moved = true;
+        }
+      } else if (e.key === "ArrowDown") {
+        if (
+          !currentCell.walls[2] &&
+          canMoveTo(player.x, player.y + 1) &&
+          !isGateBlocking(player.x, player.y, player.x, player.y + 1)
+        ) {
+          player.y++;
+          moved = true;
+        }
+      } else if (e.key === "ArrowLeft") {
+        if (
+          !currentCell.walls[3] &&
+          canMoveTo(player.x - 1, player.y) &&
+          !isGateBlocking(player.x, player.y, player.x - 1, player.y)
+        ) {
+          player.x--;
+          moved = true;
+        }
+      }
+
+      if (moved) {
+        if (player.x === goal.x && player.y === goal.y) {
+          document.getElementById("result").textContent = "🎉 Reached the center!";
+        } else {
+          document.getElementById("result").textContent = "";
+        }
+      }
+
+      drawMaze();
+    });
+
+    // Gate definition
+    // Gate blocks movement between two adjacent cells: (x1,y1) <-> (x2,y2)
+    let gate = null;
+
+    // Draw gate wall
+    function drawGateWall({ x1, y1, x2, y2 }) {
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 4;
+
+      const xPixel1 = x1 * cellSize;
+      const yPixel1 = y1 * cellSize;
+      const xPixel2 = x2 * cellSize;
+      const yPixel2 = y2 * cellSize;
+
+      if (x1 === x2) {
+        // vertical gate wall (horizontal barrier)
+        const topCellY = Math.min(y1, y2);
+        const leftCellX = x1;
+        ctx.beginPath();
+        ctx.moveTo(xPixel1 + 2, yPixel1 + cellSize);
+        ctx.lineTo(xPixel1 + cellSize - 2, yPixel1 + cellSize);
+        ctx.stroke();
+      } else if (y1 === y2) {
+        // horizontal gate wall (vertical barrier)
+        const leftCellX = Math.min(x1, x2);
+        const topCellY = y1;
+        ctx.beginPath();
+        ctx.moveTo(xPixel1 + cellSize, yPixel1 + 2);
+        ctx.lineTo(xPixel1 + cellSize, yPixel1 + cellSize - 2);
+        ctx.stroke();
+      }
+    }
+
+    // Check if gate blocks movement between two cells
+    function isGateBlocking(x1, y1, x2, y2) {
+      if (!gate) return false;
+      // Since gate blocks movement both ways
+      return (
+        (gate.x1 === x1 && gate.y1 === y1 && gate.x2 === x2 && gate.y2 === y2) ||
+        (gate.x1 === x2 && gate.y1 === y2 && gate.x2 === x1 && gate.y2 === y1)
+      );
+    }
+
+    // Use BFS to check if goal reachable from start, ignoring gate
+    function isGoalReachable() {
+      const visited = new Set();
+      const queue = [{ x: 0, y: 0 }];
+
+      while (queue.length > 0) {
+        const { x, y } = queue.shift();
+        if (x === goal.x && y === goal.y) return true;
+
+        visited.add(`${x},${y}`);
+        const currentCell = grid[index(x, y)];
+
+        // For each direction, check if can move and not blocked by gate
+        const moves = [
+          { dx: 0, dy: -1, wall: 0 },
+          { dx: 1, dy: 0, wall: 1 },
+          { dx: 0, dy: 1, wall: 2 },
+          { dx: -1, dy: 0, wall: 3 },
+        ];
+
+        for (const move of moves) {
+          const nx = x + move.dx;
+          const ny = y + move.dy;
+          if (
+            canMoveTo(nx, ny) &&
+            !currentCell.walls[move.wall] &&
+            !isGateBlocking(x, y, nx, ny) &&
+            !visited.has(`${nx},${ny}`)
+          ) {
+            queue.push({ x: nx, y: ny });
+          }
+        }
+      }
+      return false;
+    }
+
+    // Create gate blocking a critical path to sometimes make goal unreachable
+    function createGate() {
+      // We want to close off exactly one path between two adjacent cells on the maze path
+      // Approach:
+      // 1. Find the shortest path from start to goal ignoring gate
+      // 2. Pick a random edge along that path (not adjacent to goal)
+      // 3. Place a gate on that edge (blocks that passage)
+
+      // First get shortest path using BFS (ignoring gate)
+      const parentMap = new Map();
+      const visited = new Set();
+      const queue = [{ x: 0, y: 0 }];
+      visited.add("0,0");
+
+      while (queue.length > 0) {
+        const { x, y } = queue.shift();
+        if (x === goal.x && y === goal.y) break;
+
+        const currentCell = grid[index(x, y)];
+        const moves = [
+          { dx: 0, dy: -1, wall: 0 },
+          { dx: 1, dy: 0, wall: 1 },
+          { dx: 0, dy: 1, wall: 2 },
+          { dx: -1, dy: 0, wall: 3 },
+        ];
+
+        for (const move of moves) {
+          const nx = x + move.dx;
+          const ny = y + move.dy;
+          if (
+            canMoveTo(nx, ny) &&
+            !currentCell.walls[move.wall] &&
+            !visited.has(`${nx},${ny}`)
+          ) {
+            visited.add(`${nx},${ny}`);
+            parentMap.set(`${nx},${ny}`, { x, y });
+            queue.push({ x: nx, y: ny });
+          }
+        }
+      }
+
+      // Reconstruct path from goal to start
+      const path = [];
+      let current = { x: goal.x, y: goal.y };
+      while (!(current.x === 0 && current.y === 0)) {
+        path.push(current);
+        current = parentMap.get(`${current.x},${current.y}`);
+        if (!current) break;
+      }
+      path.push({ x: 0, y: 0 });
+      path.reverse();
+
+      if (path.length <= 2) return null; // no path or trivial path
+
+      // Pick random edge in path excluding last edge near goal (so red box isn't blocked)
+      // So choose from path indices 0 to path.length-3
+      const maxIndex = path.length - 3;
+      const edgeIndex = Math.floor(Math.random() * (maxIndex + 1));
+
+      const cellA = path[edgeIndex];
+      const cellB = path[edgeIndex + 1];
+
+      return { x1: cellA.x, y1: cellA.y, x2: cellB.x, y2: cellB.y };
+    }
+
+    // Initialize game
+    function initGame() {
+      generateMaze();
+      player = { x: 0, y: 0 };
+      gate = null;
+
+      // 50% chance to add a gate to block path
+      if (Math.random() < 0.5) {
+        gate = createGate();
+      }
+
+      drawMaze();
+      document.getElementById("result").textContent = "";
+    }
+
+
+
+
+    // Check user answer
+    function checkAnswer(answer) {
+      const reachable = isGoalReachable();
+      if ((reachable && answer === "Yes") || (!reachable && answer === "No")) {
+        document.getElementById("result").textContent = "✅ Correct!";
+      } else {
+        document.getElementById("result").textContent = "❌ Wrong answer.";
+      }
+    }
+
+    // Start the game
+    initGame();
+
+
+    document.getElementById("btnCapture").addEventListener("click", () => {
+      html2canvas(document.querySelector(".cntt")).then(canvas => {
+        canvas.toBlob(blob => {
+          capturedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+          document.getElementById("btnUpload").disabled = false;
+        }, 'image/png');
+      });
+    });
+
+    document.getElementById("btnUpload").addEventListener("click", () => {
+      if (!capturedBlob) return alert("No screenshot captured!");
+
+      const formData = new FormData();
+      formData.append("screenshot", capturedBlob, "screenshot.png");
+
+      fetch("https://backend.stawro.com/stawro/upload.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status && res.path) {
+          postQuestion(res.path);
+        } else {
+          alert("Upload failed.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Upload error.");
+      });
+    });
+
+
+    function postQuestion(path) {
+      const difficulty = document.getElementById("difficultySelect").value;
+      if (!difficulty) return alert("Please select a difficulty!");
+
+      const reachable = isGoalReachable();
+
+      const postData = {
+        question: "Can the man reach the center of the maze?",
+        answer: reachable ? "Yes" : "No",
+        a: "Yes",
+        b: "No",
+        c: "----",
+        d: "----",
+        language: "English",
+        category: "Maze Logic",
+        difficulty: difficulty,
+        type: "Puzzle",
+        image: `https://backend.stawro.com/stawro/${path}`, // You can add screenshot path here if you capture the canvas
+        seconds: "15"
+      };
+
+      fetch("http://localhost/api/question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      })
+        .then(res => res.json())
+        .then(data => {
+          initGame()
+          alert("✅ Maze question posted successfully!");
+        })
+        .catch(error => {
+          console.error(error);
+          alert("❌ Error posting question. Check API and CORS settings.");
+        });
+    }
+
+
+
+
+
+  </script>
+</body>
+
+</html>

@@ -218,6 +218,8 @@
       noneBtn.onclick = () => handleAnswer(true, noneBtn, count, true);
       optionsDiv.appendChild(noneBtn);
     }
+
+    document.getElementById('ans').innerText = `Answer : ${quizData.answer}`
   }
 
   function handleAnswer(isCorrect, clickedBtn, correctAnswer, isNone = false) {
@@ -239,7 +241,7 @@
   generateQuestion();
 
 
-  document.getElementById('ans').innerText = `Answer : ${quizData.answer}`
+  
 
 document.getElementById("btnCapture").addEventListener("click", function () {
       const element = document.querySelector(".cnt_an");

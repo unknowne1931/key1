@@ -3,47 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <title>Sudoku MCQ Puzzle</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #363333;
       text-align: center;
       padding: 20px;
+      color: white;
     }
-
     .sudoku {
       display: grid;
       grid-template-columns: repeat(9, 50px);
       gap: 2px;
       justify-content: center;
-      margin-bottom: 20px;
+      margin: 20px auto;
+      padding: 10px;
+      width: 65%;
     }
-
     .cell {
       width: 50px;
       height: 50px;
       border: 1px solid #5c5858;
       background: linear-gradient(to bottom, #4ca8e6, #002c6d);
       font-weight: bold;
-      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
       font-size: 20px;
       color: #ffffff;
-      align-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 4px;
     }
-
     .cell.empty {
       background: linear-gradient(to bottom, #5aa5d6, #0861e7);
-      color: #888;
+      color: yellow;
     }
-
     .options {
       display: flex;
       flex-direction: column;
       max-width: 200px;
-      margin: 0 auto;
+      margin: 10px auto;
     }
-
     .options button {
       margin: 5px 0;
       padding: 10px;
@@ -53,17 +54,33 @@
       border-radius: 4px;
       background: #e4dfdf;
     }
-
     .options button:hover {
-      background: #ddd;
+      background: #ccc;
     }
-
     #result {
       margin-top: 15px;
       font-size: 18px;
       font-weight: bold;
     }
-    
+    #difficultySelect {
+      margin-top: 15px;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    #btnCapture, #btnUpload {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    #previewContainer img {
+      margin-top: 15px;
+      max-width: 300px;
+      border: 2px solid #fff;
+    }
   </style>
 </head>
 <body>
@@ -72,6 +89,20 @@
   <div id="question">What number goes in the yellow cell?</div>
   <div class="options" id="options"></div>
   <div id="result"></div>
+
+  <select id="difficultySelect">
+    <option value="" selected disabled>Choose Difficulty</option>
+    <option value="Too Easy">Too Easy</option>
+    <option value="Easy">Easy</option>
+    <option value="Medium">Medium</option>
+    <option value="Tough">Tough</option>
+    <option value="Too Tough">Too Tough</option>
+  </select>
+
+  <br />
+  <button id="btnCapture">📸 Capture Screenshot</button>
+  <button id="btnUpload" disabled>⬆️ Upload</button>
+  <div id="previewContainer"></div>
 
   <script>
     const sudokuBase = [
@@ -86,24 +117,21 @@
       [3, 4, 5, 2, 8, 6, 1, 7, 9]
     ];
 
-    let emptyRow = 0;
-    let emptyCol = 0;
-    let correctAnswer = 0;
+    let emptyRow = 0, emptyCol = 0, correctAnswer = 0;
+    let quizData = {}, capturedBlob = null;
 
     function generatePuzzle() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
 
-      // Clone the base grid
       const puzzle = sudokuBase.map(row => [...row]);
 
-      // Choose a random cell to hide
       emptyRow = Math.floor(Math.random() * 9);
       emptyCol = Math.floor(Math.random() * 9);
       correctAnswer = puzzle[emptyRow][emptyCol];
       puzzle[emptyRow][emptyCol] = null;
 
-      // Draw grid
+      // Fill grid
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
           const cell = document.createElement('div');
@@ -117,16 +145,9 @@
       const options = [correctAnswer];
       while (options.length < 4) {
         const num = Math.floor(Math.random() * 9) + 1;
-        if (!options.includes(num)) {
-          options.push(num);
-        }
+        if (!options.includes(num)) options.push(num);
       }
-
-      // Shuffle options
-      for (let i = options.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [options[i], options[j]] = [options[j], options[i]];
-      }
+      options.sort(() => Math.random() - 0.5);
 
       const optionsDiv = document.getElementById('options');
       optionsDiv.innerHTML = '';
@@ -136,6 +157,15 @@
         btn.onclick = () => checkAnswer(opt);
         optionsDiv.appendChild(btn);
       });
+
+      // Store quizData for posting
+      quizData = {
+        question: "What number goes in the yellow cell?",
+        answer: correctAnswer,
+        options: options
+      };
+
+      document.getElementById("result").textContent = '';
     }
 
     function checkAnswer(selected) {
@@ -150,8 +180,81 @@
 
     generatePuzzle();
 
+    document.getElementById("btnCapture").addEventListener("click", () => {
+      html2canvas(document.querySelector(".sudoku")).then(canvas => {
+        canvas.toBlob(blob => {
+          capturedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+          document.getElementById("btnUpload").disabled = false;
+        }, 'image/png');
+      });
+    });
 
+    document.getElementById("btnUpload").addEventListener("click", () => {
+      if (!capturedBlob) return alert("No screenshot captured!");
+
+      const formData = new FormData();
+      formData.append("screenshot", capturedBlob, "screenshot.png");
+
+      fetch("https://backend.stawro.com/stawro/upload.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status && res.path) {
+          postQuestion(res.path);
+        } else {
+          alert("Upload failed.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Upload error.");
+      });
+    });
+
+    function postQuestion(imagePath) {
+      const difficulty = document.getElementById("difficultySelect").value;
+      if (!difficulty) return alert("Please select a difficulty!");
+
+      const options = quizData.options.map(o => o.toString());
+      const answerStr = quizData.answer.toString();
+      const noneCorrect = !options.includes(answerStr);
+
+      const postData = {
+        question: quizData.question,
+        answer: noneCorrect ? "None of the above" : answerStr,
+        a: options[0] || "",
+        b: options[1] || "",
+        c: options[2] || "",
+        d: noneCorrect ? "None of the above" : options[3] || "",
+        language: "English",
+        category: "Counting",
+        difficulty: difficulty,
+        type: "Mental Ability",
+        image: `https://backend.stawro.com/stawro/${imagePath}`,
+        seconds: "10"
+      };
+
+      fetch("http://localhost/api/question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert("✅ Question posted successfully!");
+        generatePuzzle();
+      })
+      .catch(error => {
+        console.error(error);
+        alert("❌ Error posting question. Check API and CORS settings.");
+      });
+    }
   </script>
 </body>
 </html>
-
