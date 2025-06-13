@@ -2,100 +2,263 @@
 # import os
 # import time
 
+
+# os.system('cls')
+
 # # MongoDB connection
 # client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
 # db = client["test"]
 # qno_counts_collection = db["qno_counts"]
-# qno_list_collection = db["questions_users"]
+# qno_list_collection = db["question datas"]
 
-# # Helper to get a replacement question
-# def get_replacement(target_difficulties, used_qnos):
-#     query = {
-#         "tough": {"$in": target_difficulties},
-#         "lang": "English"
-#     }
+# # Convert cursor to list
+# data = list(qno_list_collection.find())
 
-#     for doc in qno_list_collection.find(query):
-#         if qno_counts_collection.find_one({"Questio": doc['Questio'], "lang": "English"}):
-#             continue  # Already exists
-#         return doc  # Valid replacement
+# # Compute group count logic
+# expected_category_count = 10
+# data_len = len(data) - expected_category_count
 
+# total_questions = len(data)  # or any integer value
+
+# sum_value = total_questions - 9
+# grp_ary = []
+# tough_lst = []
+# cate_lst = []
+
+# for dat in data:
+#     if dat['difficulty'] in tough_lst:
+#         continue
+#     else:
+#         tough_lst.append(dat['difficulty'])
+
+
+# for dat in data:
+#     if dat['category'] in cate_lst:
+#         continue
+#     else:
+#         cate_lst.append(dat['category'])
+
+
+
+# specific_numbers = []
+# for i in range(sum_value, 0, -10):
+#     specific_numbers.append(i)
+#     grp_ary.append([])
+
+
+# print(specific_numbers)
+# print(grp_ary)
+# print(tough_lst)
+# print(cate_lst)
+
+
+# for dat in grp_ary:
+#     while len(dat) < expected_category_count:
+#         for tg in tough_lst:
+#             data = qno_list_collection.find({"difficulty" : tg})
+#             for get_data in data:
+#                 if get_data['difficulty'] and get_data['category'] in dat:
+#                     continue
+#                 else:
+#                     dat.append(data)
+#                 # print(get_data['difficulty'] + get_data['category'])
+#             # count_easy = sum(1 for item in data if item['difficulty'] == tg)
+#             # if count_easy <= 2 and data['_id'] not in dat["difficulty"]:
+#             #     dat.append(i)
+                
+                
+ 
+#             # if tg not in dat['difficulty'] and 
+
+
+# print(len(grp_ary))
+
+# for data in grp_ary:
+#     for dat in data:
+#         print(dat)
+
+
+
+
+
+
+
+
+
+
+# from pymongo import MongoClient
+# import os
+
+# # Clear screen
+# os.system('cls' if os.name == 'nt' else 'clear')
+
+# # MongoDB connection
+# client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
+# db = client["test"]
+# qno_list_collection = db["question datas"]
+
+# # Fetch all questions
+# all_questions = list(qno_list_collection.find())
+
+# expected_category_count = 10
+# total_questions = len(all_questions)
+# sum_value = total_questions - 9  # Controls number of groups
+
+# specific_numbers = []
+# for i in range(sum_value, 0, -10):
+#     specific_numbers.append(i)
+
+
+
+# # Extract unique difficulties and categories
+# difficulties = list({q['difficulty'] for q in all_questions})
+# categories = list({q['category'] for q in all_questions})
+
+# # Create group slots and group counters
+# group_count = sum_value // expected_category_count
+# grp_ary = [[] for _ in range(group_count)]
+
+# print(f"Total Questions: {total_questions}")
+# print(f"Group Count: {group_count}")
+# print(f"Difficulties: {difficulties}")
+# print(f"Categories: {categories}")
+# print(f'Groups Starts : {specific_numbers}')
+
+# # Helper to track used questions
+# used_ids = set()
+
+# # Begin grouping
+# for group in grp_ary:
+#     group_categories = set()
+#     group_difficulties = set()
+
+#     for question in all_questions:
+#         qid = str(question['_id'])
+
+#         if qid in used_ids:
+#             continue
+
+#         # Ensure uniqueness in category and difficulty
+#         if question['category'] in group_categories:
+#             continue
+#         if question['difficulty'] in group_difficulties:
+#             continue
+
+#         # Add to group
+#         group.append(question)
+#         group_categories.add(question['category'])
+#         group_difficulties.add(question['difficulty'])
+#         used_ids.add(qid)
+
+#         if len(group) >= expected_category_count:
+#             break
+
+# # Print results
+# print(f"\nTotal Groups Formed: {len(grp_ary)}\n")
+
+# for idx, group in enumerate(grp_ary, 1):
+#     print(f"\nGroup {idx} ({len(group)} questions):")
+#     for q in group:
+#         print(f"  - ID: {q['_id']} | Difficulty: {q['difficulty']} | Category: {q['category']}")
+
+
+
+
+
+
+
+
+
+
+
+
+# from pymongo import MongoClient
+# import os
+# import random
+
+# # Clear screen
+# os.system('cls' if os.name == 'nt' else 'clear')
+
+# # MongoDB connection
+# client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
+# db = client["test"]
+# qno_list_collection = db["question datas"]
+
+# # Fetch all questions
+# all_questions = list(qno_list_collection.find())
+# random.shuffle(all_questions)  # Optional: Shuffle to randomize selection
+
+# expected_category_count = 10
+# total_questions = len(all_questions)
+# group_count = (total_questions // expected_category_count)
+# sum_value = total_questions - (expected_category_count-1) 
+
+# specific_numbers = []
+# for i in range(sum_value, 0, -expected_category_count):
+#     specific_numbers.append(i)
+
+# print(f"Total Questions: {total_questions}")
+# print(f"Target Groups: {group_count}")
+# print(f"Specific numbers: {specific_numbers}")
+
+# # Difficulty group requirement
+# difficulty_structure = ["Too Easy", "Too Easy", "Easy", "Easy"]
+
+# # Prepare storage
+# used_ids = set()
+# grp_ary = []
+
+# # Helper to filter questions
+# def get_question(difficulty, excluded_categories):
+#     for q in all_questions:
+#         qid = str(q['_id'])
+#         if (
+#             qid not in used_ids and
+#             q['difficulty'] == difficulty and
+#             q['category'] not in excluded_categories
+#         ):
+#             return q
 #     return None
 
-# while True:
-#     try:
-#         os.system('cls' if os.name == 'nt' else 'clear')
-#         print("\033[96m[INFO] Running Tough Question Balancing...\033[0m")
+# # Start grouping
+# for _ in range(group_count):
+#     group = []
+#     used_categories = set()
 
-#         # Get all English questions
-#         english_questions = list(qno_counts_collection.find({"lang": "English"}))
-#         qno_len = len(english_questions)
+#     # Add specific difficulty pattern first
+#     for diff in difficulty_structure:
+#         q = get_question(diff, used_categories)
+#         if q:
+#             group.append(q)
+#             used_ids.add(str(q['_id']))
+#             used_categories.add(q['category'])
 
-#         # Group qnos by difficulty
-#         difficulty_groups = {
-#             "Too Easy": [],
-#             "Easy": [],
-#             "Medium": [],
-#             "Tough": [],
-#             "Too Tough": []
-#         }
+#     # Fill the rest (6 more questions) without repeating category
+#     for q in all_questions:
+#         if len(group) >= expected_category_count:
+#             break
+#         qid = str(q['_id'])
+#         if qid in used_ids or q['category'] in used_categories:
+#             continue
+#         group.append(q)
+#         used_ids.add(qid)
+#         used_categories.add(q['category'])
 
-#         for doc in english_questions:
-#             difficulty = doc.get("tough")
-#             qno = doc.get("qno")
-#             if difficulty in difficulty_groups:
-#                 difficulty_groups[difficulty].append(qno)
+#     if len(group) == expected_category_count:
+#         grp_ary.append(group)
 
-#         # Create groups of 10
-#         group_qnos = []
-#         for i in range(qno_len - 9, 0, -10):
-#             group = list(range(i, i + 10))
-#             group_qnos.append(group)
+# # Print results
+# print(f"\nTotal Groups Formed: {len(grp_ary)}")
 
-#         # Process each group
-#         for group in group_qnos:
-#             questions = []
-#             for qno in group:
-#                 qno_str = str(qno)
-#                 doc = qno_counts_collection.find_one({"qno": qno_str, "lang": "English"})
-#                 if doc:
-#                     questions.append({"qno": qno_str, "tough": doc['tough']})
+# for idx, group in enumerate(grp_ary, 0):
 
-#             tough_qs = [q for q in questions if q["tough"] in ["Tough", "Too Tough"]]
-#             easy_qs = [q for q in questions if q["tough"] in ["Too Easy", "Easy", "Medium"]]
-
-#             if len(tough_qs) == 2:
-#                 print(f"\033[92m✅ Group OK with 2 tough: {[q['qno'] for q in tough_qs]}\033[0m")
-#             else:
-#                 print(f"\033[93m🔧 Fixing group: {group}\033[0m")
-#                 if len(tough_qs) > 2:
-#                     for extra in tough_qs[2:]:
-#                         replacement = get_replacement(["Too Easy", "Easy", "Medium"], group)
-#                         if replacement:
-#                             replacement.pop('_id', None)  # ✅ Remove _id
-#                             qno_counts_collection.update_one(
-#                                 {"qno": extra["qno"], "lang": "English"},
-#                                 {"$set": replacement | {"yes": [""], "no": [""]}}
-#                             )
-#                 elif len(tough_qs) < 2:
-#                     needed = 2 - len(tough_qs)
-#                     for _ in range(needed):
-#                         replacement = get_replacement(["Tough", "Too Tough"], group)
-#                         if replacement and easy_qs:
-#                             to_replace = easy_qs.pop(0)
-#                             replacement.pop('_id', None)  # ✅ Remove _id
-#                             qno_counts_collection.update_one(
-#                                 {"qno": to_replace["qno"], "lang": "English"},
-#                                 {"$set": replacement | {"yes": [""], "no": [""]}}
-#                             )
-#                 print("\033[92m✅ Group fixed to have exactly 2 Tough/Too Tough questions.\033[0m")
-#             print("----------------------------------------------------------")
-
-#         time.sleep(10)
-
-#     except Exception as e:
-#         print(f"\033[91m[ERROR] {e}\033[0m")
-#         time.sleep(5)
+#     print(f"\nGroup {idx + 1} ({len(group)} questions):")
+#     for q_idx, q in enumerate(group, 0):
+#         print(specific_numbers[q_idx])
+#         sum_tott = specific_numbers[q_idx] + (expected_category_count-1)
+#         while specific_numbers[q_idx] <= sum_tott:
+#             specific_numbers[q_idx] = specific_numbers[q_idx] + 1
+#             print(f" no {q_idx} : QNO {specific_numbers}. ID: {q['_id']} | Difficulty: {q['difficulty']} | Category: {q['category']}")
 
 
 
@@ -128,873 +291,328 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 99% correct
 
 
 
 
 # from pymongo import MongoClient
 # import os
-# import ctypes
-
-# # Clear the console
-# os.system('cls' if os.name == 'nt' else 'clear')
-
-# # MongoDB connection
-# client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
-# db = client["test"]
-# qno_counts_collection = db["qno_counts"]
-# qno_list_collection = db["question datas"]
-
-# # Get unique categories with English language
-# categories = []
-# for doc in qno_list_collection.find({"language": "English"}):
-#     if doc['category'] not in categories:
-#         categories.append(doc['category'])
-
-# # Count number of questions per category
-# category_lengths = []
-# for category in categories:
-#     count = qno_list_collection.count_documents({"category": category, "language": "English"})
-#     category_lengths.append({"category": category, "length": count})
-
-# er_01 = []
-
-# # Compare lengths
-# if category_lengths:
-#     base_length = category_lengths[1]['length'] or category_lengths[0]['length']
-#     for cat in category_lengths:
-#         if cat['length'] != base_length:
-#             print(f"\033[93mCategory '{cat['category']}' has length {cat['length']} (not equal to {base_length})\033[0m")
-#             print(f"\033[91mSome questions are missing {cat['category']} length Questions not Enough \033[0m")
-#             er_01.append(cat['category'])
-            
-#             # ctypes.windll.user32.MessageBoxW(0, f"Some questions are missing IN : {cat['category']}", "Missing Questions Alert", 1)
-            
-#         elif int(cat['length'])  > int(base_length):
-#             print(f"\033[93mThe length of {cat['category']} is High in Length {cat['length']}\033[0m")
-            
-#         else:
-#             print(f"\033[92mCategory '{cat['category']}' has length {cat['length']} (equal to {base_length})\033[0m")
-
-
-# if len(er_01) > 0:
-#     for er in er_01:
-#         print(f"\033[91m make fix this {er} length Increase or Decrease to continue \033[0m")
-#         # exit()
-
-# else:
-#     print("\033[92mSelected Category Questions have same length\033[0m")
-#     print("add function and make contine frome here")
-
-# if len(category_lengths) == 10:
-#     print("\033[92mAll category is ok\033[0m")
-# else:
-#     print("\033[91msome category questions are missing\033[0m")
-#     print(f"\033[91mI Found {len(category_lengths)} Questions Types Only\033[0m")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from pymongo import MongoClient
-# import os
+# import random
+# import sys
 # import time
 
-# # Optional: Only use ctypes if you're on Windows and want to show a popup
-# # import ctypes
-
-
-# # Clear the console
+# # Clear screen
 # os.system('cls' if os.name == 'nt' else 'clear')
 
 # # MongoDB connection
 # client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
 # db = client["test"]
 # qno_list_collection = db["question datas"]
+# live_data_base = db['qno_counts']
+
+# # Delete all documents from "qno_counts" collection
+# delete_result = live_data_base.delete_many({})
+# print(f"\nDeleted {delete_result.deleted_count} documents from 'qno_counts' collection.")
 
 
+# # Fetch all questions
+# all_questions = list(qno_list_collection.find())
+# random.shuffle(all_questions)  # Optional: Shuffle to randomize selection
 
-# final_arry = []
-
-# # make chage it to 10 after to add 10 questions
 # expected_category_count = 10
-# tought_need_len = 0
-# specific_num = []
-# type_difi = [ 'Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough']
+# total_questions = len(all_questions)
+# group_count = (total_questions // expected_category_count)
+# sum_value = total_questions - (expected_category_count-1) 
+
+# specific_numbers = []
+# for i in range(sum_value, 0, -expected_category_count):
+#     specific_numbers.append(i)
+
+# print(f"Total Questions: {total_questions}")
+# print(f"Target Groups: {group_count}")
+# print(f"Specific numbers: {specific_numbers}")
+
+# # Difficulty group requirement
+# difficulty_structure = ["Too Easy", "Too Easy", "Easy", "Easy"]
+
+# # Prepare storage
+# used_ids = set()
+# grp_ary = []
+
+# # Helper to filter questions
+# def get_question(difficulty, excluded_categories):
+#     for q in all_questions:
+#         qid = str(q['_id'])
+#         if (
+#             qid not in used_ids and
+#             q['difficulty'] == difficulty and
+#             q['category'] not in excluded_categories
+#         ):
+#             return q
+#     return None
+
+# # Start grouping
+# for _ in range(group_count):
+#     group = []
+#     used_categories = set()
+
+#     # Add specific difficulty pattern first
+#     for diff in difficulty_structure:
+#         q = get_question(diff, used_categories)
+#         if q:
+#             group.append(q)
+#             used_ids.add(str(q['_id']))
+#             used_categories.add(q['category'])
+
+#     # Fill the rest (6 more questions) without repeating category
+#     for q in all_questions:
+#         if len(group) >= expected_category_count:
+#             break
+#         qid = str(q['_id'])
+#         if qid in used_ids or q['category'] in used_categories:
+#             continue
+#         group.append(q)
+#         used_ids.add(qid)
+#         used_categories.add(q['category'])
+
+#     if len(group) == expected_category_count:
+#         grp_ary.append(group)
+
+# # Print results
+# print(f"\nTotal Groups Formed: {len(grp_ary)}")
 
 
-
-
-
-# def get_all_qno_to_bal():
-#     print(f"expected Ways {len(specific_num)}")
-#     print(f"Need {tought_need_len}")
-#     # for dat in data:
-#     #     print(dat['difficulty'], dat['category'])
-
-        
-
+# for idx, group in enumerate(grp_ary):
+#     start_qno = specific_numbers[idx]  # e.g., 91, 81, ...
+#     print(f"\nGroup {idx + 1} ({len(group)} questions):")
     
-    
-
-
-
-
-# # Get unique categories with English language
-# categories = set()
-# for doc in qno_list_collection.find({"language": "English"}):
-#     categories.add(doc['category'])
-
-# # Count number of questions per category
-# category_lengths = []
-# for category in categories:
-#     count = qno_list_collection.count_documents({"category": category, "language": "English"})
-#     category_lengths.append({"category": category, "length": count})
-
-# # Error tracking
-# er_01 = []
-# category_lengths_list = 0
-
-# # Compare lengths
-# if category_lengths:
-#     # Choose the least length as base for comparison
-#     base_length = min([c['length'] for c in category_lengths])
-#     lengths = [c['length'] for c in category_lengths]
-#     category_lengths_list = base_length
-#     base_length = max(set(lengths), key=lengths.count)  # Most common length
-
-#     print(f"\nBase length chosen for comparison: {base_length}\n")
-
-#     for cat in category_lengths:
-#         cat_name = cat['category']
-#         cat_len = cat['length']
-#         if cat_len < base_length:
-#             print(f"\033[93mCategory '{cat_name}' has only {cat_len} questions. Expected: {base_length}\033[0m")
-#             print(f"\033[91mSome questions are missing in category '{cat_name}'. Please add more.\033[0m")
-#             er_01.append(cat_name)
-
-#             # Optional popup alert (Windows only)
-#             # ctypes.windll.user32.MessageBoxW(0, f"Missing questions in: {cat_name}", "Alert", 1)
-
-#         elif cat_len > base_length:
-#             print(f"\033[93mCategory '{cat_name}' has extra questions: {cat_len} > {base_length}\033[0m")
+#     for i, q in enumerate(group):
+#         qno = start_qno + i  # sequential question number
+#         print(f" QNO {qno} - ID: {q['_id']} | Difficulty: {q['difficulty']} | Category: {q['category']}")
+#         ans = ''
+#         if q['answer'] == q['a']:
+#             ans == "a"
+#         elif q['answer'] == q['b']:
+#             ans == "b"
+#         elif q['answer'] == q['c']:
+#             ans == "c"
+#         elif q['answer'] == q['d']:
+#             ans == "d"
 #         else:
-#             print(f"\033[92mCategory '{cat_name}' has correct number of questions: {cat_len}\033[0m")
+#             print(f"\033[91mSome answers are Missing. Check it id: {q['_id']}\033[0m")
+#             sys.exit("Stopping execution as requested.")
 
-# # Summary
-# print("\n" + "-"*50)
+#         live_data_base.insert_one(
+#             {
+#                 "Time": time.time(),
+#                 "user": "Auto",
+#                 "img": q['image'],
+#                 "Questio": q['question'],
+#                 "qno": f"{qno}",
+#                 "a": q['a'],
+#                 "b": q['b'],
+#                 "c": q['c'],
+#                 "d": q['d'],
+#                 "Ans": ans,
+#                 "lang": q['language'],
+#                 "tough": q['difficulty'],
+#                 "seconds": q['seconds'],
+#                 "sub_lang": q['category'],
+#                 "yes": [
+#                     ""
+#                 ],
+#                 "no": [
+#                     "",
+#                     ],        
+#                 }
+#             )
 
-# if er_01:
-#     for cat in er_01:
-#         print(f"\033[91m❌ Fix required: Adjust number of questions in '{cat}' to match others.\033[0m")
-#     # Optional: exit after error
-#     # exit(1)
-# else:
-#     print("\033[92m✅ All selected category questions have the same length.\033[0m")
-#     print("🔁 You can proceed with the next step here...")
 
 
+# print("Everythin Ok")
+# print('\033[1;32m' + '\033[1m' + '\033[38;2;0;255;0m' + "\n\n" + "Everything Ok".center(40) + '\033[0m')
+# print('\033[1;32m' + '\033[1m' + '\033[38;2;0;255;0m' + "\n" + "NOTE: Font size 40px is only applicable in web/GUI, not in terminal." + '\033[0m')
 
-# total_qno_len = qno_list_collection.count_documents({})
 
-# sum = total_qno_len - expected_category_count
 
 
-# i = sum
 
-# while i > 0:
-#     specific_num.append(i)
-#     i-=expected_category_count
 
-# print(f"I Found {len(specific_num)} Groups")
 
 
 
-# for dat in type_difi:
-#     print(f"Need {len(specific_num)*2} {dat} Questions")
-#     tought_need_len = len(specific_num)*2
 
-# get_all_qno_to_bal()
 
-# print(f"Totaly need {len(specific_num)*expected_category_count} Questions")
 
 
 
 
 
 
-# # for i in range(category_lengths_list):
-# #     final_arry.append([])
 
 
 
 
 
 
-# # # Final check for number of categories
 
-# # if len(category_lengths) == expected_category_count:
-# #     print(f"\033[92m✅ All {expected_category_count} categories are present.\033[0m")
-# #     for cat_gr_len in category_lengths:
-# #         get_all_qno_to_bal(expected_category_count, cat_gr_len, category_lengths_list)
 
-# # else:
-# #     print(f"\033[91m⚠️ Expected {expected_category_count} categories but found {len(category_lengths)}.\033[0m")
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from pymongo import MongoClient
-# from collections import defaultdict
-
-# # MongoDB connection
-# client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
-# db = client["test"]
-# qno_list_collection = db["question datas"]
-
-# # Config
-# difficulties = ['Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough']
-# expected_category_count = 10
-# all_qnlist = []
-# specific_num = []
-
-# total_qno_len = qno_list_collection.count_documents({})
-
-# sum = total_qno_len - expected_category_count
-
-
-# i = sum
-
-# while i > 0:
-#     specific_num.append(i)
-#     i-=expected_category_count
-
-# for dif in difficulties:
-#     data = qno_list_collection.find({"difficulty" : dif})
-#     for data_new in data:
-#         dat = {
-#             "difficulty" : data_new['difficulty'],
-#             "category" : data_new['category'],
-#             "id" : data_new['_id']
-#         }
-#         all_qnlist.append(dat)
-
-# # for item in all_qnlist:
-# #     print(f"Difficulty: {item['difficulty']} ; Category: {item['category']} ; ID: {item['id']}")
-
-
-# print(f"\033[92mGroups from {specific_num} , Expected Group : {len(specific_num)}\033[0m")
-
+from pymongo import MongoClient
 import os
+import random
+import sys
+import time
 
-os.system('cls')
+# Clear screen
+os.system('cls' if os.name == 'nt' else 'clear')
 
-ary1 = []
-ary2 = []
-ary3 = []
+# MongoDB connection
+client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
+db = client["test"]
+qno_list_collection = db["question datas"]
+live_data_base = db['qno_counts']
 
+# Delete all documents from "qno_counts" collection
+delete_result = live_data_base.delete_many({})
+print(f"\nDeleted {delete_result.deleted_count} documents from 'qno_counts' collection.")
 
-data = [
-  {
-    "_id": {
-      "$numberInt": "1"
-    },
-    "language": "English",
-    "category": "calend",
-    "difficulty": "Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:01Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:01Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "2"
-    },
-    "language": "English",
-    "category": "colo",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:02Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:02Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "3"
-    },
-    "language": "English",
-    "category": "spel",
-    "difficulty": "Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:03Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:03Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "4"
-    },
-    "language": "English",
-    "category": "int_text",
-    "difficulty": "Too Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:04Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:04Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "5"
-    },
-    "language": "English",
-    "category": "sudoku",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:05Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:05Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "6"
-    },
-    "language": "English",
-    "category": "gk",
-    "difficulty": "Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:06Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:06Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "7"
-    },
-    "language": "English",
-    "category": "img_smlr",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:07Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:07Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "8"
-    },
-    "language": "English",
-    "category": "sent",
-    "difficulty": "Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:08Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:08Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "9"
-    },
-    "language": "English",
-    "category": "msng_ltr",
-    "difficulty": "Too Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:09Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:09Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "10"
-    },
-    "language": "English",
-    "category": "shape",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:10Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:10Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "11"
-    },
-    "language": "English",
-    "category": "calend",
-    "difficulty": "Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:11Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:11Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "12"
-    },
-    "language": "English",
-    "category": "colo",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:12Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:12Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "13"
-    },
-    "language": "English",
-    "category": "spel",
-    "difficulty": "Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:13Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:13Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "14"
-    },
-    "language": "English",
-    "category": "int_text",
-    "difficulty": "Too Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:14Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:14Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "15"
-    },
-    "language": "English",
-    "category": "sudoku",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:15Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:15Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "16"
-    },
-    "language": "English",
-    "category": "gk",
-    "difficulty": "Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:16Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:16Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "17"
-    },
-    "language": "English",
-    "category": "img_smlr",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:17Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:17Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "18"
-    },
-    "language": "English",
-    "category": "sent",
-    "difficulty": "Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:18Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:18Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "19"
-    },
-    "language": "English",
-    "category": "msng_ltr",
-    "difficulty": "Too Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:19Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:19Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "20"
-    },
-    "language": "English",
-    "category": "shape",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:20Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:20Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "21"
-    },
-    "language": "English",
-    "category": "calend",
-    "difficulty": "Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:21Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:21Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "22"
-    },
-    "language": "English",
-    "category": "colo",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:22Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:22Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "23"
-    },
-    "language": "English",
-    "category": "spel",
-    "difficulty": "Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:23Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:23Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "24"
-    },
-    "language": "English",
-    "category": "int_text",
-    "difficulty": "Too Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:24Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:24Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "25"
-    },
-    "language": "English",
-    "category": "sudoku",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:25Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:25Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "26"
-    },
-    "language": "English",
-    "category": "gk",
-    "difficulty": "Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:26Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:26Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "27"
-    },
-    "language": "English",
-    "category": "img_smlr",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:27Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:27Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "28"
-    },
-    "language": "English",
-    "category": "sent",
-    "difficulty": "Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:28Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:28Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "29"
-    },
-    "language": "English",
-    "category": "msng_ltr",
-    "difficulty": "Too Tough",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:29Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:29Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "30"
-    },
-    "language": "English",
-    "category": "shape",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:30Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:30Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "31"
-    },
-    "language": "English",
-    "category": "calend",
-    "difficulty": "Too Easy",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:31Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:31Z"
-    }
-  },
-  {
-    "_id": {
-      "$numberInt": "32"
-    },
-    "language": "English",
-    "category": "colo",
-    "difficulty": "Medium",
-    "type": "Mental Ability",
-    "createdAt": {
-      "$date": "2025-06-02T06:45:32Z"
-    },
-    "updatedAt": {
-      "$date": "2025-06-02T06:45:32Z"
-    }
-  }
-]
-
-# Create a dictionary to hold groups by (category, difficulty)
-
-
-# Print all categories and all difficulties found in the data
-categories = sorted(set(d['category'] for d in data))
-difficulties = sorted(set(d['difficulty'] for d in data))
-print("Categories:", categories)
-print("Difficulties:", difficulties)
-print()
-grouped = {}
-
-
+# Fetch and shuffle all questions
+all_questions = list(qno_list_collection.find())
+random.shuffle(all_questions)
 
 expected_category_count = 10
-data_len = len(data) - expected_category_count
+total_questions = len(all_questions)
+group_count = total_questions // expected_category_count
+sum_value = total_questions - (expected_category_count - 1)
 
+# Create specific starting numbers for question groups
+specific_numbers = []
+for i in range(sum_value, 0, -expected_category_count):
+    specific_numbers.append(i)
 
-i = data_len
-specific_num = []
+print(f"Total Questions: {total_questions}")
+print(f"Target Groups: {group_count}")
+print(f"Specific numbers: {specific_numbers}")
 
+# Required difficulty structure per group
+difficulty_structure = ["Too Easy", "Too Easy", "Easy", "Easy"]
 
-while i > 0:
-    specific_num.append(i)
-    i-=expected_category_count
+# Track used question IDs and store groups
+used_ids = set()
+grp_ary = []
 
+# Helper: Get question with specific difficulty & unused category
+def get_question(difficulty, excluded_categories):
+    for q in all_questions:
+        qid = str(q['_id'])
+        if (
+            qid not in used_ids and
+            q['difficulty'] == difficulty and
+            q['category'] not in excluded_categories
+        ):
+            return q
+    return None
 
-#tough calculus
-need_qn_ln = len(specific_num)*2
-
-
-print(f"\033[92m{len(specific_num)} Groups Possible\033[0m")
-
-
-
-# Fill the dictionary
-for dat in data:
-    cat = dat['category']
-    dif = dat['difficulty']
-    key = (cat, dif)
-    if key not in grouped:
-        grouped[key] = []
-    grouped[key].append(dat)
-
-# Print required count for each (category, difficulty) and show if enough exist
-print("\nRequired per (category, difficulty):", len(specific_num))
-print("Summary of all categories and all difficulties:\n")
-for cat in categories:
-    for dif in difficulties:
-        key = (cat, dif)
-        count = len(grouped.get(key, []))
-        enough = count >= len(specific_num)
-        status = "✅ Enough" if enough else "❌ Not enough"
-        color = "\033[92m" if enough else "\033[91m"
-        print(f"{color}Category: {cat:10} | Difficulty: {dif:9} | Count: {count:2} | {status}\033[0m")
-print()
-
-
-# Create groups of 10 questions, as many as len(specific_num)
-groups = []
-for group_idx in range(len(specific_num)):
+# Start forming groups
+for _ in range(group_count):
     group = []
-    for cat in categories:
-        for dif in difficulties:
-            key = (cat, dif)
-            # Only add if there are enough questions for this group
-            if len(grouped.get(key, [])) > group_idx:
-                group.append(grouped[key][group_idx])
-            # Stop if group reaches 10 questions
-            if len(group) == 10:
-                break
-        if len(group) == 10:
+    used_categories = set()
+
+    # Add required difficulty pattern
+    for diff in difficulty_structure:
+        q = get_question(diff, used_categories)
+        if q:
+            group.append(q)
+            used_ids.add(str(q['_id']))
+            used_categories.add(q['category'])
+
+    # Fill remaining slots (6 more) without repeating categories
+    for q in all_questions:
+        if len(group) >= expected_category_count:
             break
-    if len(group) == 10:
-        groups.append(group)
+        qid = str(q['_id'])
+        if qid in used_ids or q['category'] in used_categories:
+            continue
+        group.append(q)
+        used_ids.add(qid)
+        used_categories.add(q['category'])
 
-# Print the groups
-for idx, group in enumerate(groups, 1):
-    print(f"\n\033[96mGroup {idx}:\033[0m")
-    for q in group:
-        print(f"  ID: {q['_id']['$numberInt']}, Category: {q['category']}, Difficulty: {q['difficulty']}")
+    # Add group only if it has exact number of questions
+    if len(group) == expected_category_count:
+        grp_ary.append(group)
 
+# Insert groups into DB and display
+print(f"\nTotal Groups Formed: {len(grp_ary)}")
 
+for idx, group in enumerate(grp_ary):
+    start_qno = specific_numbers[idx]
+    print(f"\n--- Group {idx + 1} ({len(group)} questions) ---")
+    
+    for i, q in enumerate(group):
+        qno = start_qno + i
+        print(f" QNO {qno} - ID: {q['_id']} | Difficulty: {q['difficulty']} | Category: {q['category']}")
 
+        # Determine correct option letter
+        answer_text = q.get('answer', '')
+        ans = ''
+        if answer_text == q.get('a'):
+            ans = "a"
+        elif answer_text == q.get('b'):
+            ans = "b"
+        elif answer_text == q.get('c'):
+            ans = "c"
+        elif answer_text == q.get('d'):
+            ans = "d"
+        else:
+            print(f"\033[91m❌ Answer mismatch or missing in ID: {q['_id']}\033[0m")
+            sys.exit("Stopping execution due to answer error.")
+
+        # Insert into qno_counts collection
+        live_data_base.insert_one({
+            "Time": time.time(),
+            "ID" : f"{q.get('_id')}",
+            "user": "Auto",
+            "img": q.get('image', ''),
+            "Questio": q.get('question', ''),
+            "qno": f"{qno}",
+            "a": q.get('a', ''),
+            "b": q.get('b', ''),
+            "c": q.get('c', ''),
+            "d": q.get('d', ''),
+            "Ans": ans,
+            "lang": q.get('language', ''),
+            "tough": q.get('difficulty', ''),
+            "seconds": f"{q.get('seconds', 30)}",
+            "sub_lang": q.get('category', ''),
+            "yes": [""],
+            "no": [""]
+        })
+
+# Final success message
+print('\033[1;32m' + "\n\n" + "✅ Everything Ok".center(40) + '\033[0m')
