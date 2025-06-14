@@ -149,14 +149,50 @@ import os
 client = MongoClient("mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata")
 
 db1 = client["test"]
-collection1 = db1["question_lists"]
+collection1 = db1["question datas"]
 qno_list_collection = db1["qno_counts"]
 
 os.system('cls')
 
+excepted_qn_in_grp = 10
+qn_len = qno_list_collection.count_documents({})
+sum_value = qn_len - (excepted_qn_in_grp - 1)
 
-for data in qno_list_collection.find({}):
-    print(data['tough'] + f" : {data['sub_lang']}")
+specific_numbers = []
+for i in range(sum_value, 0, -excepted_qn_in_grp):
+    specific_numbers.append(i)
+
+print(specific_numbers)
+
+for spec_1 in specific_numbers:
+    print(f"From : {spec_1}")
+    prnt_to = spec_1 + (excepted_qn_in_grp-1)
+    qn_for_analysis_grp = []
+    while spec_1 <= prnt_to:
+        qno_get_data = qno_list_collection.find_one({"qno" : str(spec_1)})
+        if qno_get_data['tough'] in ["Tough", "Too Tough"]:
+            dat = {
+                "qno" : qno_get_data['qno'],
+                "tough" : qno_get_data['tough'],
+                "ID" : qno_get_data['ID'],
+                "cate" : qno_get_data['sub_lang']
+            }
+            qn_for_analysis_grp.append(dat)
+        spec_1 = spec_1 +1
+        
+    print(f"Tough Len :{len(qn_for_analysis_grp)}")
+    if len(qn_for_analysis_grp) > 4:
+        print(f"\033[93mRemove {len(qn_for_analysis_grp) - 4} remaining Questions\033[0m")
+        
+    elif len(qn_for_analysis_grp) < 4:
+        print(f"\033[91mAdd {4 - len(qn_for_analysis_grp)}\033[0m")
+    else:
+        print("\033[92mEverything Ok with this Group\033[0m")
+    print("-----------------------------")
+
+# for data in qno_list_collection.find({}):
+#     print(data['tough'] + f" : {data['sub_lang']}")
+
 
 
 

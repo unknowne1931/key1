@@ -4,6 +4,7 @@ from colorama import Fore, Style, init
 import os
 import subprocess
 
+
 # Initialize colorama
 init(autoreset=True)
 
