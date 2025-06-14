@@ -1,4 +1,4 @@
-##everything ok
+# everything ok
 
 import random
 import requests
@@ -9,10 +9,19 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configuration
 UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-POST_URL = "http://localhost/api/question"  # Change to your actual API URL
+POST_URL = "http://localhost/api/question"
 CHARS = "abcdefghijklmnopqrstuvwxyz"
 
-def get_random_code(length=18):
+# Difficulty Configs
+DIFFICULTY_SETTINGS = {
+    "Too Easy": {"code_length": 6, "seconds": 10},
+    "Easy": {"code_length": 8, "seconds": 12},
+    "Medium": {"code_length": 12, "seconds": 16},
+    "Tough": {"code_length": 16, "seconds": 18},
+    "Too Tough": {"code_length": 20, "seconds": 18}
+}
+
+def get_random_code(length):
     return ''.join(random.choice(CHARS) for _ in range(length))
 
 def get_new_char(exclude):
@@ -41,10 +50,10 @@ def generate_options(correct):
     return opts
 
 def render_code_to_image_bytes(code):
-    width, height = 400, 250  # ✅ Updated dimensions
+    width, height = 400, 250
     bg_color = (0, 0, 0)
     text_color = (255, 255, 255)
-    font_size = 30  # Adjusted for better fit
+    font_size = 30
 
     img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
@@ -78,7 +87,7 @@ def upload_image_from_bytes(image_buffer):
         print("❌ Error parsing upload response:", str(e))
         return {}
 
-def post_question(correct, options, image_path, difficulty):
+def post_question(correct, options, image_path, difficulty, seconds):
     image_url = f"https://backend.stawro.com/stawro/{image_path}"
     payload = {
         "question": "Guess the correct code",
@@ -92,19 +101,26 @@ def post_question(correct, options, image_path, difficulty):
         "difficulty": difficulty,
         "type": "Mental Ability",
         "image": image_url,
-        "seconds": "15"
+        "seconds": str(seconds)
     }
 
     print("📤 Payload to POST:", payload)
     res = requests.post(POST_URL, json=payload)
     return res.status_code == 200
 
-# 🟢 Auto Question Generation Script
 def run_auto(total_questions=5, difficulty="Medium"):
+    settings = DIFFICULTY_SETTINGS.get(difficulty)
+    if not settings:
+        print("❌ Invalid difficulty selected.")
+        return
+
+    code_length = settings["code_length"]
+    seconds = settings["seconds"]
+
     for i in range(1, total_questions + 1):
         print(f"\n--- Generating Question {i} ---")
 
-        correct = get_random_code()
+        correct = get_random_code(code_length)
         options = generate_options(correct)
 
         image_buffer = render_code_to_image_bytes(correct)
@@ -116,7 +132,7 @@ def run_auto(total_questions=5, difficulty="Medium"):
                 print("⚠️ Upload success but no path returned.")
                 continue
 
-            success = post_question(correct, options, uploaded_path, difficulty)
+            success = post_question(correct, options, uploaded_path, difficulty, seconds)
             if success:
                 print("✅ Question posted successfully.")
             else:
