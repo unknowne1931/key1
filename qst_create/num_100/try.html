@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find the Wrong Numbers</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 2px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .box {
+      padding: 10px;
+      background-color: #b1def5;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .answer-btn {
+      padding: 10px 18px;
+      margin: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .answer-btn:hover {
+      background-color: #2c80b4;
+    }
+
+    #result {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .ss_cnt {
+      width: 600px;
+      height: auto;
+      border: 1px solid;
+      margin: auto;
+      padding: 20px;
+      border-radius: 5px;
+      background: white;
+    }
+
+    #previewContainer img {
+      margin-top: 15px;
+      max-width: 100%;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Count the Wrong Numbers</h1>
+  <p>Some numbers between 1–100 are wrongly placed. Can you count how many are wrong?</p>
+
+  <label for="difficultySelect">Difficulty: </label>
+  <select id="difficultySelect">
+    <option value="Easy">Easy</option>
+    <option value="Medium" selected>Medium</option>
+    <option value="Tough">Tough</option>
+  </select>
+
+  <div class="ss_cnt">
+    <div id="grid"></div>
+  </div>
+
+  <div id="mcq-buttons"></div>
+  <div id="result"></div>
+
+  <button id="btnCapture">📸 Capture Screenshot</button>
+  <button id="btnUpload" disabled>⬆️ Upload</button>
+  <div id="previewContainer"></div>
+
+  <script>
+    let capturedBlob = null;
+    const grid = document.getElementById("grid");
+    const mcqButtons = document.getElementById("mcq-buttons");
+    const correctSeries = Array.from({ length: 100 }, (_, i) => i + 1);
+    const displaySeries = [...correctSeries];
+
+    const wrongCount = Math.floor(Math.random() * 4) + 5; // 5 to 8
+    const wrongIndexes = new Set();
+
+    while (wrongIndexes.size < wrongCount) {
+      const randIndex = Math.floor(Math.random() * 100);
+      wrongIndexes.add(randIndex);
+    }
+
+    wrongIndexes.forEach(index => {
+      let wrongNumber;
+      do {
+        wrongNumber = Math.floor(Math.random() * 100) + 1;
+      } while (wrongNumber === correctSeries[index]);
+      displaySeries[index] = wrongNumber;
+    });
+
+    displaySeries.forEach((num, i) => {
+      const box = document.createElement("div");
+      box.className = "box";
+      box.textContent = num;
+      if (num !== correctSeries[i]) box.classList.add("wrong");
+      grid.appendChild(box);
+    });
+
+    const correctAnswer = wrongCount;
+    const optionsSet = new Set([correctAnswer]);
+    while (optionsSet.size < 4) {
+      const offset = Math.floor(Math.random() * 5) - 2;
+      const opt = correctAnswer + offset;
+      if (opt > 0 && opt <= 100) optionsSet.add(opt);
+    }
+
+    const options = [...optionsSet].sort((a, b) => a - b);
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "answer-btn";
+      btn.textContent = opt;
+      btn.onclick = () => checkAnswer(opt);
+      mcqButtons.appendChild(btn);
+    });
+
+    function checkAnswer(selected) {
+      const result = document.getElementById("result");
+      if (selected === correctAnswer) {
+        result.textContent = "✅ Correct! You found all misplaced numbers!";
+      } else {
+        result.textContent = `❌ Incorrect. There were ${correctAnswer} wrongly placed numbers.`;
+      }
+    }
+
+    // Capture
+    document.getElementById("btnCapture").addEventListener("click", function () {
+      const element = document.querySelector(".ss_cnt");
+      html2canvas(element).then(canvas => {
+        canvas.toBlob(blob => {
+          capturedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+          document.getElementById("btnUpload").disabled = false;
+        }, 'image/webp');
+      });
+    });
+
+    // Upload
+    document.getElementById("btnUpload").addEventListener("click", function () {
+      if (!capturedBlob) return alert("No screenshot captured!");
+
+      const formData = new FormData();
+      formData.append("screenshot", capturedBlob, "screenshot.webp");
+
+      fetch("https://backend.stawro.com/stawro/upload.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status && res.path) {
+          const fullImagePath = `https://backend.stawro.com/stawro/${res.path}`;
+          alert("✅ Upload successful!");
+          postQuestion(fullImagePath);
+        } else {
+          alert("❌ Upload failed.");
+        }
+      })
+      .catch(err => {
+        console.error("Upload error:", err);
+        alert("❌ Upload error.");
+      });
+    });
+
+    // Post question to DB
+    function postQuestion(imagePath) {
+      const difficulty = document.getElementById("difficultySelect").value || "Medium";
+      const correct = correctAnswer.toString();
+      const shuffledOptions = options.map(opt => opt.toString());
+      let ans = correct;
+      let d = shuffledOptions[3] || "";
+
+      if (!shuffledOptions.includes(correct)) {
+        ans = "None of the above";
+        d = "None of the above";
+      }
+
+      fetch("http://localhost/api/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: "How many wrong numbers are present in the grid?",
+          answer: ans,
+          a: shuffledOptions[0] || "",
+          b: shuffledOptions[1] || "",
+          c: shuffledOptions[2] || "",
+          d: d,
+          language: "English",
+          category: "Counting_100",
+          difficulty: difficulty,
+          type: "Mental Ability",
+          image: imagePath,
+          seconds: "10"
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert("✅ Question posted to database!");
+      })
+      .catch(error => {
+        console.error("❌ Error posting question:", error);
+        alert("❌ Error posting question.");
+      });
+    }
+  </script>
+</body>
+</html>
