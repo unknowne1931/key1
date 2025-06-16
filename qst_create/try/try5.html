@@ -78,13 +78,11 @@
       <option value="Too Tough">Too Tough</option>
     </select>
   </div>
-
   
   <div class="options">
     <button onclick="checkAnswer('Yes')">Yes</button>
     <button onclick="checkAnswer('No')">No</button>
   </div>
-
 
   <div id="result"></div>
 
@@ -118,7 +116,6 @@
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
 
-        // Draw walls as lines
         if (this.walls[0]) { // top
           ctx.beginPath();
           ctx.moveTo(x, y);
@@ -152,7 +149,6 @@
     }
 
     function generateMaze() {
-      // Initialize grid
       grid.length = 0;
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
@@ -160,7 +156,6 @@
         }
       }
 
-      // Recursive backtracker maze generation
       const stack = [];
       const startCell = grid[0];
       startCell.visited = true;
@@ -170,7 +165,6 @@
         const current = stack[stack.length - 1];
         const neighbors = [];
 
-        // Check neighbors that are not visited
         const directions = [
           [0, -1, 0, 2], // top neighbor and direction walls to remove
           [1, 0, 1, 3],  // right
@@ -202,20 +196,16 @@
       }
     }
 
-    // Player and Goal setup
     let player = { x: 0, y: 0 };
     const goal = { x: Math.floor(cols / 2), y: Math.floor(rows / 2) };
 
-    // Draw maze and entities
     function drawMaze() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw all cells
       for (const cell of grid) {
         cell.draw();
       }
 
-      // Draw goal (red square) — always visible
       ctx.fillStyle = "red";
       ctx.fillRect(
         goal.x * cellSize + 4,
@@ -224,7 +214,6 @@
         cellSize - 8
       );
 
-      // Draw player (blue circle)
       ctx.fillStyle = "blue";
       ctx.beginPath();
       ctx.arc(
@@ -236,24 +225,20 @@
       );
       ctx.fill();
 
-      // If gate is closed, draw gate wall in black
       if (gate) {
         drawGateWall(gate);
       }
     }
 
-    // Movement check helper
     function canMoveTo(x, y) {
       return x >= 0 && y >= 0 && x < cols && y < rows;
     }
 
-    // Handle keypress for player movement
     document.addEventListener("keydown", (e) => {
       const currentCell = grid[index(player.x, player.y)];
       let moved = false;
 
       if (e.key === "ArrowUp") {
-        // Check walls and gate
         if (
           !currentCell.walls[0] &&
           canMoveTo(player.x, player.y - 1) &&
@@ -304,7 +289,6 @@
 
     let gate = null;
 
-    // Draw gate wall
     function drawGateWall({ x1, y1, x2, y2 }) {
       ctx.strokeStyle = "black";
       ctx.lineWidth = 4;
@@ -315,7 +299,6 @@
       const yPixel2 = y2 * cellSize;
 
       if (x1 === x2) {
-        // vertical gate wall (horizontal barrier)
         const topCellY = Math.min(y1, y2);
         const leftCellX = x1;
         ctx.beginPath();
@@ -323,7 +306,6 @@
         ctx.lineTo(xPixel1 + cellSize - 2, yPixel1 + cellSize);
         ctx.stroke();
       } else if (y1 === y2) {
-        // horizontal gate wall (vertical barrier)
         const leftCellX = Math.min(x1, x2);
         const topCellY = y1;
         ctx.beginPath();
@@ -333,17 +315,13 @@
       }
     }
 
-    // Check if gate blocks movement between two cells
     function isGateBlocking(x1, y1, x2, y2) {
       if (!gate) return false;
-      // Since gate blocks movement both ways
       return (
         (gate.x1 === x1 && gate.y1 === y1 && gate.x2 === x2 && gate.y2 === y2) ||
         (gate.x1 === x2 && gate.y1 === y2 && gate.x2 === x1 && gate.y2 === y1)
       );
     }
-
-    // Use BFS to check if goal reachable from start, ignoring gate
     function isGoalReachable() {
       const visited = new Set();
       const queue = [{ x: 0, y: 0 }];
@@ -354,8 +332,6 @@
 
         visited.add(`${x},${y}`);
         const currentCell = grid[index(x, y)];
-
-        // For each direction, check if can move and not blocked by gate
         const moves = [
           { dx: 0, dy: -1, wall: 0 },
           { dx: 1, dy: 0, wall: 1 },
@@ -413,7 +389,6 @@
         }
       }
 
-      // Reconstruct path from goal to start
       const path = [];
       let current = { x: goal.x, y: goal.y };
       while (!(current.x === 0 && current.y === 0)) {
@@ -426,8 +401,6 @@
 
       if (path.length <= 2) return null; // no path or trivial path
 
-      // Pick random edge in path excluding last edge near goal (so red box isn't blocked)
-      // So choose from path indices 0 to path.length-3
       const maxIndex = path.length - 3;
       const edgeIndex = Math.floor(Math.random() * (maxIndex + 1));
 
@@ -536,10 +509,6 @@
           alert("❌ Error posting question. Check API and CORS settings.");
         });
     }
-
-
-
-
 
   </script>
 </body>

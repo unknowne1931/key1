@@ -518,7 +518,7 @@ def corect_code_crt(total, level):
 
 def img_similar_crt(num ,difficulty):
     # ---- Configuration ----
-    ALL_IMAGES = ["./main_ai/1.png", "./main_ai/2.png", "./main_ai/3.png", "./main_ai/4.png"]  # Ensure these files exist
+    ALL_IMAGES = ["1.png", "2.png", "3.png", "4.png"]  # Ensure these files exist
     LABELS = ["A", "B", "C", "D"]
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
     POST_ENDPOINT = "http://localhost/api/question"

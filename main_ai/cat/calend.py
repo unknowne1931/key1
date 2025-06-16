@@ -1,164 +1,150 @@
-from PIL import Image, ImageDraw, ImageFont
-import calendar
+# everything ok
+
 import random
 import requests
+from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-import sys
-import time
-import sys
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# === CONFIG ===
-API_UPLOAD = "https://backend.stawro.com/stawro/upload.php"
-API_POST = "http://localhost/api/question"
-FONT_PATH = "arial.ttf"  # Make sure this font exists
-YEAR = 2024
+# Configuration
+UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
+POST_URL = "http://localhost/api/question"
+CHARS = "abcdefghijklmnopqrstuvwxyz"
 
+# Difficulty Configs
+DIFFICULTY_SETTINGS = {
+    "Too Easy": {"code_length": 6, "seconds": 10},
+    "Easy": {"code_length": 8, "seconds": 12},
+    "Medium": {"code_length": 12, "seconds": 16},
+    "Tough": {"code_length": 16, "seconds": 18},
+    "Too Tough": {"code_length": 20, "seconds": 18}
+}
 
-def draw_calendar(month, year, x_day, hint_day):
-    img = Image.new('RGB', (700, 500), color=(37, 35, 35))
+def get_random_code(length):
+    return ''.join(random.choice(CHARS) for _ in range(length))
+
+def get_new_char(exclude):
+    while True:
+        ch = random.choice(CHARS)
+        if ch != exclude:
+            return ch
+
+def mutate_two_letters(original):
+    arr = list(original)
+    first_index = random.randint(0, len(arr) - 1)
+    second_index = first_index
+    while second_index == first_index:
+        second_index = random.randint(0, len(arr) - 1)
+    arr[first_index] = get_new_char(arr[first_index])
+    arr[second_index] = get_new_char(arr[second_index])
+    return ''.join(arr)
+
+def generate_options(correct):
+    opts = [correct]
+    while len(opts) < 4:
+        mutated = mutate_two_letters(correct)
+        if mutated not in opts:
+            opts.append(mutated)
+    random.shuffle(opts)
+    return opts
+
+def render_code_to_image_bytes(code):
+    width, height = 400, 250
+    bg_color = (0, 0, 0)
+    text_color = (255, 255, 255)
+    font_size = 30
+
+    img = Image.new("RGB", (width, height), bg_color)
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(FONT_PATH, 20)
-    title_font = ImageFont.truetype(FONT_PATH, 30)
 
-    draw.text((250, 20), f"{calendar.month_name[month]} {year}", font=title_font, fill="white")
+    try:
+        font = ImageFont.truetype("arial.ttf", font_size)
+    except:
+        font = ImageFont.load_default()
 
-    days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    for i, day in enumerate(days):
-        draw.text((i * 100 + 20, 70), day, font=font, fill="white")
+    bbox = draw.textbbox((0, 0), code, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
 
-    month_days = calendar.monthcalendar(year, month)
-    for row_idx, week in enumerate(month_days):
-        for col_idx, day in enumerate(week):
-            x = col_idx * 100 + 20
-            y = row_idx * 60 + 100
-            if day == 0:
+    x = (width - text_width) // 2
+    y = (height - text_height) // 2
+    draw.text((x, y), code, fill=text_color, font=font)
+
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
+
+def upload_image_from_bytes(image_buffer):
+    files = {'screenshot': ('screenshot.png', image_buffer, 'image/png')}
+    response = requests.post(UPLOAD_URL, files=files, verify=False)
+    try:
+        result = response.json()
+        print("🔍 Upload response:", result)
+        return result
+    except Exception as e:
+        print("❌ Error parsing upload response:", str(e))
+        return {}
+
+def post_question(correct, options, image_path, difficulty, seconds):
+    image_url = f"https://backend.stawro.com/stawro/{image_path}"
+    payload = {
+        "question": "Guess the correct code",
+        "answer": correct,
+        "a": options[0],
+        "b": options[1],
+        "c": options[2],
+        "d": options[3],
+        "language": "English",
+        "category": "Code Guessing",
+        "difficulty": difficulty,
+        "type": "Mental Ability",
+        "image": image_url,
+        "seconds": str(seconds)
+    }
+
+    print("📤 Payload to POST:", payload)
+    res = requests.post(POST_URL, json=payload)
+    return res.status_code == 200
+
+def run_auto(total_questions=5, difficulty="Medium"):
+    settings = DIFFICULTY_SETTINGS.get(difficulty)
+    if not settings:
+        print("❌ Invalid difficulty selected.")
+        return
+
+    code_length = settings["code_length"]
+    seconds = settings["seconds"]
+
+    for i in range(1, total_questions + 1):
+        print(f"\n--- Generating Question {i} ---")
+
+        correct = get_random_code(code_length)
+        options = generate_options(correct)
+
+        image_buffer = render_code_to_image_bytes(correct)
+        upload_result = upload_image_from_bytes(image_buffer)
+
+        if upload_result.get("status"):
+            uploaded_path = upload_result.get("path", "")
+            if not uploaded_path:
+                print("⚠️ Upload success but no path returned.")
                 continue
-            bg = "white"
-            text = str(day)
-            if day == x_day:
-                bg = "red"
-                text = "X"
-            elif day == hint_day:
-                bg = "blue"
-            draw.rectangle([x-5, y-5, x+50, y+40], fill=bg)
-            draw.text((x, y), text, font=font, fill="black" if bg != "white" else "white")
-    return img
 
-
-def choose_days(max_day, difficulty):
-    hint_day = random.randint(5, max_day - 5)
-    if difficulty in ["Too Easy", "Easy"]:
-        delta = random.choice([-2, -1, 1, 2])
-    elif difficulty == "Medium":
-        delta = random.choice([-5, -4, -3, 3, 4, 5])
-    elif difficulty in ["Tough", "Too Tough"]:
-        delta = random.choice(range(-max_day + 7, -7)) + random.choice([0, 7]) if random.random() < 0.5 else random.choice(range(7, max_day - 7))
-    else:
-        delta = random.choice([-2, -1, 1, 2])  # fallback
-
-    x_day = hint_day + delta
-    x_day = max(1, min(max_day, x_day))
-    if x_day == hint_day:
-        x_day = x_day + 1 if x_day < max_day else x_day - 1
-    return x_day, hint_day
-
-
-def get_mcq_options(correct, max_day):
-    include_none = random.random() < 0.35
-    options = set()
-    correct = int(correct)
-    if include_none:
-        while len(options) < 3:
-            d = correct + random.choice([-2, -1, 1, 2])
-            if 1 <= d <= max_day and d != correct:
-                options.add(str(d))
-        options.add("None of the above")
-        return list(options), "None of the above"
-    else:
-        options.add(str(correct))
-        while len(options) < 4:
-            d = correct + random.choice([-6, -5, -4, -3, 3, 4, 5, 6])
-            if 1 <= d <= max_day:
-                options.add(str(d))
-        opts = list(options)
-        random.shuffle(opts)
-        return opts, str(correct)
-
-
-def upload_image(img):
-    try:
-        buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        buffer.seek(0)
-        files = {'screenshot': ('calendar.png', buffer, 'image/png')}
-        response = requests.post(API_UPLOAD, files=files, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        if data.get("status") and data.get("path"):
-            return f"https://backend.stawro.com/stawro/{data['path']}"
-        else:
-            raise Exception("Invalid upload response: " + str(data))
-    except Exception as e:
-        print(f"❌ Error uploading image: {e}")
-        sys.exit(1)
-
-
-def post_question(img_url, options, answer, level):
-    try:
-        payload = {
-            "question": "Which date is marked with 'X'?",
-            "answer": answer,
-            "a": options[0],
-            "b": options[1],
-            "c": options[2],
-            "d": options[3],
-            "language": "English",
-            "category": "calender",
-            "difficulty": level,
-            "type": "Mental Ability",
-            "image": img_url,
-            "seconds": 10
-        }
-        response = requests.post(API_POST, json=payload, timeout=10)
-        response.raise_for_status()
-        return response.ok
-    except Exception as e:
-        print(f"❌ Error posting question: {e}")
-        sys.exit(1)
-
-
-def main(total, level):
-    for i in range(total):
-        print(f"\n📌 Creating question {i+1}/{total}...")
-
-        try:
-            month = random.randint(1, 12)
-            max_day = calendar.monthrange(YEAR, month)[1]
-
-            x_day, hint_day = choose_days(max_day, level)
-            img = draw_calendar(month, YEAR, x_day, hint_day)
-            options, answer = get_mcq_options(x_day, max_day)
-            image_url = upload_image(img)
-
-            if image_url:
-                success = post_question(image_url, options, answer, level)
-                print("✅ Question posted successfully!" if success else "❌ Failed to post question.")
+            success = post_question(correct, options, uploaded_path, difficulty, seconds)
+            if success:
+                print("✅ Question posted successfully.")
             else:
-                print("❌ Image upload failed.")
-                sys.exit(1)
+                print("❌ Failed to post question to API.")
+        else:
+            print("❌ Image upload failed or invalid response.")
 
-            time.sleep(0.2)
-
-        except Exception as e:
-            print(f"❌ Unexpected error on question {i+1}: {e}")
-            sys.exit(1)
-
-
+# 🔘 Ask user input and run
 if __name__ == "__main__":
     try:
-        total_questions = int(sys.argv[1])
-        difficulty_level = sys.argv[2]
-        main(total_questions, difficulty_level)
+        total = int(input("How many questions to generate? "))
+        level = input("Enter difficulty (Too Easy / Easy / Medium / Tough / Too Tough): ").strip()
+        run_auto(total_questions=total, difficulty=level)
     except Exception as e:
-        print(f"❌ Startup Error: {e}")
-        sys.exit(1)
+        print("❌ Invalid input:", e)
