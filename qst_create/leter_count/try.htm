@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Letter Count MCQ</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    .card {
+      text-align: center;
+    }
+    .sentence {
+      font-size: 18px;
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      width: 400px;
+      height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10px;
+      padding: 20px;
+      background: #fff;
+    }
+    .options button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .options button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    #btnCapture, #btnUpload {
+      margin: 10px;
+      padding: 10px 20px;
+    }
+    #previewContainer img {
+      margin-top: 15px;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Letter Count Challenge</h2>
+    <p class="sentence" id="sentence">Loading...</p>
+    <p id="question"></p>
+    <div class="options" id="options"></div>
+    <p class="result" id="result"></p>
+
+    <label for="difficultySelect">Select Difficulty:</label>
+    <select id="difficultySelect">
+      <option value="">--Select--</option>
+      <option value="Too Easy">Too Easy</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Tough">Tough</option>
+      <option value="Too Tough">Too Tough</option>
+    </select>
+
+    <br><br>
+    <button id="btnCapture">📸 Capture Screenshot</button>
+    <button id="btnUpload" disabled>⬆️ Upload</button>
+    <div id="previewContainer"></div>
+  </div>
+
+  <script>
+    let capturedBlob = null;
+    let quizData = {};
+
+    const wordBank = [
+      "elephant", "walks", "through", "a", "quiet", "jungle",
+      "bright", "sky", "above", "makes", "birds", "sing",
+      "dream", "brings", "hope", "sun", "rises", "again", "after", "storm"
+    ];
+
+    function generateSentence() {
+      let words = [];
+      while (words.length < 10) {
+        const word = wordBank[Math.floor(Math.random() * wordBank.length)];
+        words.push(word);
+      }
+      return words.join(" ");
+    }
+
+    function getRandomLetter(sentence) {
+      const letters = sentence.replace(/[^a-z]/gi, "").toLowerCase();
+      return letters[Math.floor(Math.random() * letters.length)];
+    }
+
+    function generateOptions(correct) {
+      let options = new Set();
+      options.add(correct);
+      while (options.size < 4) {
+        const wrong = correct + Math.floor(Math.random() * 5) - 2;
+        if (wrong >= 0) options.add(wrong);
+      }
+      return Array.from(options).sort(() => Math.random() - 0.5);
+    }
+
+    function generatePuzzle() {
+      const sentence = generateSentence();
+      const letter = getRandomLetter(sentence);
+      const count = (sentence.toLowerCase().match(new RegExp(letter, "g")) || []).length;
+
+      document.getElementById("sentence").textContent = `"${sentence}"`;
+      document.getElementById("question").textContent = `How many times does the letter "${letter}" appear?`;
+
+      const options = generateOptions(count);
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => {
+          const result = document.getElementById("result");
+          if (opt === count) {
+            result.textContent = "✅ Correct!";
+            result.style.color = "green";
+          } else {
+            result.textContent = `❌ Incorrect. Correct answer is ${count}`;
+            result.style.color = "red";
+          }
+        };
+        container.appendChild(btn);
+      });
+
+      quizData = {
+        question: `How many times does the letter "${letter}" appear in the sentence?`,
+        options: options,
+        answer: count
+      };
+    }
+
+    generatePuzzle();
+
+    document.getElementById("btnCapture").addEventListener("click", () => {
+      html2canvas(document.querySelector(".sentence")).then(canvas => {
+        canvas.toBlob(blob => {
+          capturedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="Preview">`;
+          document.getElementById("btnUpload").disabled = false;
+        }, 'image/png');
+      });
+    });
+
+    document.getElementById("btnUpload").addEventListener("click", () => {
+      if (!capturedBlob) return alert("No screenshot captured!");
+
+      const formData = new FormData();
+      formData.append("screenshot", capturedBlob, "screenshot.png");
+
+      fetch("https://backend.stawro.com/stawro/upload.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status && res.path) {
+          postQuestion(res.path);
+        } else {
+          alert("Upload failed.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Upload error.");
+      });
+    });
+
+    function postQuestion(imagePath) {
+      const difficulty = document.getElementById("difficultySelect").value;
+      if (!difficulty) return alert("Please select a difficulty!");
+
+      const options = quizData.options.map(o => o.toString());
+      const answerStr = quizData.answer.toString();
+      const noneCorrect = !options.includes(answerStr);
+
+      const postData = {
+        question: quizData.question,
+        answer: noneCorrect ? "None of the above" : answerStr,
+        a: options[0] || "",
+        b: options[1] || "",
+        c: options[2] || "",
+        d: noneCorrect ? "None of the above" : options[3] || "",
+        language: "English",
+        category: "leter_find",
+        difficulty: difficulty,
+        type: "Mental Ability",
+        image: `https://backend.stawro.com/stawro/${imagePath}`,
+        seconds: "10"
+      };
+
+      fetch("http://localhost/api/question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert("✅ Question posted successfully!");
+        generatePuzzle();
+      })
+      .catch(error => {
+        console.error(error);
+        alert("❌ Error posting question. Check API and CORS settings.");
+      });
+    }
+  </script>
+</body>
+</html>

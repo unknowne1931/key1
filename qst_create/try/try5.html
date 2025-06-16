@@ -302,8 +302,6 @@
       drawMaze();
     });
 
-    // Gate definition
-    // Gate blocks movement between two adjacent cells: (x1,y1) <-> (x2,y2)
     let gate = null;
 
     // Draw gate wall
@@ -381,15 +379,8 @@
       return false;
     }
 
-    // Create gate blocking a critical path to sometimes make goal unreachable
     function createGate() {
-      // We want to close off exactly one path between two adjacent cells on the maze path
-      // Approach:
-      // 1. Find the shortest path from start to goal ignoring gate
-      // 2. Pick a random edge along that path (not adjacent to goal)
-      // 3. Place a gate on that edge (blocks that passage)
 
-      // First get shortest path using BFS (ignoring gate)
       const parentMap = new Map();
       const visited = new Set();
       const queue = [{ x: 0, y: 0 }];
@@ -446,13 +437,11 @@
       return { x1: cellA.x, y1: cellA.y, x2: cellB.x, y2: cellB.y };
     }
 
-    // Initialize game
     function initGame() {
       generateMaze();
       player = { x: 0, y: 0 };
       gate = null;
 
-      // 50% chance to add a gate to block path
       if (Math.random() < 0.5) {
         gate = createGate();
       }
@@ -461,10 +450,6 @@
       document.getElementById("result").textContent = "";
     }
 
-
-
-
-    // Check user answer
     function checkAnswer(answer) {
       const reachable = isGoalReachable();
       if ((reachable && answer === "Yes") || (!reachable && answer === "No")) {
@@ -474,7 +459,6 @@
       }
     }
 
-    // Start the game
     initGame();
 
 
