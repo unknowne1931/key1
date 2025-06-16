@@ -7,144 +7,144 @@ from io import BytesIO
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Configuration
-UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-POST_URL = "http://localhost/api/question"
-CHARS = "abcdefghijklmnopqrstuvwxyz"
 
-# Difficulty Configs
-DIFFICULTY_SETTINGS = {
-    "Too Easy": {"code_length": 6, "seconds": 10},
-    "Easy": {"code_length": 8, "seconds": 12},
-    "Medium": {"code_length": 12, "seconds": 16},
-    "Tough": {"code_length": 16, "seconds": 18},
-    "Too Tough": {"code_length": 20, "seconds": 18}
+
+# ---- Configuration ----
+ALL_IMAGES = ["1.png", "2.png", "3.png", "4.png"]  # Ensure these files exist
+LABELS = ["A", "B", "C", "D"]
+UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
+POST_ENDPOINT = "http://localhost/api/question"
+DIFFICULTY_SECONDS = {
+    "Too Easy": 10,
+    "Easy": 15,
+    "Medium": 20,
+    "Tough": 25,
+    "Too Tough": 30
 }
+FINAL_WIDTH = 400
+FINAL_HEIGHT = 250
 
-def get_random_code(length):
-    return ''.join(random.choice(CHARS) for _ in range(length))
-
-def get_new_char(exclude):
-    while True:
-        ch = random.choice(CHARS)
-        if ch != exclude:
-            return ch
-
-def mutate_two_letters(original):
-    arr = list(original)
-    first_index = random.randint(0, len(arr) - 1)
-    second_index = first_index
-    while second_index == first_index:
-        second_index = random.randint(0, len(arr) - 1)
-    arr[first_index] = get_new_char(arr[first_index])
-    arr[second_index] = get_new_char(arr[second_index])
-    return ''.join(arr)
-
-def generate_options(correct):
-    opts = [correct]
-    while len(opts) < 4:
-        mutated = mutate_two_letters(correct)
-        if mutated not in opts:
-            opts.append(mutated)
-    random.shuffle(opts)
-    return opts
-
-def render_code_to_image_bytes(code):
-    width, height = 400, 250
+# ---- Render the images with labels into a single image ----
+def render_images_to_image_bytes(image_filenames, labels):
+    image_size = (int(FINAL_WIDTH / 2 - 15), int(FINAL_HEIGHT / 2 - 15))
+    padding = 10
     bg_color = (0, 0, 0)
-    text_color = (255, 255, 255)
-    font_size = 30
-
-    img = Image.new("RGB", (width, height), bg_color)
-    draw = ImageDraw.Draw(img)
+    label_bg = (0, 0, 0)
+    label_color = (255, 255, 255)
+    label_font_size = 14
 
     try:
-        font = ImageFont.truetype("arial.ttf", font_size)
+        font = ImageFont.truetype("arial.ttf", label_font_size)
     except:
         font = ImageFont.load_default()
 
-    bbox = draw.textbbox((0, 0), code, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    cols = 2
+    rows = 2
+    final_img = Image.new("RGB", (FINAL_WIDTH, FINAL_HEIGHT), bg_color)
+    draw = ImageDraw.Draw(final_img)
 
-    x = (width - text_width) // 2
-    y = (height - text_height) // 2
-    draw.text((x, y), code, fill=text_color, font=font)
+    for idx, (filename, label) in enumerate(zip(image_filenames, labels)):
+        try:
+            img = Image.open(filename).resize(image_size)
+        except Exception as e:
+            print(f"⚠️ Failed to load {filename}: {e}")
+            img = Image.new("RGB", image_size, (128, 128, 128))
+
+        col = idx % cols
+        row = idx // cols
+        x = padding + col * (image_size[0] + padding)
+        y = padding + row * (image_size[1] + padding)
+
+        final_img.paste(img, (x, y))
+
+        draw.rectangle([x + 5, y + 5, x + 35, y + 25], fill=label_bg)
+        draw.text((x + 10, y + 8), label.upper(), fill=label_color, font=font)
 
     buffer = BytesIO()
-    img.save(buffer, format="PNG")
+    final_img.save(buffer, format="PNG")
     buffer.seek(0)
     return buffer
 
-def upload_image_from_bytes(image_buffer):
-    files = {'screenshot': ('screenshot.png', image_buffer, 'image/png')}
-    response = requests.post(UPLOAD_URL, files=files, verify=False)
-    try:
-        result = response.json()
-        print("🔍 Upload response:", result)
-        return result
-    except Exception as e:
-        print("❌ Error parsing upload response:", str(e))
-        return {}
+# ---- Get options and correct answer ----
+def get_options_and_answer(images, labels):
+    seen = {}
+    correct_answer = "None of those"
 
-def post_question(correct, options, image_path, difficulty, seconds):
-    image_url = f"https://backend.stawro.com/stawro/{image_path}"
+    for idx, img in enumerate(images):
+        if img in seen:
+            correct_answer = f"{labels[seen[img]]},{labels[idx]}"
+            break
+        seen[img] = idx
+
+    all_pairs = [f"{labels[i]},{labels[j]}" for i in range(len(labels)) for j in range(i+1, len(labels))]
+    options = set([correct_answer]) if correct_answer != "None of those" else set()
+    while len(options) < 3:
+        rand_pair = random.choice(all_pairs)
+        if rand_pair != correct_answer:
+            options.add(rand_pair)
+    options.add("None of those")
+    return list(options), correct_answer
+
+# ---- Upload image ----
+def upload_image(image_buffer):
+    files = {"screenshot": ("screenshot.png", image_buffer, "image/png")}
+    res = requests.post(UPLOAD_ENDPOINT, files=files)
+    res.raise_for_status()
+    return res.json()
+
+# ---- Post question ----
+def post_question(correct_answer, options, difficulty, image_url):
     payload = {
-        "question": "Guess the correct code",
-        "answer": correct,
+        "question": "Which Images Match?",
+        "answer": correct_answer,
         "a": options[0],
         "b": options[1],
         "c": options[2],
         "d": options[3],
         "language": "English",
-        "category": "Code Guessing",
+        "category": "similar_images",
         "difficulty": difficulty,
         "type": "Mental Ability",
         "image": image_url,
-        "seconds": str(seconds)
+        "seconds": DIFFICULTY_SECONDS.get(difficulty, 15)
     }
+    res = requests.post(POST_ENDPOINT, json=payload)
+    res.raise_for_status()
+    return res.json()
 
-    print("📤 Payload to POST:", payload)
-    res = requests.post(POST_URL, json=payload)
-    return res.status_code == 200
+# ---- Run Multiple Questions ----
+def run_multiple_quiz_generations():
+    num = int(input("Enter number of questions to generate: "))
+    difficulty = input("Enter difficulty (Too Easy, Easy, Medium, Tough, Too Tough): ").strip()
 
-def run_auto(total_questions=5, difficulty="Medium"):
-    settings = DIFFICULTY_SETTINGS.get(difficulty)
-    if not settings:
-        print("❌ Invalid difficulty selected.")
-        return
+    for i in range(1, num + 1):
+        print(f"\n🔁 Generating Q{i}/{num}")
+        selected = random.sample(ALL_IMAGES, 3)
+        dup = random.choice(selected)
+        selected.append(dup)
+        random.shuffle(selected)
 
-    code_length = settings["code_length"]
-    seconds = settings["seconds"]
+        image_buffer = render_images_to_image_bytes(selected, LABELS)
+        options, correct = get_options_and_answer(selected, LABELS)
+        random.shuffle(options)
 
-    for i in range(1, total_questions + 1):
-        print(f"\n--- Generating Question {i} ---")
+        print(f"✅ Correct Answer: {correct}")
+        print(f"🎯 Options: {options}")
 
-        correct = get_random_code(code_length)
-        options = generate_options(correct)
-
-        image_buffer = render_code_to_image_bytes(correct)
-        upload_result = upload_image_from_bytes(image_buffer)
-
-        if upload_result.get("status"):
-            uploaded_path = upload_result.get("path", "")
-            if not uploaded_path:
-                print("⚠️ Upload success but no path returned.")
-                continue
-
-            success = post_question(correct, options, uploaded_path, difficulty, seconds)
-            if success:
-                print("✅ Question posted successfully.")
+        try:
+            upload_res = upload_image(image_buffer)
+            if upload_res.get("status"):
+                image_path = f"https://backend.stawro.com/stawro/uploads/{upload_res['filename']}"
+                print("🖼️ Uploaded to:", image_path)
+                post_result = post_question(correct, options, difficulty, image_path)
+                print("📤 Question posted:", post_result)
             else:
-                print("❌ Failed to post question to API.")
-        else:
-            print("❌ Image upload failed or invalid response.")
+                print("❌ Upload failed:", upload_res)
+        except Exception as e:
+            print("❗ Error:", e)
 
-# 🔘 Ask user input and run
+    print("\n🎉 Done generating all questions!")
+
+# ---- Main Entry Point ----
 if __name__ == "__main__":
-    try:
-        total = int(input("How many questions to generate? "))
-        level = input("Enter difficulty (Too Easy / Easy / Medium / Tough / Too Tough): ").strip()
-        run_auto(total_questions=total, difficulty=level)
-    except Exception as e:
-        print("❌ Invalid input:", e)
+    run_multiple_quiz_generations()
