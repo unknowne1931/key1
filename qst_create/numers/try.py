@@ -4,6 +4,7 @@ import io
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
+
 # === CONFIG ===
 UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
 POST_ENDPOINT = "http://localhost/api/question"

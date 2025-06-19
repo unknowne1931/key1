@@ -1,5 +1,3 @@
-##Everything ok
-
 import os
 from pymongo import MongoClient
 import subprocess
@@ -12,34 +10,9 @@ from io import BytesIO
 import sys
 import time
 import urllib3
-import traceback
+
 import math
 import io
-
-import pyttsx3
-
-# Setup pyttsx3 with female voice
-engine = pyttsx3.init()
-voices = engine.getProperty('voices')
-female_voice = None
-for voice in voices:
-    if "female" in voice.name.lower() or "female" in voice.id.lower():
-        female_voice = voice.id
-        break
-if female_voice:
-    engine.setProperty('voice', female_voice)
-else:
-    # fallback to first voice if female not found
-    engine.setProperty('voice', voices[1].id)
-
-# Set slower speech rate (default is usually 200)
-engine.setProperty('rate', 170)
-
-
-def speak(text):
-    engine.say(text)
-    engine.runAndWait()
-
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -60,11 +33,6 @@ client = MongoClient(MONGODB_URI)
 db = client["test"]
 collection1 = db["qno_counts"]
 collection = db["question datas"]
-
-
-auto = ''
-expected_category = 9
-cat_list = []
 
 
 
@@ -203,80 +171,33 @@ def calender_crt(total_questions, difficulty_level):
     def main(total, level):
         for i in range(total):
             print(f"\n📌 Creating question {i+1}/{total}...")
-
             try:
-                # Random month and max days
                 month = random.randint(1, 12)
                 max_day = calendar.monthrange(YEAR, month)[1]
-                print(f"👉 Selected month: {month}, Max days: {max_day}")
-
-                # Choose days
-                try:
-                    x_day, hint_day = choose_days(max_day, level)
-                    print(f"🗓️ Selected x_day: {x_day}, hint_day: {hint_day}")
-                except Exception as e:
-                    print(f"⚠️ Failed to choose days: {e}")
-                    traceback.print_exc()
+                x_day, hint_day = choose_days(max_day, level)
+                img = draw_calendar(month, YEAR, x_day, hint_day)
+                options, answer = get_mcq_options(x_day, max_day)
+                image_url = upload_image(img)
+                if not image_url:
+                    print("❌ Skipping due to image upload failure.")
                     continue
-
-                # Draw calendar
-                try:
-                    img = draw_calendar(month, YEAR, x_day, hint_day)
-                    print("🖼️ Calendar image generated.")
-                except Exception as e:
-                    print(f"⚠️ Failed to draw calendar: {e}")
-                    traceback.print_exc()
-                    continue
-
-                # Create options
-                try:
-                    options, answer = get_mcq_options(x_day, max_day)
-                    print(f"🧠 Options: {options}, Correct: {answer}")
-                except Exception as e:
-                    print(f"⚠️ Failed to generate options: {e}")
-                    traceback.print_exc()
-                    continue
-
-                # Upload image
-                try:
-                    image_url = upload_image(img)
-                    if not image_url:
-                        print("❌ Image upload failed. Skipping.")
-                        continue
-                    print(f"🌐 Image uploaded: {image_url}")
-                except Exception as e:
-                    print(f"⚠️ Failed to upload image: {e}")
-                    traceback.print_exc()
-                    continue
-
-
-                # Post question
-                try:
-                    success = post_question(image_url, options, answer, level)
-                    if success:
-                        print("✅ Question posted successfully!")
-                        return True
-                    else:
-                        print("❌ Failed to post question.")
-                        return False    
-                    
-                except Exception as e:
-                    print(f"⚠️ Failed to post question: {e}")
-                    traceback.print_exc()
-                    continue
-
-                time.sleep(0.3)  # Prevent rate limiting or API overload
+                success = post_question(image_url, options, answer, level)
+                if success:
+                    print("✅ Question posted successfully!")
+                else:
+                    print("❌ Skipped due to post failure.")
+                time.sleep(0.3)
 
             except Exception as e:
-                print(f"❌ General error in iteration {i+1}: {e}")
-                traceback.print_exc()
+                print(f"❌ Unexpected error on question {i+1}: {e}")
                 continue
+
 
     if __name__ == "__main__":
         try:
             # total_questions = int(sys.argv[1]) if len(sys.argv) > 1 else int(input("Enter number of questions: "))
             # difficulty_level = sys.argv[2] if len(sys.argv) > 2 else input("Enter difficulty: ")
-            main(total_questions, difficulty_level)
+            main(int(total_questions), difficulty_level)
         except Exception as e:
             print(f"❌ Startup Error: {e}")
             sys.exit(1)
@@ -414,7 +335,6 @@ def clock_crt( num_questions,difficulty):
         response = requests.post(url, json=body)
         if response.ok:
             print(f"✅ Question posted with {estimated_seconds} seconds!")
-            return True
         else:
             print("❌ Failed to post question:", response.status_code, response.text)
 
@@ -576,7 +496,6 @@ def corect_code_crt(total, level):
                 success = post_question(correct, options, uploaded_path, difficulty, seconds)
                 if success:
                     print("✅ Question posted successfully.")
-                    return True
                 else:
                     print("❌ Failed to post question to API.")
             else:
@@ -719,15 +638,14 @@ def img_similar_crt(num ,difficulty):
                 if upload_res.get("status"):
                     image_path = f"https://backend.stawro.com/stawro/uploads/{upload_res['filename']}"
                     print("🖼️ Uploaded to:", image_path)
-                    # post_result = post_question(correct, options, difficulty, image_path)
-                    print('\033[92m' + "📤 Question Posted  Successfully:" + '\033[0m')
-                    return True
+                    post_result = post_question(correct, options, difficulty, image_path)
+                    print("📤 Question posted:", post_result)
                 else:
                     print("❌ Upload failed:", upload_res)
             except Exception as e:
                 print("❗ Error:", e)
 
-        # print("\n🎉 Done generating all questions!")
+        print("\n🎉 Done generating all questions!")
 
     # ---- Main Entry Point ----
     if __name__ == "__main__":
@@ -857,8 +775,7 @@ def int_char_mix_crt(num_questions, difficulty):
                     image_url = upload_image(img_buffer)
                     if image_url:
                         post_question(question, correct_answer, options, image_url, difficulty)
-                        print('\033[92m' + f"✅ Uploaded Question {i + 1}" + '\033[0m')
-                        return True
+                        print(f"✅ Uploaded Question {i + 1}")
                     else:
                         print(f"❌ Skipped Question {i + 1} (upload failed)")
                 except Exception as e:
@@ -867,7 +784,6 @@ def int_char_mix_crt(num_questions, difficulty):
                 time.sleep(0.5)  # Prevent too fast spamming
 
             print(f"\n🎉 Done! {num_questions} questions uploaded.")
-            return True
 
         except Exception as e:
             print(f"❌ Critical failure: {e}")
@@ -967,7 +883,6 @@ def leter_count_crt(num_questions, user_input):
         response = requests.post(POST_ENDPOINT, json=question_data)
         if response.status_code == 200:
             print("✅ Question posted successfully!\n")
-            return True
         else:
             print("❌ Failed to post question:", response.text)
 
@@ -1212,7 +1127,6 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
             res = requests.post(POST_URL, json=payload)
             if res.status_code == 200:
                 print("✅ Question posted successfully!")
-                return True
             else:
                 print("❌ Failed to post question:", res.text)
 
@@ -1500,12 +1414,6 @@ def numers_crt(num_questions, difficulty):
         main()
 
 
-cat_grp_ary = [calender_crt, clock_crt, corect_code_crt, img_similar_crt, int_char_mix_crt, leter_count_crt, maze_crt, num_100_crt, numers_crt]
-
-
-# Counting_100 = num_100_crt()
-# clock = clock_crt()
-# leter_find = 
 
 
 
@@ -1514,46 +1422,10 @@ cat_grp_ary = [calender_crt, clock_crt, corect_code_crt, img_similar_crt, int_ch
 
 
 
-def create_cate_and_qst(expected_group):
-    os.system('cls')
-    tough_dif = ['Too Easy', 'Easy', 'Medium', "Tough", 'Too Tough', 'Too Easy', 'Easy', 'Medium', "Tough",] #make add another one 9 category exist
-    
-    for i in range(expected_group):
-        random.shuffle(tough_dif)
-        random.shuffle(cat_grp_ary)
-        
-        for dif, cat in zip(tough_dif, cat_grp_ary):
+expected_group = 3
 
-            cat(1, dif)
-            time.sleep(2)
-
-        speak(f"Group {i+1} is created")
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        time.sleep(5)
-        os.system('cls')
-
-
-
-
-
-
-
-
-
-speak("I need length to Create total Number of Groups")
-expected_group = int(input("Expected category Groups [ex : 2, 10, 40] : "))  #Expected category Groups
-
-if collection.count_documents({}) > 0:
-    speak("Can i Delete all Questions Data And Reupload frome first")
-    delet = input("Can i Delete all Questions Data And Reupload frome first ['Yes', 'Y', 'y'] : ") #If Yes It will Delete All "question datas" 
-    if delet == "Yes" or "y" or "Y":
-        delete_result = collection.delete_many({})
-        print(f"Deleted {delete_result.deleted_count} documents from 'question datas'.")
-
-
+tough = ['Too Easy', 'Easy', 'Medium', 'Tough', 'Too Tough']
+cat_list = []
 
 data = collection.find({})
 
@@ -1567,36 +1439,12 @@ for index, dat in enumerate(data):
     
 
 
-if len(cat_list) < expected_category:
-    print('Wee need more Category')
-    speak(f"I Have found : {len(cat_list)} Category , i Need : {expected_category - len(cat_list)} more Category")
-    print(f"\033[93mI Have found : {len(cat_list)} Category , i Need : {expected_category - len(cat_list)}\033[0m")
-    auto = input("Can I Run All Automatic 'Yes', 'yes' ,'Y', 'y' or 'No', 'N', 'n'   : ")
-    if auto == "Y" or 'Yes' or 'yes' or 'y':
-        create_cate_and_qst(expected_group)
-    else:
-        ask_per1 = input("Can i create a Questions 'yes', 'y' : ")
-        if ask_per1 == "Yes" or 'y':
-            create_cate_and_qst(expected_group)
-
-
-elif len(cat_list) == expected_category:
-    print('\033[92m' + "Everything OK" + '\033[0m')
+if len(cat_list) < 10:
+    print('Wee need more Questions')
+elif len(cat_list) == 10:
+    print("Everything ok with Question")
 else:
-    print("I Found More Category")
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print("I Found more Questions")
     # leter_count_crt(int('20'), "Easy")
     # int_char_mix_crt(int("20"), "Easy")
     # maze_crt(int("20"), "Easy")
@@ -1604,10 +1452,5 @@ else:
     # numers_crt(int('20'), 'Easy')
         
 print(len(cat_list))
-
-
-
-
-
 
 

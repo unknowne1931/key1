@@ -1,0 +1,11 @@
+{
+  "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Obama_portrait_crop.jpg/440px-Obama_portrait_crop.jpg",
+  "options": [
+    "A",
+    "Isaac Newton B",
+    "Nikola Tesla C",
+    "Albert Einstein D",
+    "Stephen Hawking"
+  ],
+  "answer": "C"
+}

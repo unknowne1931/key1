@@ -1,0 +1,252 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gemini Speech Assistant</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      font-size: 18px;
+      width: 90%;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🎤 Hold Space or Mouse to Speak</h2>
+  <button id="talkBtn">Hold to Talk</button>
+  <div id="output"><b>🗣️ You:</b> <i>(waiting)</i></div>
+
+  <script>
+    const btn = document.getElementById('talkBtn');
+    const output = document.getElementById('output');
+
+    const GEMINI_API_KEY = "AIzaSyASImPVmqr18ZeGKIBbDYTgmP_bseArWhE"; // Replace with your Gemini key
+    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isListening = false;
+    let finalTranscript = '';
+
+    if (!SpeechRecognition) {
+      alert("❌ Your browser does not support Speech Recognition.");
+      btn.disabled = true;
+    } else {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-IN";
+
+      recognition.onresult = (event) => {
+        finalTranscript = event.results[0][0].transcript;
+        output.innerHTML = `<b>🗣️ You:</b> ${finalTranscript}`;
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        if (finalTranscript.trim()) {
+          askGemini(finalTranscript.trim());
+        }
+      };
+    }
+
+    function startListening() {
+      finalTranscript = '';
+      if (recognition) {
+        recognition.start();
+        isListening = true;
+        output.innerHTML = `<b>🗣️ You:</b> Listening...`;
+      }
+    }
+
+    function stopListening() {
+      if (isListening && recognition) {
+        recognition.stop();
+      }
+    }
+
+    async function askGemini(promptText) {
+  const body = {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text:
+              `You are a job interview assistant. Help me perform well in my job interview.\n\n` +
+              `Keep your answers short, professional, confident, and easy to speak aloud.\n\n` +
+              `make give best responce i will directly readto their questions \n\n` +
+              `make give codes in the bottom with explanation \n\n` +
+              `make add some best UI for every responce \n\n` +
+              `Now, based on what I just said, give a strong reply:\n"${promptText}"`
+          }
+        ]
+      }
+    ]
+  };
+
+  try {
+    const response = await fetch(GEMINI_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ No reply.";
+    output.innerHTML = `<b>🗣️ You:</b> ${promptText}\n\n<b>🤖 Gemini (Interview Coach):</b> ${reply}`;
+  } catch (error) {
+    output.innerHTML = `<b>🗣️ You:</b> ${promptText}\n\n❌ Error: ${error.message}`;
+  }
+}
+
+
+    // Mouse controls
+    btn.addEventListener('mousedown', startListening);
+    btn.addEventListener('mouseup', stopListening);
+    btn.addEventListener('mouseleave', stopListening);
+
+    // Spacebar controls
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !isListening) {
+        e.preventDefault();
+        startListening();
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        stopListening();
+      }
+    });
+  </script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>POST JSON Request</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    #response {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #eef;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Send JSON POST Request</h2>
+    <label for="questionId">Conceptual Question ID:</label>
+    <input type="text" id="questionId" value="0dc74b52-e1fe-4d50-949d-fa2a06d34557">
+    <button onclick="sendPostRequest()">Send Request</button>
+
+    <div id="response"></div>
+  </div>
+
+  <script>
+    function sendPostRequest() {
+      const id = document.getElementById("questionId").value;
+      const bodyData = {
+        conceptualQuestionId: id
+      };
+
+      fetch("https://acciojob-backend-eobnd7jx2q-el.a.run.app/aptitude/get-aptitude-question-detail", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(bodyData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("response").textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(error => {
+        document.getElementById("response").textContent = "Error: " + error;
+      });
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

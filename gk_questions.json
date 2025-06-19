@@ -1,0 +1,112 @@
+[
+  {
+    "question": "Which country hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris B",
+      "Los Angeles C",
+      "Tokyo D",
+      "Beijing"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which country hosted the 2023 FIFA Women's World Cup?",
+    "options": [
+      "A",
+      "USA B",
+      "Germany C",
+      "Australia & New Zealand D",
+      "Brazil"
+    ],
+    "answer": "C"
+  },
+  {
+    "question": "Which country hosted the 2023 FIFA Women's World Cup?",
+    "options": [
+      "A",
+      "USA B",
+      "Germany C",
+      "Australia & New Zealand D",
+      "France"
+    ],
+    "answer": "C"
+  },
+  {
+    "question": "Which country recently hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris B",
+      "Los Angeles C",
+      "Tokyo D",
+      "London"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which country recently hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris B",
+      "Los Angeles C",
+      "Tokyo D",
+      "Beijing"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which country hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris, France B",
+      "Los Angeles, USA C",
+      "Tokyo, Japan D",
+      "Brisbane, Australia"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which country recently (in 2024) joined NATO as its 32nd member?",
+    "options": [
+      "A",
+      "Ukraine B",
+      "Finland C",
+      "Sweden D",
+      "Bosnia and Herzegovina"
+    ],
+    "answer": "C"
+  },
+  {
+    "question": "Which country hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris, France B",
+      "Los Angeles, USA C",
+      "Tokyo, Japan D",
+      "Brisbane, Australia"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which country hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris, France B",
+      "Los Angeles, USA C",
+      "Tokyo, Japan D",
+      "Brisbane, Australia"
+    ],
+    "answer": "A"
+  },
+  {
+    "question": "Which country hosted the 2024 Summer Olympics?",
+    "options": [
+      "A",
+      "Paris B",
+      "Los Angeles C",
+      "Tokyo D",
+      "Brisbane"
+    ],
+    "answer": "A"
+  }
+]

@@ -7,3 +7,11 @@ num_100
 numers
 leter_count
 maze
+
+
+
+
+
+None
+False
+True
