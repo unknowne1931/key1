@@ -1,16 +1,18 @@
-i = int(input("Number : "))
 
-def is_one(n):
 
-    def is_one_sub(n):
-        # Now n is accessed and used in the function
-        print("is_one_sub called with n =", n)
-
-    if n == 1:
+def one(i):
+    print("one")
+    def two(i):
+        print("two")
         return True
-    elif n < 1:
-        is_one_sub(n)
 
-dat = is_one(i)
 
-print(dat)
+def three(i):
+    dat = one(i)
+    if dat is True:
+        print("True")
+    else:
+        print("False")
+
+if __name__ == "__main__":
+    three(1)
