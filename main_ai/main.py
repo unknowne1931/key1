@@ -1434,12 +1434,6 @@ def create_cate_and_qst(expected_group):
 
 
 
-
-
-
-
-
-
 speak("I need length to Create total Number of Groups")
 expected_group = int(input("Expected category Groups [ex : 2, 10, 40] : "))  #Expected category Groups
 
@@ -1487,22 +1481,6 @@ else:
 
 
 
-
-
-
-
-
-
-
-
-
-    # leter_count_crt(int('20'), "Easy")
-    # int_char_mix_crt(int("20"), "Easy")
-    # maze_crt(int("20"), "Easy")
-    # num_100_crt(int("20"), "Easy")
-    # numers_crt(int('20'), 'Easy')
-        
-# print(len(cat_list))
 
 
 
