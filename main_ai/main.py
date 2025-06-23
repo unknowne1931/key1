@@ -68,168 +68,143 @@ cat_list = []
 
 
 
-def calender_crt(total_questions, difficulty_level):
-    # === CONFIG ===
-    API_UPLOAD = "https://backend.stawro.com/stawro/upload.php"
-    API_POST = "http://localhost/api/question"
-    FONT_PATH = "arial.ttf"  # Try load, fallback if fails
-    YEAR = 2024
-    RETRY_LIMIT = 3
-    PADDING = 20
+def seT(one, two):
+    def get_difficulty_settings(level):
+        settings = {
+            "Too Easy":     {"common": 6, "extra": 2, "base": 50,  "set_len": 8,  "seconds": 8},
+            "Easy":         {"common": 5, "extra": 3, "base": 60,  "set_len": 9,  "seconds": 10},
+            "Medium":       {"common": 4, "extra": 4, "base": 80,  "set_len": 10, "seconds": 12},
+            "Tough":        {"common": 4, "extra": 5, "base": 100, "set_len": 12, "seconds": 14},
+            "Too Tough":    {"common": 4, "extra": 8, "base": 150, "set_len": 20, "seconds": 16}
+        }
+        return settings.get(level.title(), settings["Medium"])
 
-    def get_font(size):
-        try:
-            return ImageFont.truetype(FONT_PATH, size)
-        except:
-            return ImageFont.load_default()
+    def generate_sets(settings, difficulty):
+        base_numbers = list(range(1, settings["base"] + 1))
+        common = random.sample(base_numbers, settings["common"])
+        used = set(common)
+        extra_pool = list(set(base_numbers) - used)
 
-    def create_calendar_image(month, year, x_day, hint_day):
-        img_width, img_height = 700 + 2 * PADDING, 500 + 2 * PADDING
-        img = Image.new("RGB", (img_width, img_height), (37, 35, 35))
+        def noisy_set():
+            fake_commons = []
+            if difficulty == "Too Tough":
+                fake_commons = random.sample(extra_pool, 2)
+            items = common + random.sample(extra_pool, settings["extra"]) + fake_commons
+            return sorted(random.sample(items, min(settings["set_len"], len(items))))
+
+        return noisy_set(), noisy_set(), noisy_set(), common
+
+    def generate_options(correct_common, extra_pool, difficulty):
+        correct = sorted(random.sample(correct_common, min(4, len(correct_common))))
+        options = [correct]
+
+        attempts = 0
+        while len(options) < 4 and attempts < 20:
+            if difficulty == "Too Tough":
+                wrong = sorted(random.sample(correct_common + extra_pool, 4))
+            else:
+                wrong = sorted(random.sample(correct_common, 2) + random.sample(extra_pool, 2))
+            if wrong not in options:
+                options.append(wrong)
+            attempts += 1
+
+        random.shuffle(options)
+        return correct, options
+
+    def create_image(setA, setB, setC, q_no, difficulty):
+        img = Image.new('RGB', (420, 280), color=(240, 244, 248))
         draw = ImageDraw.Draw(img)
 
-        font = get_font(20)
-        title_font = get_font(30)
-
-        draw.text((img_width // 2 - 100, PADDING), f"{calendar.month_name[month]} {year}", font=title_font, fill="white")
-
-        days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-        for i, day in enumerate(days):
-            draw.text((i * 100 + PADDING, 70 + PADDING), day, font=font, fill="white")
-
-        month_days = calendar.monthcalendar(year, month)
-        for row_idx, week in enumerate(month_days):
-            for col_idx, day in enumerate(week):
-                x = col_idx * 100 + PADDING
-                y = row_idx * 60 + 100 + PADDING
-                if day == 0:
-                    continue
-                bg = "white"
-                text = str(day)
-                if day == x_day:
-                    bg = "red"
-                    text = "X"
-                elif day == hint_day:
-                    bg = "blue"
-                draw.rectangle([x - 5, y - 5, x + 50, y + 40], fill=bg)
-                draw.text((x, y), text, font=font, fill="black" if bg != "white" else "white")
-        return img
-
-    def upload_image_to_server(img):
         try:
-            buffer = BytesIO()
-            img.save(buffer, format="PNG")
-            buffer.seek(0)
-            files = {'screenshot': ('calendar.png', buffer, 'image/png')}
-            response = requests.post(API_UPLOAD, files=files, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            if data.get("status") and data.get("path"):
-                return f"https://backend.stawro.com/stawro/{data['path']}"
+            title_font = ImageFont.truetype("arialbd.ttf", 18)
+            set_font = ImageFont.truetype("arial.ttf", 14)
+            small_font = ImageFont.truetype("arial.ttf", 12)
+        except:
+            title_font = ImageFont.load_default()
+            set_font = ImageFont.load_default()
+            small_font = ImageFont.load_default()
+
+        sets = [
+            (setA, (249, 155, 130), 50),
+            (setB, (125, 201, 255), 115),
+            (setC, (142, 224, 149), 180),
+        ]
+        for items, color, y in sets:
+            draw.rounded_rectangle([10, y, 410, y + 45], radius=8, fill=color, outline="black", width=2)
+            display_text = " ".join(map(str, sorted(items)))
+            draw.text((20, y + 5), display_text, fill="black", font=set_font)
+
+        draw.text((280, 260), "Made by staWro", font=small_font, fill="gray")
+
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+        return buffer
+
+    def upload_image(image_buffer):
+        files = {'screenshot': ("screenshot.png", image_buffer, "image/png")}
+        try:
+            res = requests.post("https://backend.stawro.com/stawro/upload.php", files=files)
+            if res.status_code == 200 and res.json().get("status") == "success":
+                return f"https://backend.stawro.com/stawro/{res.json()['path']}"
             else:
-                print("Invalid upload response:", data)
+                print("❌ Upload failed:", res.text)
+                return None
         except Exception as e:
-            print("Upload error:", e)
-        return None
+            print("❌ Upload error:", e)
+            return None
 
-    def post_calendar_question(image_url, options, correct_answer, difficulty):
+    def post_question(correct, options, difficulty, image_url, seconds):
+        body = {
+            "question": "Find numbers that are common to all 3 sets.",
+            "answer": ", ".join(map(str, correct)),
+            "a": ", ".join(map(str, options[0])),
+            "b": ", ".join(map(str, options[1])),
+            "c": ", ".join(map(str, options[2])),
+            "d": ", ".join(map(str, options[3])),
+            "language": "English",
+            "category": "Set_Theory",
+            "difficulty": difficulty,
+            "type": "Mental Ability",
+            "image": image_url,
+            "seconds": str(seconds)
+        }
+
         try:
-            payload = {
-                "question": "Which date is marked with 'X'?",
-                "answer": correct_answer,
-                "a": options[0],
-                "b": options[1],
-                "c": options[2],
-                "d": options[3],
-                "language": "English",
-                "category": "calender",
-                "difficulty": difficulty,
-                "type": "Mental Ability",
-                "image": image_url,
-                "seconds": 10
-            }
-            response = requests.post(API_POST, json=payload, timeout=10)
-            response.raise_for_status()
-            return response.status_code == 200
+            res = requests.post("http://localhost/api/question", json=body)
+            if res.ok:
+                print(f"✅ Q Posted — {difficulty} ({seconds}s)")
+                return True
+            else:
+                print("❌ Error posting:", res.text)
+                return False
         except Exception as e:
-            print("Post error:", e)
-        return False
+            print("❌ Exception posting:", e)
+            return False
 
-    def generate_day_options(correct_day, max_day):
-        correct = int(correct_day)
-        include_none = random.random() < 0.35
-        options = set()
+    # === Main Controller ===
+    try:
+        num_questions = int(one)
+        difficulty = two.strip().title()
+        settings = get_difficulty_settings(difficulty)
+        seconds = settings["seconds"]
 
-        if include_none:
-            while len(options) < 3:
-                d = correct + random.choice([-2, -1, 1, 2])
-                if 1 <= d <= max_day and d != correct:
-                    options.add(str(d))
-            options.add("None of the above")
-            return list(options), "None of the above"
-        else:
-            options.add(str(correct))
-            while len(options) < 4:
-                d = correct + random.choice([-6, -5, -4, -3, 3, 4, 5, 6])
-                if 1 <= d <= max_day:
-                    options.add(str(d))
-            opts = list(options)
-            random.shuffle(opts)
-            return opts, str(correct)
+        for i in range(1, num_questions + 1):
+            setA, setB, setC, common = generate_sets(settings, difficulty)
+            extra_pool = list(set(setA + setB + setC) - set(common))
+            correct, options = generate_options(common, extra_pool, difficulty)
+            image_buffer = create_image(setA, setB, setC, i, difficulty)
+            image_url = upload_image(image_buffer)
 
-    def pick_hint_and_x_day(max_day, difficulty):
-        hint = random.randint(5, max_day - 5)
-        delta = {
-            "Too Easy": [-2, -1, 1, 2],
-            "Easy": [-2, -1, 1, 2],
-            "Medium": [-5, -4, -3, 3, 4, 5],
-            "Tough": list(range(-max_day + 7, -7)) + [0, 7],
-            "Too Tough": list(range(7, max_day - 7))
-        }.get(difficulty, [-2, -1, 1, 2])
-        shift = random.choice(delta)
-        x_day = max(1, min(max_day, hint + shift))
-        if x_day == hint:
-            x_day = x_day + 1 if x_day < max_day else x_day - 1
-        return x_day, hint
+            if not image_url:
+                return "No"
+            if not post_question(correct, options, difficulty, image_url, seconds):
+                return "No"
 
-    def generate_calendar_question(difficulty):
-        month = random.randint(1, 12)
-        max_day = calendar.monthrange(YEAR, month)[1]
-        x_day, hint_day = pick_hint_and_x_day(max_day, difficulty)
-        img = create_calendar_image(month, YEAR, x_day, hint_day)
-        options, correct = generate_day_options(x_day, max_day)
-        print(f"📆 Month: {month}, Max Days: {max_day}")
-        print(f"📍 X Day: {x_day}, Hint Day: {hint_day}")
-        return img, options, correct
-
-    def calender_crt_updated(total_questions, difficulty):
-        posted = 0
-        for i in range(total_questions):
-            print(f"\n📌 Creating calendar question {i+1}/{total_questions}")
-            try:
-                img, options, correct = generate_calendar_question(difficulty)
-                print("🖼️ Calendar image drawn successfully.")
-                image_url = upload_image_to_server(img)
-                if not image_url:
-                    print("🚫 Skipped due to image upload failure.")
-                    continue
-                success = post_calendar_question(image_url, options, correct, difficulty)
-                if success:
-                    print("✅ Question posted successfully.")
-                    posted += 1
-                else:
-                    print("❌ Failed to post question.")
-            except Exception as e:
-                print("❌ Error creating question:", e)
-                traceback.print_exc()
-            time.sleep(0.5)
-
-        print(f"\n📊 Finished: {posted}/{total_questions} questions posted.")
-        return posted == total_questions
-
-    # Example usage
-    # calender_crt_updated(1, "Medium")
-
+        return True
+    except Exception as e:
+        print("❌ Exception occurred:", e)
+        return "No"
 
 def clock_crt(num_questions, difficulty):
     def get_random_time(include_seconds=False):
@@ -1408,7 +1383,7 @@ def numers_crt(num_questions, difficulty):
 
 
 
-cat_grp_ary = [calender_crt, clock_crt, corect_code_crt, img_similar_crt, int_char_mix_crt, leter_count_crt, maze_crt, num_100_crt, numers_crt]
+cat_grp_ary = [seT, clock_crt, corect_code_crt, img_similar_crt, int_char_mix_crt, leter_count_crt, maze_crt, num_100_crt, numers_crt]
 
 
 # Counting_100 = num_100_crt()
@@ -1432,21 +1407,17 @@ def create_cate_and_qst(expected_group):
     for i in range(expected_group):
         random.shuffle(cat_grp_ary)
         for dif, cat in zip(tough_dif, cat_grp_ary):
-            time.sleep(2)
-            data = cat(1, dif)
-            if data is True:
-                print('\033[92m' + f' ------------------------------------------------ {i+1} Group {dif} Category {cat.__name__} -------------------------------------------' + '\033[0m')
-            else:
-                speak(f"Group {i+1} is not created")
-                print('\033[91m' + f' ------------------------------------------------ {i+1} Group {dif} Category {cat.__name__} -------------------------------------------' + '\033[0m')
-                time.sleep(5)
-                dat = cat(1, dif)
-                if dat is True:
-                    print('\033[92m' + f' ------------------------------------------------ {i+1} Group {dif} Category {cat.__name__} -------------------------------------------' + '\033[0m')
+            while True:
+                data = cat(1, dif)
+
+                if data is True:
+                    print('\033[92m' + f' ------------------------ {i+1} Group {dif} Category {cat.__name__} ------------------------' + '\033[0m')
+                    break
                 else:
-                    speak(f"Group {i+1} is not created")
-                    print('\033[91m' + f' ------------------------ {i+1} Group {dif} Category {cat.__name__} -------------------------------------------' + '\033[0m')
-                    exit()
+                    speak(f"Group {i+1} is not created, i am trying to create again")
+                    print('\033[91m' + f' ------------------------ {i+1} Group {dif} Category {cat.__name__} ------------------------' + '\033[0m')
+                    time.sleep(5)
+
 
 
         speak(f"Group {i+1} is created")
@@ -1456,6 +1427,10 @@ def create_cate_and_qst(expected_group):
         print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
         time.sleep(3)
         os.system('cls')
+    
+    print('\033[92m' + "All Groups Created Successfully" + '\033[0m')
+    speak("All Groups Created Successfully")
+    speak("You can check in your database")
 
 
 
