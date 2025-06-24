@@ -63,7 +63,7 @@ collection = db["question datas"]
 
 
 auto = ''
-expected_category = 9
+expected_category = 10
 cat_list = []
 
 
@@ -1378,6 +1378,168 @@ def numers_crt(num_questions, difficulty):
 
     return main()
 
+def omr_crt(num_questions, difficulty):
+    UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
+    POST_URL = "http://localhost/api/question"
+    ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
+
+    if difficulty not in ALLOWED_DIFFICULTIES:
+        print(f"❌ Invalid difficulty level. Allowed: {ALLOWED_DIFFICULTIES}")
+        return False
+
+    def generate_number_by_difficulty(diff):
+        if diff == "Too Easy":
+            return str(random.randint(1000, 9999)).zfill(4)
+        elif diff == "Easy":
+            return str(random.randint(100000, 999999)).zfill(6)
+        elif diff == "Medium":
+            return str(random.randint(1000000000, 9999999999))
+        elif diff == "Tough":
+            return str(random.randint(1000000000, 9999999999))
+        elif diff == "Too Tough":
+            return str(random.randint(100000000000, 999999999999))
+        else:
+            return str(random.randint(1000000000, 9999999999))
+
+    def generate_options_based_on_difficulty(correct, diff):
+        options = [correct]
+        used = {correct}
+        arr_len = len(correct)
+
+        while len(options) < 4:
+            arr = list(correct)
+
+            if diff == "Too Easy":
+                arr[arr_len // 2] = str(random.randint(0, 9))
+            elif diff == "Easy":
+                i = random.choice([arr_len // 2 - 1, arr_len // 2])
+                arr[i] = str(random.randint(0, 9))
+            elif diff == "Medium":
+                i = random.choice([4, 5]) if arr_len > 5 else arr_len // 2
+                arr[i] = str(random.randint(0, 9))
+            elif diff == "Tough":
+                i = random.randint(0, arr_len - 1)
+                arr[i] = str(random.randint(0, 9))
+            elif diff == "Too Tough":
+                indices = random.sample(range(arr_len), random.randint(2, 3))
+                for i in indices:
+                    arr[i] = str(random.randint(0, 9))
+
+            new_str = ''.join(arr)
+            if new_str not in used:
+                used.add(new_str)
+                options.append(new_str)
+
+        random.shuffle(options)
+        return options
+
+    def render_omr_image(number):
+        width, height = 400, 250
+        col_width = width // len(number)
+        img = Image.new("RGB", (width, height), "white")
+        draw = ImageDraw.Draw(img)
+
+        try:
+            font = ImageFont.truetype("arial.ttf", 12)
+        except:
+            font = ImageFont.load_default()
+
+        for idx, digit in enumerate(number):
+            x = idx * col_width + col_width // 2
+            for i in range(10):
+                y = 20 + i * 20
+                r = 8
+                fill_color = "#000000" if str(i) == digit else "#ffffff"
+                outline_color = "#000000"
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=fill_color, outline=outline_color)
+                try:
+                    w, h = font.getsize(str(i))
+                except AttributeError:
+                    bbox = font.getbbox(str(i))
+                    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+                draw.text((x - w // 2, y - h // 2), str(i), fill="black", font=font)
+
+        return img
+
+    def upload_image(img):
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+        files = {'screenshot': ('omr.png', buffer, 'image/png')}
+        try:
+            response = requests.post(UPLOAD_URL, files=files)
+            data = response.json()
+            if data.get("status") == "success":
+                print(f"✅ Uploaded: {data.get('path')}")
+                return data.get("path")
+            else:
+                print("❌ Upload failed.")
+        except Exception as e:
+            print("❌ Upload error:", e)
+        return None
+
+    def post_question(correct, options, image_path, diff):
+        option_labels = ['a', 'b', 'c', 'd']
+
+        difficulty_seconds_map = {
+            "Too Easy": "15",
+            "Easy": "20",
+            "Medium": "25",
+            "Tough": "30",
+            "Too Tough": "35"
+        }
+
+        payload = {
+            "question": "What is the number shown in the OMR sheet?",
+            "answer": correct,
+            "language": "English",
+            "category": "OMR Challenge",
+            "difficulty": diff,
+            "type": "Mental Ability",
+            "image": f"https://backend.stawro.com/stawro/{image_path}",
+            "seconds": difficulty_seconds_map.get(diff, "20")
+        }
+
+        for i, val in enumerate(options):
+            payload[option_labels[i]] = val
+
+        try:
+            res = requests.post(POST_URL, json=payload)
+            if res.ok:
+                print("✅ Question posted successfully!")
+                return True
+            else:
+                print("❌ Failed to post question.")
+                return False
+        except Exception as e:
+            print("❌ Error posting question:", e)
+            return False
+
+    # Main Loop
+    success_count = 0
+
+    for _ in range(num_questions):
+        correct = generate_number_by_difficulty(difficulty)
+        options = generate_options_based_on_difficulty(correct, difficulty)
+
+        print(f"\n🎯 Correct Number: {correct}")
+        print("🧠 Options:")
+        for opt in options:
+            print(" -", opt)
+
+        image = render_omr_image(correct)
+        path = upload_image(image)
+
+        if path:
+            if post_question(correct, options, path, difficulty):
+                success_count += 1
+
+    if success_count == num_questions:
+        print(f"\n✅ All {num_questions} questions posted successfully.")
+        return True
+    else:
+        print(f"\n⚠️ Only {success_count}/{num_questions} questions posted.")
+        return False
 
 
 
@@ -1386,7 +1548,7 @@ def numers_crt(num_questions, difficulty):
 
 
 
-cat_grp_ary = [seT, clock_crt, corect_code_crt, img_similar_crt, int_char_mix_crt, leter_count_crt, maze_crt, num_100_crt, numers_crt]
+cat_grp_ary = [seT, clock_crt, corect_code_crt, img_similar_crt, int_char_mix_crt, leter_count_crt, maze_crt, num_100_crt, numers_crt, omr_crt]
 
 
 # Counting_100 = num_100_crt()
@@ -1405,7 +1567,7 @@ def create_cate_and_qst(expected_group):
     # data = calender_crt(1, "Too Easy")
     # print(f"Status : {data}")
 
-    tough_dif = ['Too Easy', 'Too Easy', 'Easy', 'Easy', 'Medium', 'Medium', "Tough", 'Tough', 'Too Tough'] #make add another one 9 category exist
+    tough_dif = ['Too Easy', 'Too Easy', 'Easy', 'Easy', 'Medium', 'Medium', "Tough", 'Tough', 'Too Tough', 'Too Tough'] #make add another one 9 category exist
     
     for i in range(expected_group):
         random.shuffle(cat_grp_ary)
