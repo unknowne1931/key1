@@ -1,4 +1,8 @@
-##Everything ok
+import os
+import time
+from pymongo import MongoClient
+from collections import defaultdict
+from bson.objectid import ObjectId
 
 import os
 from pymongo import MongoClient
@@ -18,57 +22,41 @@ import io
 
 import pyttsx3
 
-# Setup pyttsx3 with female voice
-engine = pyttsx3.init()
-voices = engine.getProperty('voices')
-female_voice = None
-for voice in voices:
-    if "female" in voice.name.lower() or "female" in voice.id.lower():
-        female_voice = voice.id
-        break
-if female_voice:
-    engine.setProperty('voice', female_voice)
-else:
-    # fallback to first voice if female not found
-    engine.setProperty('voice', voices[1].id)
-
-# Set slower speech rate (default is usually 200)
-engine.setProperty('rate', 170)
-
-
-def speak(text):
-    engine.say(text)
-    engine.runAndWait()
-
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
-os.system('cls')
-
-# MongoDB connection
+# --- Connect to MongoDB ---
 MONGODB_URI = os.getenv(
     "MONGODB_URI",
     "mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata"
 )
 
-
-
-
-
 client = MongoClient(MONGODB_URI)
 db = client["test"]
-collection1 = db["qno_counts"]
-collection = db["question datas"]
+collection = db["qno_counts"]
+start_stop_db = db["start_stops"]
+
+# ✅ System control function
+def stop_start(new_status):
+    start_stop = start_stop_db.find_one({})
+    if not start_stop:
+        start_stop_db.insert_one({"Status": new_status})
+        print(f"\033[93m⚠️ Created Status Document with value: {new_status}\033[0m")
+        return
+
+    current_status = start_stop.get("Status", "on")
+
+    if current_status.lower() != new_status.lower():
+        start_stop_db.update_one({"_id": start_stop["_id"]}, {"$set": {"Status": new_status}})
+        if new_status != "on":
+            print(f"\033[91m⛔ Game stopped. Status changed to: {new_status}\033[0m")
+        else:
+            print("\033[92m✅ Game is running...\033[0m")
+    else:
+        print("\033[91m⛔ System is stopped. Please start it to continue.\033[0m")
 
 
-auto = ''
-expected_category = 9
-cat_list = []
+# --- Configuration ---
+expected_range = 100
 
-
-
-def seT(one, two):
+def seT(one, two, num):
     def get_difficulty_settings(level):
         settings = {
             "Too Easy":     {"common": 6, "extra": 2, "base": 50,  "set_len": 8,  "seconds": 8},
@@ -156,22 +144,22 @@ def seT(one, two):
 
     def post_question(correct, options, difficulty, image_url, seconds):
         body = {
-            "question": "Find numbers that are common to all 3 sets.",
-            "answer": ", ".join(map(str, correct)),
+            'qno': num,
+            "Questio": "Find numbers that are common to all 3 sets.",
+            "Ans": ", ".join(map(str, correct)),
             "a": ", ".join(map(str, options[0])),
             "b": ", ".join(map(str, options[1])),
             "c": ", ".join(map(str, options[2])),
             "d": ", ".join(map(str, options[3])),
-            "language": "English",
-            "category": "Set_Theory",
-            "difficulty": difficulty,
-            "type": "Mental Ability",
-            "image": image_url,
-            "seconds": str(seconds)
+            "lang": "English",
+            "sub_lang": "Set_Theory",
+            "tough": difficulty,
+            "img": image_url,
+            "seconds": str(seconds),
         }
 
         try:
-            res = requests.post("http://localhost/api/question", json=body)
+            res = requests.post("http://localhost/api/question/change", json=body)
             if res.ok:
                 print(f"✅ Q Posted — {difficulty} ({seconds}s)")
                 return True
@@ -206,7 +194,7 @@ def seT(one, two):
         print("❌ Exception occurred:", e)
         return "No"
 
-def clock_crt(num_questions, difficulty):
+def clock_crt(num_questions, difficulty, num):
     def get_random_time(include_seconds=False):
         hour = random.randint(1, 12)
         minute = random.randint(0, 59)
@@ -315,20 +303,21 @@ def clock_crt(num_questions, difficulty):
         return None
 
     def post_question(ans, options, filename, difficulty, estimated_seconds):
-        url = "http://localhost/api/question"
+        url = "http://localhost/api/question/change"
         body = {
-            "question": "Guess the time shown on the clock.",
-            "answer": ans,
+            'qno' : num,
+            "Questio": "Guess the time shown on the clock.",
+            "Ans": ans,
             "a": options[0],
             "b": options[1],
             "c": options[2],
             "d": options[3],
-            "language": "English",
-            "category": "clock",
-            "difficulty": difficulty,
-            "type": "Mental Ability",
-            "image": f"https://backend.stawro.com/stawro/uploads/{filename}",
-            "seconds": estimated_seconds
+            "lang": "English",
+            "sub_lang": "clock",
+            "tough": difficulty,
+            "img": f"https://backend.stawro.com/stawro/uploads/{filename}",
+            "seconds": estimated_seconds,
+            
         }
         try:
             response = requests.post(url, json=body)
@@ -363,10 +352,10 @@ def clock_crt(num_questions, difficulty):
     print(f"\n📊 Finished: {success_count}/{num_questions} posted successfully.")
     return success_count == num_questions
 
-def corect_code_crt(total, level):
+def corect_code_crt(total, level, num):
     # Configuration
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://localhost/api/question"
+    POST_URL = "http://localhost/api/question/change"
     CHARS = "abcdefghijklmnopqrstuvwxyz"
 
     # Difficulty Configs
@@ -445,18 +434,19 @@ def corect_code_crt(total, level):
     def post_question(correct, options, image_path, difficulty, seconds):
         image_url = f"https://backend.stawro.com/stawro/{image_path}"
         payload = {
-            "question": "Guess the correct code",
-            "answer": correct,
+            'qno': num,
+            "Questio": "Guess the correct code",
+            "Ans": correct,
             "a": options[0],
             "b": options[1],
             "c": options[2],
             "d": options[3],
-            "language": "English",
-            "category": "Code Guessing",
-            "difficulty": difficulty,
-            "type": "Mental Ability",
-            "image": image_url,
-            "seconds": str(seconds)
+            "lang": "English",
+            "sub_lang": "Code Guessing",
+            "tough": difficulty,
+            "img": image_url,
+            "seconds": str(seconds),
+            
         }
 
         try:
@@ -498,12 +488,12 @@ def corect_code_crt(total, level):
 
     return run_auto(total_questions=total, difficulty=level)
 
-def img_similar_crt(num, difficulty):
+def img_similar_crt(num, difficulty, qnoo):
     # ---- Configuration ----
     ALL_IMAGES = ["./main_ai/1.png", "./main_ai/2.png", "./main_ai/3.png", "./main_ai/4.png"]
     LABELS = ["A", "B", "C", "D"]
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question"
+    POST_ENDPOINT = "http://localhost/api/question/change"
     DIFFICULTY_SECONDS = {
         "Too Easy": 10,
         "Easy": 15,
@@ -579,18 +569,19 @@ def img_similar_crt(num, difficulty):
 
     def post_question(correct_answer, options, difficulty, image_url):
         payload = {
-            "question": "Which Images Match?",
-            "answer": correct_answer,
+            "qno": qnoo,
+            "Questio": "Which Images Match?",
+            "Ans": correct_answer,
             "a": options[0],
             "b": options[1],
             "c": options[2],
             "d": options[3],
-            "language": "English",
-            "category": "similar_images",
-            "difficulty": difficulty,
-            "type": "Mental Ability",
-            "image": image_url,
-            "seconds": DIFFICULTY_SECONDS.get(difficulty, 15)
+            "lang": "English",
+            "sub_lang": "similar_images",
+            "tough": difficulty,
+            "img": image_url,
+            "seconds": DIFFICULTY_SECONDS.get(difficulty, 15),
+
         }
         res = requests.post(POST_ENDPOINT, json=payload)
         res.raise_for_status()
@@ -628,11 +619,11 @@ def img_similar_crt(num, difficulty):
     print(f"\n📊 Done! {success_count}/{num} questions uploaded.")
     return success_count == num
 
-def int_char_mix_crt(num_questions, difficulty):    
+def int_char_mix_crt(num_questions, difficulty, num):    
 
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question"
+    POST_ENDPOINT = "http://localhost/api/question/change"
     FONT_PATH = "arial.ttf"
 
     # === UTILITY FUNCTIONS ===
@@ -694,19 +685,24 @@ def int_char_mix_crt(num_questions, difficulty):
 
     def post_question(question, answer, options, image_url, difficulty):
         payload = {
-            "question": question,
-            "answer": str(answer),
+            "qno": num,
+            "Questio": question,
+            "Ans": str(answer),
             "a": str(options[0]),
             "b": str(options[1]),
             "c": str(options[2]),
             "d": str(options[3]),
-            "language": "English",
-            "category": "Character Count",
-            "difficulty": difficulty,
-            "type": "Mental Ability",
-            "image": image_url,
-            "seconds": get_seconds_for_difficulty(difficulty)
+            "lang": "English",
+            "sub_lang": "Character Count",
+            "tough": difficulty,
+            "img": image_url,
+            "seconds": get_seconds_for_difficulty(difficulty),
+
         }
+
+
+
+
         try:
             response = requests.post(POST_ENDPOINT, json=payload, timeout=10)
             response.raise_for_status()
@@ -769,13 +765,13 @@ def int_char_mix_crt(num_questions, difficulty):
     print(f"\n📊 Done! {success_count}/{num_questions} questions uploaded.")
     return success_count == num_questions
 
-def leter_count_crt(num_questions, user_input):
+def leter_count_crt(num_questions, user_input, num):
     import random, requests, io
     from PIL import Image, ImageDraw
 
     # === CONFIGURATION ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question"
+    POST_ENDPOINT = "http://localhost/api/question/change"
     IMAGE_WIDTH = 400
     IMAGE_HEIGHT = 250
 
@@ -897,18 +893,18 @@ def leter_count_crt(num_questions, user_input):
             is_none_correct = correct_str not in options_str
 
             question_data = {
-                "question": f'How many times does the letter "{letter}" appear in the sentence?',
-                "answer": "None of the above" if is_none_correct else correct_str,
+                "qno" : num,
+                "Questio": f'How many times does the letter "{letter}" appear in the sentence?',
+                "Ans": "None of the above" if is_none_correct else correct_str,
                 "a": options_str[0] if not is_none_correct else "",
                 "b": options_str[1] if not is_none_correct else "",
                 "c": options_str[2] if not is_none_correct else "",
                 "d": "None of the above" if is_none_correct else options_str[3],
-                "language": "English",
-                "category": "leter_find",
-                "difficulty": difficulty,
-                "type": "Mental Ability",
-                "image": f"https://backend.stawro.com/stawro/{image_path}",
-                "seconds": seconds
+                "lang": "English",
+                "sub_lang": "leter_find",
+                "tough": difficulty,
+                "img": f"https://backend.stawro.com/stawro/{image_path}",
+                "seconds": seconds,
             }
 
             if post_question(question_data):
@@ -919,9 +915,9 @@ def leter_count_crt(num_questions, user_input):
 
     return success_count == num_questions
 
-def maze_crt(NUM_QUESTIONS, DIFFICULTY):
+def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://localhost/api/question"
+    POST_URL = "http://localhost/api/question/change"
 
     difficulty_config = {
         "Too Easy": {"size": 9, "seconds": 10},
@@ -1055,20 +1051,38 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
             return res.json().get("path", None)
 
         def post_question(self, img_url, answer):
+            # payload = {
+            #     "question": "Can the man reach the center of the maze?",
+            #     "answer": answer,
+            #     "a": "Yes",
+            #     "b": "No",
+            #     "c": "----",
+            #     "d": "----",
+            #     "language": "English",
+            #     "category": "Maze Logic",
+            #     "difficulty": DIFFICULTY,
+            #     "type": "Mental Ability",
+            #     "image": f"https://backend.stawro.com/stawro/{img_url}",
+            #     "seconds": str(config["seconds"])
+            # }
+
+
             payload = {
-                "question": "Can the man reach the center of the maze?",
-                "answer": answer,
+                "Questio": "Can the man reach the center of the maze?",
+                "Ans": answer,
                 "a": "Yes",
                 "b": "No",
-                "c": "----",
-                "d": "----",
-                "language": "English",
-                "category": "Maze Logic",
-                "difficulty": DIFFICULTY,
-                "type": "Mental Ability",
-                "image": f"https://backend.stawro.com/stawro/{img_url}",
-                "seconds": str(config["seconds"])
+                "c": "",
+                "d": "",
+                "qno" : str(num),
+                "lang": "English",
+                "sub_lang": "Maze Logic",
+                "tough": DIFFICULTY,
+                "img": f"https://backend.stawro.com/stawro/{img_url}",
+                "seconds": str(config["seconds"]),
             }
+
+
             res = requests.post(POST_URL, json=payload)
             if res.status_code == 200:
                 print("✅ Question posted successfully!")
@@ -1104,9 +1118,9 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
         print(f"✅ {success_count}/{NUM_QUESTIONS} questions posted successfully.")
         return False
 
-def num_100_crt(num_questions, difficulty):
+def num_100_crt(num_questions, difficulty, num):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question"
+    POST_ENDPOINT = "http://localhost/api/question/change"
     FONT_PATH = "arial.ttf"
 
     try:
@@ -1199,20 +1213,38 @@ def num_100_crt(num_questions, difficulty):
             return None
 
     def post_question(image_path, correct_answer, options):
-        payload = {
-            "question": "How many wrong numbers are present in the grid?",
-            "answer": str(correct_answer),
+        # payload = {
+        #     "question": "How many wrong numbers are present in the grid?",
+        #     "answer": str(correct_answer),
+        #     "a": str(options[0]),
+        #     "b": str(options[1]),
+        #     "c": str(options[2]),
+        #     "d": str(options[3]),
+        #     "language": "English",
+        #     "category": "Counting_100",
+        #     "difficulty": difficulty,
+        #     "type": "Mental Ability",
+        #     "image": image_path,
+        #     "seconds": "10"
+        # }
+
+        payload = {                
+            "img": image_path,
+            "Questio": "How many wrong numbers are present in the Table?",
+            "qno": num,
             "a": str(options[0]),
             "b": str(options[1]),
             "c": str(options[2]),
             "d": str(options[3]),
-            "language": "English",
-            "category": "Counting_100",
-            "difficulty": difficulty,
-            "type": "Mental Ability",
-            "image": image_path,
-            "seconds": "10"
+            "Ans": str(correct_answer),
+            "lang": "English",
+            "tough": difficulty,
+            "seconds": '20',
+            "sub_lang": "Counting_100",
+
         }
+
+
         try:
             res = requests.post(POST_ENDPOINT, json=payload)
             if res.status_code == 200:
@@ -1242,10 +1274,10 @@ def num_100_crt(num_questions, difficulty):
         print(f"Only {success_count}/{num_questions} questions were successfully posted.")
         return False
 
-def numers_crt(num_questions, difficulty):
+def numers_crt(num_questions, difficulty, num):
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question"
+    POST_ENDPOINT = "http://localhost/api/question/change"
     IMAGE_WIDTH = 400
     IMAGE_HEIGHT = 250
     FONT_SIZE = 22
@@ -1343,20 +1375,39 @@ def numers_crt(num_questions, difficulty):
                 print("❌ Failed to upload image.")
                 continue
 
-            post_data = {
-                "question": q["question"],
-                "answer": q["answer"],
+            # post_data = {
+            #     "question": q["question"],
+            #     "answer": q["answer"],
+            #     "a": q["options"][0],
+            #     "b": q["options"][1],
+            #     "c": q["options"][2],
+            #     "d": q["options"][3],
+            #     "language": "English",
+            #     "category": "Counting",
+            #     "difficulty": q["difficulty"],
+            #     "type": "Mental Ability",
+            #     "image": f"https://backend.stawro.com/stawro/{image_path}",
+            #     "seconds": str(q["seconds"])
+            # }
+
+            post_data = {                
+                "img": f'https://backend.stawro.com/stawro/{image_path}',
+                "Questio": q["question"],
+                "qno": num,
                 "a": q["options"][0],
                 "b": q["options"][1],
                 "c": q["options"][2],
                 "d": q["options"][3],
-                "language": "English",
-                "category": "Counting",
-                "difficulty": q["difficulty"],
-                "type": "Mental Ability",
-                "image": f"https://backend.stawro.com/stawro/{image_path}",
-                "seconds": str(q["seconds"])
+                "Ans": q["answer"],
+                "lang": "English",
+                "tough": q["difficulty"],
+                "seconds": str(q["seconds"]),
+                "sub_lang": "Counting",
+              
             }
+
+
+
 
             result = post_question(post_data)
             print("📥 Response from API:", result)
@@ -1381,113 +1432,126 @@ def numers_crt(num_questions, difficulty):
 
 
 
-# Test Run
-# numers_crt(3, "Tough")
+def change_qn(qno, new_toughness, cat):
+    if cat == 'Counting':
+        numers_crt(1, new_toughness, qno)
+    elif cat == 'Counting_100':
+        num_100_crt(1, new_toughness, qno)
+    elif cat == 'Maze Logic':
+        maze_crt(1, new_toughness, qno)
+    elif cat == 'leter_find':
+        leter_count_crt(1, new_toughness, qno)
+    elif cat == 'Character Count':
+        int_char_mix_crt(1, new_toughness, qno)
+    elif cat == 'similar_images':
+        img_similar_crt(1, new_toughness, qno)
+    elif cat == 'Code Guessing':
+        corect_code_crt(1, new_toughness, qno)
+    elif cat == 'clock':
+        clock_crt(1, new_toughness, qno)
+    elif cat == 'Set_Theory':
+        seT(1, new_toughness, qno)
+    else:
+        stop_start("off")
+        print(f"\033[91m⚠️ Unknown category: {cat}\033[0m")
+        return False
 
-
-
-cat_grp_ary = [seT, clock_crt, corect_code_crt, img_similar_crt, int_char_mix_crt, leter_count_crt, maze_crt, num_100_crt, numers_crt]
-
-
-# Counting_100 = num_100_crt()
-# clock = clock_crt()
-# leter_find = 
-
-
-
-
-
-
-
-
-def create_cate_and_qst(expected_group):
-    os.system('cls')
-    # data = calender_crt(1, "Too Easy")
-    # print(f"Status : {data}")
-
-    tough_dif = ['Too Easy', 'Too Easy', 'Easy', 'Easy', 'Medium', 'Medium', "Tough", 'Tough', 'Too Tough'] #make add another one 9 category exist
     
-    for i in range(expected_group):
-        random.shuffle(cat_grp_ary)
-        for dif, cat in zip(tough_dif, cat_grp_ary):
-            while True:
-                data = cat(1, dif)
+    
 
-                if data is True:
-                    print('\033[92m' + f' ------------------------ {i+1} Group {dif} Category {cat.__name__} ------------------------' + '\033[0m')
-                    break
+
+
+
+
+
+
+
+# === Main loop ===
+while True:
+    os.system("cls" if os.name == "nt" else "clear")
+
+    docs = list(collection.find().sort("qno", 1))
+    existing_qnos = set()
+    unexpected_qnos = []
+
+    print(f"\nTotal documents: {len(docs)}\n")
+
+    # ✅ Detect and show duplicate qnos
+    qno_docs_map = defaultdict(list)
+    for doc in docs:
+        qno_str = str(doc.get("qno", "0")).strip()
+        qno_docs_map[qno_str].append(doc)
+
+    duplicates = {qno: entries for qno, entries in qno_docs_map.items() if len(entries) > 1}
+
+    if duplicates:
+        print("\n\033[91m⚠️ Duplicate QNOs Detected and Will Be Cleaned:\033[0m")
+        for qno, entries in duplicates.items():
+            print(f"\033[91m - Q{qno} appears {len(entries)} times\033[0m")
+
+            # Keep only one (the first), delete others
+            to_delete = entries[1:]  # skip the first entry
+            for doc in to_delete:
+                collection.delete_one({"_id": ObjectId(doc["_id"])})
+            print(f"\033[92m   ✔️ Deleted {len(to_delete)} duplicates of Q{qno}\033[0m")
+    else:
+        print("\n\033[92m✅ No duplicate QNOs found.\033[0m")
+
+    # Step 1: Analyze in-range questions
+    for expected_qno in range(1, expected_range + 1):
+        found = False
+        for data in docs:
+            qno = int(data.get("qno", 0))
+            if qno == expected_qno:
+                found = True
+                existing_qnos.add(qno)
+                
+                yes_list = data.get("yes", [])
+                count = len(yes_list)
+                tough = data.get("tough", "Unknown")
+                cat = data.get("sub_lang", "Unknown")
+
+                if count > 2:
+                    if tough in ['Too Tough', 'Tough']:
+                        print(f'\033[91mQ{qno}: Change to TOUGH (Already tough) — Count: {count}\033[0m')
+                        change_qn(qno, tough, cat)
+                    elif tough == 'Medium':
+                        print(f'\033[93mQ{qno}: Change to MEDIUM — Count: {count}\033[0m')
+                        change_qn(qno, tough, cat)
+                    elif count > 5:
+                        print(f'\033[94mQ{qno}: Change to EASY — Count: {count}\033[0m')
+                        change_qn(qno, tough, cat)
+                    else:
+                        print(f'\033[91mQ{qno}: Answered > 2 times — Count: {count}\033[0m')
                 else:
-                    speak(f"Group {i+1} is not created, i am trying to create again")
-                    print('\033[91m' + f' ------------------------ {i+1} Group {dif} Category {cat.__name__} ------------------------' + '\033[0m')
-                    time.sleep(5)
+                    print(f'\033[92mQ{qno}: ✅ Good — Count: {count}\033[0m')
+                break
+
+        if not found:
+            # stop_start("off")
+            print(f'\033[95m⚠️ Missing Question Q{expected_qno} — Not Found in DB\033[0m')
+            data = change_qn(expected_qno, "Medium", "clock")
+            print(data)
+            print(f"\033[92m✅ Question Q{expected_qno} created successfully.\033[0m")
 
 
 
-        speak(f"Group {i+1} is created")
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        print('\033[92m' + f' ------------------------------------------------ {i+1} Group -------------------------------------------' + '\033[0m')
-        time.sleep(3)
-        os.system('cls')
-    
-    print('\033[92m' + "All Groups Created Successfully" + '\033[0m')
-    speak("All Groups Created Successfully")
-    speak("You can check in your database")
+    # Step 2: Find and delete out-of-range questions
+    for data in docs:
+        qno = int(data.get("qno", 0))
+        if qno < 1 or qno > expected_range:
+            unexpected_qnos.append(qno)
 
-
-
-speak("I need length to Create total Number of Groups")
-expected_group = int(input("Expected category Groups [ex : 2, 10, 40] : "))  #Expected category Groups
-
-if collection.count_documents({}) > 0:
-    speak("Can i Delete all Questions Data And Reupload frome first")
-    delet = input("Can i Delete all Questions Data And Reupload frome first ['Yes', 'Y', 'y'] : ") #If Yes It will Delete All "question datas" 
-    if delet == "Yes" or "y" or "Y":
-        delete_result = collection.delete_many({})
-        print(f"Deleted {delete_result.deleted_count} documents from 'question datas'.")
+    if unexpected_qnos:
+        stop_start("off")  # Stop system
+        print("\n\033[91m⚠️ Deleting Out-of-Range Question Numbers (Not 1–100):\033[0m")
+        for uq in sorted(set(unexpected_qnos)):
+            print(f"\033[91m - Deleting Q{uq}...\033[0m")
+            result = collection.delete_many({"qno": uq})
+        print("\033[92m✅ All unexpected questions deleted successfully.\033[0m")
     else:
-        print("I will not delete any data")
+        print("\n\033[92m✅ All question numbers are within the range 1–100.\033[0m")
 
-
-
-data = collection.find({})
-
-
-for index, dat in enumerate(data):
-    print('\033[92m' + '>'*index + " " + '\033[0m')
-    if dat['category'] not in cat_list:
-        cat_list.append(dat['category'])
-    os.system('cls')
-
+    # Wait before next scan
+    time.sleep(5)
     
-
-
-if len(cat_list) < expected_category:
-    print('Wee need more Category')
-    speak(f"I Have found : {len(cat_list)} Category , i Need : {expected_category - len(cat_list)} more Category")
-    print(f"\033[93mI Have found : {len(cat_list)} Category , i Need : {expected_category - len(cat_list)}\033[0m")
-    auto = input("Can I Run All Automatic 'Yes', 'yes' ,'Y', 'y' or 'No', 'N', 'n'   : ")
-    if auto == "Y" or 'Yes' or 'yes' or 'y':
-        create_cate_and_qst(expected_group)
-    else:
-        ask_per1 = input("Can i create a Questions 'yes', 'y' : ")
-        if ask_per1 == "Yes" or 'y':
-            create_cate_and_qst(expected_group)
-
-
-elif len(cat_list) == expected_category:
-    print('\033[92m' + "Everything OK" + '\033[0m')
-else:
-    print("I Found More Category")
-
-
-
-
-
-
-
-
-
-
-
