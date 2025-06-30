@@ -5,7 +5,7 @@ import io
 
 # === CONFIGURATION ===
 UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-POST_ENDPOINT = "http://localhost/api/question"
+POST_ENDPOINT = "http://192.168.31.44/api/question"
 IMAGE_WIDTH = 400
 IMAGE_HEIGHT = 250
 

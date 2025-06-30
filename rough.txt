@@ -1,1 +1,6 @@
 Maze  : Complete
+Character Count : Complete
+seT : Complete
+clock : Complete
+correct_code_crt : Complete
+img_similar : Complete

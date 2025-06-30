@@ -9,7 +9,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configuration
 UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-POST_URL = "http://localhost/api/question"
+POST_URL = "http://192.168.31.44/api/question"
 CHARS = "abcdefghijklmnopqrstuvwxyz"
 
 # Difficulty Configs

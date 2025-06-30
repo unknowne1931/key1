@@ -56,14 +56,152 @@ def stop_start(new_status):
 # --- Configuration ---
 expected_range = 200
 
+# def seT1(one, two, num):
+#     def get_difficulty_settings(level):
+#         settings = {
+#             "Too Easy":     {"common": 6, "extra": 2, "base": 50,  "set_len": 8,  "seconds": 8},
+#             "Easy":         {"common": 5, "extra": 3, "base": 60,  "set_len": 9,  "seconds": 10},
+#             "Medium":       {"common": 4, "extra": 4, "base": 80,  "set_len": 10, "seconds": 12},
+#             "Tough":        {"common": 4, "extra": 5, "base": 100, "set_len": 12, "seconds": 14},
+#             "Too Tough":    {"common": 4, "extra": 8, "base": 150, "set_len": 20, "seconds": 16}
+#         }
+#         return settings.get(level.title(), settings["Medium"])
+
+#     def generate_sets(settings, difficulty):
+#         base_numbers = list(range(1, settings["base"] + 1))
+#         common = random.sample(base_numbers, settings["common"])
+#         used = set(common)
+#         extra_pool = list(set(base_numbers) - used)
+
+#         def noisy_set():
+#             fake_commons = []
+#             if difficulty == "Too Tough":
+#                 fake_commons = random.sample(extra_pool, 2)
+#             items = common + random.sample(extra_pool, settings["extra"]) + fake_commons
+#             return sorted(random.sample(items, min(settings["set_len"], len(items))))
+
+#         return noisy_set(), noisy_set(), noisy_set(), common
+
+#     def generate_options(correct_common, extra_pool, difficulty):
+#         correct = sorted(random.sample(correct_common, min(4, len(correct_common))))
+#         options = [correct]
+
+#         attempts = 0
+#         while len(options) < 4 and attempts < 20:
+#             if difficulty == "Too Tough":
+#                 wrong = sorted(random.sample(correct_common + extra_pool, 4))
+#             else:
+#                 wrong = sorted(random.sample(correct_common, 2) + random.sample(extra_pool, 2))
+#             if wrong not in options:
+#                 options.append(wrong)
+#             attempts += 1
+
+#         random.shuffle(options)
+#         return correct, options
+
+#     def create_image(setA, setB, setC, q_no, difficulty):
+#         img = Image.new('RGB', (420, 280), color=(240, 244, 248))
+#         draw = ImageDraw.Draw(img)
+
+#         try:
+#             title_font = ImageFont.truetype("arialbd.ttf", 18)
+#             set_font = ImageFont.truetype("arial.ttf", 14)
+#             small_font = ImageFont.truetype("arial.ttf", 12)
+#         except:
+#             title_font = ImageFont.load_default()
+#             set_font = ImageFont.load_default()
+#             small_font = ImageFont.load_default()
+
+#         sets = [
+#             (setA, (249, 155, 130), 50),
+#             (setB, (125, 201, 255), 115),
+#             (setC, (142, 224, 149), 180),
+#         ]
+#         for items, color, y in sets:
+#             draw.rounded_rectangle([10, y, 410, y + 45], radius=8, fill=color, outline="black", width=2)
+#             display_text = " ".join(map(str, sorted(items)))
+#             draw.text((20, y + 5), display_text, fill="black", font=set_font)
+
+#         draw.text((280, 260), "Made by staWro", font=small_font, fill="gray")
+
+#         buffer = BytesIO()
+#         img.save(buffer, format="PNG")
+#         buffer.seek(0)
+#         return buffer
+
+#     def upload_image(image_buffer):
+#         files = {'screenshot': ("screenshot.png", image_buffer, "image/png")}
+#         try:
+#             res = requests.post("https://backend.stawro.com/stawro/upload.php", files=files)
+#             if res.status_code == 200 and res.json().get("status") == "success":
+#                 return f"https://backend.stawro.com/stawro/{res.json()['path']}"
+#             else:
+#                 print("❌ Upload failed:", res.text)
+#                 return None
+#         except Exception as e:
+#             print("❌ Upload error:", e)
+#             return None
+
+#     def post_question(correct, options, difficulty, image_url, seconds):
+#         body = {
+#             'qno': num,
+#             "Questio": "Find numbers that are common to all 3 sets.",
+#             "Ans": ", ".join(map(str, correct)),
+#             "a": ", ".join(map(str, options[0])),
+#             "b": ", ".join(map(str, options[1])),
+#             "c": ", ".join(map(str, options[2])),
+#             "d": ", ".join(map(str, options[3])),
+#             "lang": "English",
+#             "sub_lang": "Set_Theory",
+#             "tough": difficulty,
+#             "img": image_url,
+#             "seconds": str(seconds),
+#         }
+
+#         try:
+#             res = requests.post("http://192.168.31.44/api/question/change", json=body)
+#             if res.ok:
+#                 print(f"✅ Q Posted — {difficulty} ({seconds}s)")
+#                 return True
+#             else:
+#                 print("❌ Error posting:", res.text)
+#                 return False
+#         except Exception as e:
+#             print("❌ Exception posting:", e)
+#             return False
+
+#     # === Main Controller ===
+#     try:
+#         num_questions = int(one)
+#         difficulty = two.strip().title()
+#         settings = get_difficulty_settings(difficulty)
+#         seconds = settings["seconds"]
+
+#         for i in range(1, num_questions + 1):
+#             setA, setB, setC, common = generate_sets(settings, difficulty)
+#             extra_pool = list(set(setA + setB + setC) - set(common))
+#             correct, options = generate_options(common, extra_pool, difficulty)
+#             image_buffer = create_image(setA, setB, setC, i, difficulty)
+#             image_url = upload_image(image_buffer)
+
+#             if not image_url:
+#                 return "No"
+#             if not post_question(correct, options, difficulty, image_url, seconds):
+#                 return "No"
+
+#         return True
+#     except Exception as e:
+#         print("❌ Exception occurred:", e)
+#         return "No"
+
 def seT(one, two, num):
     def get_difficulty_settings(level):
         settings = {
-            "Too Easy":     {"common": 6, "extra": 2, "base": 50,  "set_len": 8,  "seconds": 8},
-            "Easy":         {"common": 5, "extra": 3, "base": 60,  "set_len": 9,  "seconds": 10},
-            "Medium":       {"common": 4, "extra": 4, "base": 80,  "set_len": 10, "seconds": 12},
-            "Tough":        {"common": 4, "extra": 5, "base": 100, "set_len": 12, "seconds": 14},
-            "Too Tough":    {"common": 4, "extra": 8, "base": 150, "set_len": 20, "seconds": 16}
+            "Too Easy": {"common": 6, "extra": 2, "base": 20, "set_len": 5, "seconds": 18},
+            "Easy": {"common": 5, "extra": 3, "base": 20, "set_len": 7, "seconds": 28},
+            "Medium": {"common": 4, "extra": 4, "base": 20, "set_len": 9, "seconds": 35},
+            "Tough": {"common": 4, "extra": 5, "base": 20, "set_len": 12, "seconds": 45},
+            "Too Tough": {"common": 4, "extra": 8, "base": 20, "set_len": 15, "seconds": 50}
         }
         return settings.get(level.title(), settings["Medium"])
 
@@ -73,31 +211,57 @@ def seT(one, two, num):
         used = set(common)
         extra_pool = list(set(base_numbers) - used)
 
-        def noisy_set():
-            fake_commons = []
-            if difficulty == "Too Tough":
-                fake_commons = random.sample(extra_pool, 2)
-            items = common + random.sample(extra_pool, settings["extra"]) + fake_commons
-            return sorted(random.sample(items, min(settings["set_len"], len(items))))
+        def build_set():
+            fake_commons = random.sample(extra_pool, 2) if difficulty == "Too Tough" else []
+            extras = random.sample(extra_pool, settings["extra"])
+            items = list(set(common + extras + fake_commons))  # ensure uniqueness
+            random.shuffle(items)
+            return items[:settings["set_len"]]
 
-        return noisy_set(), noisy_set(), noisy_set(), common
+        # Force common to be in all 3 sets
+        def enforce_common(s):
+            # Make sure all common elements are in the set
+            missing = [x for x in common if x not in s]
+            if missing:
+                s = s[:max(0, settings["set_len"] - len(missing))] + missing
+            return sorted(s)
+
+        setA = enforce_common(build_set())
+        setB = enforce_common(build_set())
+        setC = enforce_common(build_set())
+
+        return setA, setB, setC, common
+
 
     def generate_options(correct_common, extra_pool, difficulty):
         correct = sorted(random.sample(correct_common, min(4, len(correct_common))))
+        correct_len = len(correct)
         options = [correct]
-
         attempts = 0
-        while len(options) < 4 and attempts < 20:
+
+        while len(options) < 4 and attempts < 50:
+            # Try to generate a wrong option with same length as correct
             if difficulty == "Too Tough":
-                wrong = sorted(random.sample(correct_common + extra_pool, 4))
+                pool = correct_common + extra_pool
             else:
-                wrong = sorted(random.sample(correct_common, 2) + random.sample(extra_pool, 2))
-            if wrong not in options:
+                pool = correct_common * 2 + extra_pool * 2
+
+            wrong = sorted(random.sample(pool, min(correct_len, len(pool))))
+            if wrong not in options and wrong != correct:
                 options.append(wrong)
             attempts += 1
 
         random.shuffle(options)
+        
+        # ✅ For debugging: print each option
+        for idx, opt in enumerate(options):
+            label = chr(65 + idx)  # A, B, C, D
+            print(f"  {label}: {opt}")
+
         return correct, options
+
+
+
 
     def create_image(setA, setB, setC, q_no, difficulty):
         img = Image.new('RGB', (420, 280), color=(240, 244, 248))
@@ -108,9 +272,7 @@ def seT(one, two, num):
             set_font = ImageFont.truetype("arial.ttf", 14)
             small_font = ImageFont.truetype("arial.ttf", 12)
         except:
-            title_font = ImageFont.load_default()
-            set_font = ImageFont.load_default()
-            small_font = ImageFont.load_default()
+            title_font = set_font = small_font = ImageFont.load_default()
 
         sets = [
             (setA, (249, 155, 130), 50),
@@ -159,7 +321,7 @@ def seT(one, two, num):
         }
 
         try:
-            res = requests.post("http://localhost/api/question/change", json=body)
+            res = requests.post("http://192.168.31.44/api/question/change", json=body)
             if res.ok:
                 print(f"✅ Q Posted — {difficulty} ({seconds}s)")
                 return True
@@ -170,7 +332,7 @@ def seT(one, two, num):
             print("❌ Exception posting:", e)
             return False
 
-    # === Main Controller ===
+    # === Main Execution ===
     try:
         num_questions = int(one)
         difficulty = two.strip().title()
@@ -178,18 +340,30 @@ def seT(one, two, num):
         seconds = settings["seconds"]
 
         for i in range(1, num_questions + 1):
-            setA, setB, setC, common = generate_sets(settings, difficulty)
-            extra_pool = list(set(setA + setB + setC) - set(common))
-            correct, options = generate_options(common, extra_pool, difficulty)
-            image_buffer = create_image(setA, setB, setC, i, difficulty)
-            image_url = upload_image(image_buffer)
+            attempts = 0
+            while attempts < 10:
+                setA, setB, setC, _ = generate_sets(settings, difficulty)
+                true_common = sorted(list(set(setA) & set(setB) & set(setC)))
 
-            if not image_url:
+                if len(true_common) >= 1:
+                    extra_pool = list(set(setA + setB + setC) - set(true_common))
+                    correct, options = generate_options(true_common, extra_pool, difficulty)
+                    image_buffer = create_image(setA, setB, setC, i, difficulty)
+                    image_url = upload_image(image_buffer)
+
+                    if not image_url or not post_question(correct, options, difficulty, image_url, seconds):
+                        return "No"
+                    break  # break the while loop if successful
+                else:
+                    attempts += 1
+                    print(f"⚠️ Retry {attempts}: No valid common found.")
+            else:
+                print("❌ Failed to generate valid question after multiple attempts.")
                 return "No"
-            if not post_question(correct, options, difficulty, image_url, seconds):
-                return "No"
+
 
         return True
+
     except Exception as e:
         print("❌ Exception occurred:", e)
         return "No"
@@ -303,7 +477,7 @@ def clock_crt(num_questions, difficulty, num):
         return None
 
     def post_question(ans, options, filename, difficulty, estimated_seconds):
-        url = "http://localhost/api/question/change"
+        url = "http://192.168.31.44/api/question/change"
         body = {
             'qno' : num,
             "Questio": "Guess the time shown on the clock.",
@@ -316,7 +490,7 @@ def clock_crt(num_questions, difficulty, num):
             "sub_lang": "clock",
             "tough": difficulty,
             "img": f"https://backend.stawro.com/stawro/uploads/{filename}",
-            "seconds": estimated_seconds,
+            "seconds": "16",
             
         }
         try:
@@ -355,16 +529,16 @@ def clock_crt(num_questions, difficulty, num):
 def corect_code_crt(total, level, num):
     # Configuration
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://localhost/api/question/change"
+    POST_URL = "http://192.168.31.44/api/question/change"
     CHARS = "abcdefghijklmnopqrstuvwxyz"
 
     # Difficulty Configs
     DIFFICULTY_SETTINGS = {
-        "Too Easy": {"code_length": 6, "seconds": 10},
-        "Easy": {"code_length": 8, "seconds": 12},
-        "Medium": {"code_length": 12, "seconds": 16},
-        "Tough": {"code_length": 16, "seconds": 18},
-        "Too Tough": {"code_length": 20, "seconds": 18}
+        "Too Easy": {"code_length": 6, "seconds": 8},
+        "Easy": {"code_length": 8, "seconds": 10},
+        "Medium": {"code_length": 12, "seconds": 14},
+        "Tough": {"code_length": 16, "seconds": 16},
+        "Too Tough": {"code_length": 20, "seconds": 24}
     }
 
     def get_random_code(length):
@@ -493,13 +667,13 @@ def img_similar_crt(num, difficulty, qnoo):
     ALL_IMAGES = ["./main_ai/1.png", "./main_ai/2.png", "./main_ai/3.png", "./main_ai/4.png"]
     LABELS = ["A", "B", "C", "D"]
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question/change"
+    POST_ENDPOINT = "http://192.168.31.44/api/question/change"
     DIFFICULTY_SECONDS = {
-        "Too Easy": 10,
-        "Easy": 15,
-        "Medium": 20,
+        "Too Easy": 25,
+        "Easy": 25,
+        "Medium": 25,
         "Tough": 25,
-        "Too Tough": 30
+        "Too Tough": 25
     }
     FINAL_WIDTH = 400
     FINAL_HEIGHT = 250
@@ -623,7 +797,7 @@ def int_char_mix_crt(num_questions, difficulty, num):
 
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question/change"
+    POST_ENDPOINT = "http://192.168.31.44/api/question/change"
     FONT_PATH = "arial.ttf"
 
     # === UTILITY FUNCTIONS ===
@@ -771,7 +945,7 @@ def leter_count_crt(num_questions, user_input, num):
 
     # === CONFIGURATION ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question/change"
+    POST_ENDPOINT = "http://192.168.31.44/api/question/change"
     IMAGE_WIDTH = 400
     IMAGE_HEIGHT = 250
 
@@ -917,7 +1091,7 @@ def leter_count_crt(num_questions, user_input, num):
 
 # def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
 #     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-#     POST_URL = "http://localhost/api/question/change"
+#     POST_URL = "http://192.168.31.44/api/question/change"
 
 #     difficulty_config = {
 #         "Too Easy": {"size": 9, "seconds": 10},
@@ -1121,7 +1295,7 @@ def leter_count_crt(num_questions, user_input, num):
 
 def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://localhost/api/question"
+    POST_URL = "http://192.168.31.44/api/question/change"
 
     difficulty_config = {
         "Too Easy": {"size": 9, "seconds": 10},
@@ -1341,7 +1515,7 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
 
 def num_100_crt(num_questions, difficulty, num):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question/change"
+    POST_ENDPOINT = "http://192.168.31.44/api/question/change"
     FONT_PATH = "arial.ttf"
 
     try:
@@ -1498,7 +1672,7 @@ def num_100_crt(num_questions, difficulty, num):
 def numers_crt(num_questions, difficulty, num):
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://localhost/api/question/change"
+    POST_ENDPOINT = "http://192.168.31.44/api/question/change"
     IMAGE_WIDTH = 400
     IMAGE_HEIGHT = 250
     FONT_SIZE = 22
@@ -1652,7 +1826,7 @@ def numers_crt(num_questions, difficulty, num):
 
 def OMR_crt(num_questions, difficulty, num):
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://localhost/api/question/change"
+    POST_URL = "http://192.168.31.44/api/question/change"
     ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
 
     if difficulty not in ALLOWED_DIFFICULTIES:

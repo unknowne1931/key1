@@ -8,7 +8,7 @@ from io import BytesIO
 
 # Config
 API_UPLOAD = "https://backend.stawro.com/stawro/upload.php"
-API_POST = "http://localhost/api/question"
+API_POST = "http://192.168.31.44/api/question"
 FONT_PATH = "arial.ttf"  # Ensure this font exists or change path
 YEAR = 2024
 

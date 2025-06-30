@@ -8,7 +8,7 @@ import pyttsx3
 
 # Configuration
 SERVER_SCRIPT = "server.js"
-SERVER_URL = "http://localhost/get/questions/from/qno/English"
+SERVER_URL = "http://192.168.31.44/get/questions/from/qno/English"
 MAX_RETRIES = 5
 RETRY_DELAY = 2  # seconds
 

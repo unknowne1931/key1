@@ -5,7 +5,7 @@ import io
 
 # === CONFIG ===
 UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-POST_ENDPOINT = "http://localhost/api/question"
+POST_ENDPOINT = "http://192.168.31.44/api/question"
 FONT_PATH = "arial.ttf"  # You can change this if needed
 
 # === Ask for user inputs ===

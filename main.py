@@ -4,7 +4,7 @@ import sys
 import time
 
 def fetch_languages():
-    url = "http://localhost/all/lang/data"
+    url = "http://192.168.31.44/all/lang/data"
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -66,7 +66,7 @@ def fetch_data():
             print(f"I Found these Languages : {languages}" )
             i = input("Select any One Language : ")
             print("")
-            url = f"http://localhost/all/{i}"
+            url = f"http://192.168.31.44/all/{i}"
 
             if i in languages:
                 try:
@@ -88,7 +88,7 @@ def fetch_data():
             print(f"I Found these Languages : {languages}" )
             i = input("Select any One Language : ")
             print("")
-            url = f"http://localhost/get/questions/from/qno/{i}"
+            url = f"http://192.168.31.44/get/questions/from/qno/{i}"
 
             if i in languages:
                 try:
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
 #     def fetch_languages(self):
 #         """Fetch and display available languages from API"""
-#         url = "http://localhost/all/lang/data"
+#         url = "http://192.168.31.44/all/lang/data"
 #         try:
 #             response = requests.get(url)
 #             if response.status_code == 200:
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 #         i = input("Select any One Language: ").strip()
 
 #         if i in self.languages:
-#             url = f"http://localhost/all/{i}"
+#             url = f"http://192.168.31.44/all/{i}"
 #             try:
 #                 response = requests.get(url)
 #                 self.loading_spinner()
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 #         i = input("Select any One Language: ").strip()
 
 #         if i in self.languages:
-#             url = f"http://localhost/get/questions/from/qno/{i}"
+#             url = f"http://192.168.31.44/get/questions/from/qno/{i}"
 #             try:
 #                 response = requests.get(url)
 #                 self.loading_spinner()

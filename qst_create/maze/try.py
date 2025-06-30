@@ -5,7 +5,7 @@ import requests
 
 # === CONFIG ===
 UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-POST_URL = "http://localhost/api/question"
+POST_URL = "http://192.168.31.44/api/question"
 
 DIFFICULTY = input("Enter difficulty (Too Easy, Easy, Medium, Tough, Too Tough): ")
 NUM_QUESTIONS = int(input("How many questions to generate? "))

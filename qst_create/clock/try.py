@@ -119,7 +119,7 @@ def upload_image(image):
         return None
 
 def post_question(ans, options, filename, difficulty="Tough", estimated_seconds=10):
-    url = "http://localhost/api/question"
+    url = "http://192.168.31.44/api/question"
     body = {
         "question": "Guess the time shown on the clock.",
         "answer": ans,

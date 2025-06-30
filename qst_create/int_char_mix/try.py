@@ -5,7 +5,7 @@
 
 # # === CONFIG ===
 # UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-# POST_ENDPOINT = "http://localhost/api/question"
+# POST_ENDPOINT = "http://192.168.31.44/api/question"
 # FONT_PATH = "arial.ttf"  # Change this to a valid font file if needed
 
 # # === FUNCTIONS ===
@@ -146,7 +146,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # === CONFIG ===
 UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-POST_ENDPOINT = "http://localhost/api/question"
+POST_ENDPOINT = "http://192.168.31.44/api/question"
 FONT_PATH = "arial.ttf"  # You can change this if needed
 
 # === UTILITY FUNCTIONS ===
