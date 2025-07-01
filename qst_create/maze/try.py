@@ -171,7 +171,7 @@ class MazeGame:
 
     def post_question(self, img_url, answer):
         payload = {
-            "question": "Can the man reach the center of the maze?",
+            "question": "Can the blue reach the red center in the maze?",
             "answer": answer,
             "a": "Yes",
             "b": "No",

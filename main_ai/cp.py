@@ -597,7 +597,7 @@ def img_similar_crt(num ,difficulty):
     # ---- Post question ----
     def post_question(correct_answer, options, difficulty, image_url):
         payload = {
-            "question": "Which Images Match?",
+            "question": "Which Pictures Are the Same?",
             "answer": correct_answer,
             "a": options[0],
             "b": options[1],
@@ -892,7 +892,8 @@ def leter_count_crt(num_questions, user_input):
 
         # Normalize and default fallback
         difficulty = "Medium"
-        for key in difficulty_map:
+        for key in sorted(difficulty_map.keys(), key=lambda k: -len(k)):
+
             if key.lower() in user_input.lower():
                 difficulty = key
                 break
@@ -1111,7 +1112,7 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
 
         def post_question(self, img_url, answer):
             payload = {
-                "question": "Can the man reach the center of the maze?",
+                "question": "Can the blue reach the red center in the maze?",
                 "answer": answer,
                 "a": "Yes",
                 "b": "No",
@@ -1259,7 +1260,7 @@ def num_100_crt(num_questions, difficulty):
 
     def post_question(image_path, correct_answer, options):
         payload = {
-            "question": "How many wrong numbers are present in the grid?",
+            "question": "How many wrong numbers are in the table?",
             "answer": str(correct_answer),
             "a": str(options[0]),
             "b": str(options[1]),

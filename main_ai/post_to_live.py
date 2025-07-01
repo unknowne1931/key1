@@ -77,7 +77,7 @@ for i, dat in enumerate(data_qns,1):
         "no" : ['']
     })
 
-    print(f'Qno {i} Posted ok ')
+    print(f"\033[92mQno {i} Posted ok\033[0m")
 
 
 stop_start('on')

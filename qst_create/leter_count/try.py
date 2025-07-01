@@ -100,7 +100,8 @@ def run_letter_quiz():
 
     # Normalize and default fallback
     difficulty = "Medium"
-    for key in difficulty_map:
+    for key in sorted(difficulty_map.keys(), key=lambda k: -len(k)):
+
         if key.lower() in user_input.lower():
             difficulty = key
             break

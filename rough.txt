@@ -4,3 +4,7 @@ seT : Complete
 clock : Complete
 correct_code_crt : Complete
 img_similar : Complete
+leter_count_crt : Complete
+num_100_crt = Complete
+counting = Not Complete
+omr = Not Complete

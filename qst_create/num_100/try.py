@@ -106,7 +106,7 @@ def upload_image(image):
 
 def post_question(image_path, correct_answer, options):
     payload = {
-        "question": "How many wrong numbers are present in the grid?",
+        "question": "How many wrong numbers are in the table?",
         "answer": str(correct_answer),
         "a": str(options[0]),
         "b": str(options[1]),

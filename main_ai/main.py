@@ -55,7 +55,6 @@ MONGODB_URI = os.getenv(
 
 
 
-
 client = MongoClient(MONGODB_URI)
 db = client["test"]
 collection1 = db["qno_counts"]
@@ -70,11 +69,11 @@ cat_list = []
 def seT(one, two):
     def get_difficulty_settings(level):
         settings = {
-            "Too Easy": {"common": 6, "extra": 2, "base": 20, "set_len": 5, "seconds": 18},
-            "Easy": {"common": 5, "extra": 3, "base": 20, "set_len": 7, "seconds": 28},
-            "Medium": {"common": 4, "extra": 4, "base": 20, "set_len": 9, "seconds": 35},
-            "Tough": {"common": 4, "extra": 5, "base": 20, "set_len": 12, "seconds": 45},
-            "Too Tough": {"common": 4, "extra": 8, "base": 20, "set_len": 15, "seconds": 50}
+            "Too Easy": {"common": 6, "extra": 2, "base": 20, "set_len": 5, "seconds": 19},
+            "Easy": {"common": 5, "extra": 3, "base": 20, "set_len": 7, "seconds": 29},
+            "Medium": {"common": 4, "extra": 4, "base": 20, "set_len": 9, "seconds": 36},
+            "Tough": {"common": 4, "extra": 5, "base": 20, "set_len": 12, "seconds": 46},
+            "Too Tough": {"common": 4, "extra": 8, "base": 20, "set_len": 15, "seconds": 51}
         }
         return settings.get(level.title(), settings["Medium"])
 
@@ -363,7 +362,7 @@ def clock_crt(num_questions, difficulty):
             "difficulty": difficulty,
             "type": "Mental Ability",
             "image": f"https://backend.stawro.com/stawro/uploads/{filename}",
-            "seconds": "16",
+            "seconds": "17",
         }
         try:
             response = requests.post(url, json=body)
@@ -406,11 +405,11 @@ def corect_code_crt(total, level):
 
     # Difficulty Configs
     DIFFICULTY_SETTINGS = {
-        "Too Easy": {"code_length": 6, "seconds": 8},
-        "Easy": {"code_length": 8, "seconds": 10},
-        "Medium": {"code_length": 12, "seconds": 14},
-        "Tough": {"code_length": 16, "seconds": 16},
-        "Too Tough": {"code_length": 20, "seconds": 24}
+        "Too Easy": {"code_length": 6, "seconds": 9},
+        "Easy": {"code_length": 8, "seconds": 11},
+        "Medium": {"code_length": 12, "seconds": 15},
+        "Tough": {"code_length": 16, "seconds": 17},
+        "Too Tough": {"code_length": 20, "seconds": 25}
     }
 
     def get_random_code(length):
@@ -614,7 +613,7 @@ def img_similar_crt(num, difficulty):
 
     def post_question(correct_answer, options, difficulty, image_url):
         payload = {
-            "question": "Which Images Match?",
+            "question": "Which Pictures Are the Same?",
             "answer": correct_answer,
             "a": options[0],
             "b": options[1],
@@ -683,11 +682,11 @@ def int_char_mix_crt(num_questions, difficulty):
 
     def get_seconds_for_difficulty(difficulty):
         return {
-            "Too Easy": 11,
-            "Easy": 12,
-            "Medium": 13,
-            "Tough": 15,
-            "Too Tough": 21
+            "Too Easy": 12,
+            "Easy": 13,
+            "Medium": 14,
+            "Tough": 16,
+            "Too Tough": 22
         }.get(difficulty, 10)
 
     def generate_image(text):
@@ -773,7 +772,7 @@ def int_char_mix_crt(num_questions, difficulty):
         random_string = get_random_string(length)
         mode = random.choice(["letters", "numbers"])
         correct_answer = count_letters(random_string) if mode == "letters" else count_numbers(random_string)
-        question_text = f"How many {mode} are in the string above?"
+        question_text = f"How many {mode} are in the text below?"
 
         # Generate options
         options = {correct_answer}
@@ -823,11 +822,11 @@ def leter_count_crt(num_questions, user_input):
     ]
 
     difficulty_map = {
-        "Too Easy": {"length_range": (3, 5), "seconds": 16},
-        "Easy": {"length_range": (4, 6), "seconds": 18},
-        "Medium": {"length_range": (5, 8), "seconds": 20},
-        "Tough": {"length_range": (6, 10), "seconds": 22},
-        "Too Tough": {"length_range": (8, 100), "seconds": 24}
+        "Too Easy": {"length_range": (3, 5), "seconds": 12},
+        "Easy": {"length_range": (4, 6), "seconds": 13},
+        "Medium": {"length_range": (5, 8), "seconds": 14},
+        "Tough": {"length_range": (6, 10), "seconds": 15},
+        "Too Tough": {"length_range": (8, 100), "seconds": 19}
     }
 
     def filter_words_by_length(min_len, max_len):
@@ -900,7 +899,8 @@ def leter_count_crt(num_questions, user_input):
 
     # === MAIN EXECUTION ===
     difficulty = "Medium"
-    for key in difficulty_map:
+    for key in sorted(difficulty_map.keys(), key=lambda k: -len(k)):
+
         if key.lower() in user_input.lower():
             difficulty = key
             break
@@ -954,202 +954,16 @@ def leter_count_crt(num_questions, user_input):
 
     return success_count == num_questions
 
-# def maze_crt(NUM_QUESTIONS, DIFFICULTY):
-#     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-#     POST_URL = "http://192.168.31.44/api/question"
-
-#     difficulty_config = {
-#         "Too Easy": {"size": 9, "seconds": 10},
-#         "Easy": {"size": 13, "seconds": 15},
-#         "Medium": {"size": 17, "seconds": 20},
-#         "Tough": {"size": 21, "seconds": 25},
-#         "Too Tough": {"size": 27, "seconds": 30}
-#     }
-
-#     config = difficulty_config.get(DIFFICULTY, difficulty_config["Medium"])
-#     CELL_SIZE = 25
-#     COLS = ROWS = config["size"]
-#     GOAL_POS = (COLS // 2, ROWS // 2)
-
-#     class Cell:
-#         def __init__(self, x, y):
-#             self.x = x
-#             self.y = y
-#             self.walls = [True, True, True, True]
-#             self.visited = False
-
-#     class MazeGame:
-#         def __init__(self, force_no=False):
-#             self.grid = [Cell(x, y) for y in range(ROWS) for x in range(COLS)]
-#             self.generate_maze()
-#             self.force_no = force_no
-#             if self.force_no:
-#                 self.block_path_somewhere()
-#             self.player = (0, 0)
-
-#         def index(self, x, y):
-#             return y * COLS + x if 0 <= x < COLS and 0 <= y < ROWS else -1
-
-#         def generate_maze(self):
-#             stack = []
-#             start = self.grid[0]
-#             start.visited = True
-#             stack.append(start)
-
-#             while stack:
-#                 current = stack[-1]
-#                 neighbors = []
-#                 directions = [(0, -1, 0, 2), (1, 0, 1, 3), (0, 1, 2, 0), (-1, 0, 3, 1)]
-#                 for dx, dy, wall, opp in directions:
-#                     nx, ny = current.x + dx, current.y + dy
-#                     idx = self.index(nx, ny)
-#                     if idx != -1 and not self.grid[idx].visited:
-#                         neighbors.append((self.grid[idx], wall, opp))
-#                 if neighbors:
-#                     neighbor, wall, opp_wall = random.choice(neighbors)
-#                     current.walls[wall] = False
-#                     neighbor.walls[opp_wall] = False
-#                     neighbor.visited = True
-#                     stack.append(neighbor)
-#                 else:
-#                     stack.pop()
-
-#         def block_path_somewhere(self):
-#             visited = set()
-#             queue = [(0, 0, [])]
-#             while queue:
-#                 x, y, path = queue.pop(0)
-#                 visited.add((x, y))
-#                 cell = self.grid[self.index(x, y)]
-#                 if (x, y) == GOAL_POS:
-#                     if len(path) > 4:
-#                         bx, by = path[len(path) // 2]
-#                         for dx, dy, wall, opp_wall in [(0, -1, 0, 2), (1, 0, 1, 3), (0, 1, 2, 0), (-1, 0, 3, 1)]:
-#                             nx, ny = bx + dx, by + dy
-#                             if (nx, ny) in path:
-#                                 idx1 = self.index(bx, by)
-#                                 idx2 = self.index(nx, ny)
-#                                 if idx1 != -1 and idx2 != -1:
-#                                     self.grid[idx1].walls[wall] = True
-#                                     self.grid[idx2].walls[opp_wall] = True
-#                                     return
-#                     return
-#                 for dx, dy, wall in [(0, -1, 0), (1, 0, 1), (0, 1, 2), (-1, 0, 3)]:
-#                     nx, ny = x + dx, y + dy
-#                     idx = self.index(nx, ny)
-#                     if idx != -1 and not cell.walls[wall] and (nx, ny) not in visited:
-#                         queue.append((nx, ny, path + [(x, y)]))
-
-#         def draw_maze(self):
-#             maze_width = CELL_SIZE * COLS
-#             maze_height = CELL_SIZE * ROWS
-#             padding = 20
-#             img = Image.new("RGB", (maze_width + 2 * padding, maze_height + 2 * padding), "white")
-#             draw = ImageDraw.Draw(img)
-
-#             for cell in self.grid:
-#                 x = cell.x * CELL_SIZE + padding
-#                 y = cell.y * CELL_SIZE + padding
-#                 if cell.walls[0]: draw.line([x, y, x + CELL_SIZE, y], fill="black", width=2)
-#                 if cell.walls[1]: draw.line([x + CELL_SIZE, y, x + CELL_SIZE, y + CELL_SIZE], fill="black", width=2)
-#                 if cell.walls[2]: draw.line([x + CELL_SIZE, y + CELL_SIZE, x, y + CELL_SIZE], fill="black", width=2)
-#                 if cell.walls[3]: draw.line([x, y + CELL_SIZE, x, y], fill="black", width=2)
-
-#             px, py = self.player
-#             draw.ellipse([px * CELL_SIZE + 6 + padding, py * CELL_SIZE + 6 + padding,
-#                           px * CELL_SIZE + CELL_SIZE - 6 + padding, py * CELL_SIZE + CELL_SIZE - 6 + padding], fill="blue")
-#             gx, gy = GOAL_POS
-#             draw.rectangle([gx * CELL_SIZE + 4 + padding, gy * CELL_SIZE + 4 + padding,
-#                             gx * CELL_SIZE + CELL_SIZE - 4 + padding, gy * CELL_SIZE + CELL_SIZE - 4 + padding], fill="red")
-
-#             img = img.resize((400, 250))
-#             return img
-
-#         def is_goal_reachable(self):
-#             visited = set()
-#             queue = [self.player]
-#             while queue:
-#                 x, y = queue.pop(0)
-#                 if (x, y) == GOAL_POS:
-#                     return True
-#                 visited.add((x, y))
-#                 cell = self.grid[self.index(x, y)]
-#                 for dx, dy, wall in [(0, -1, 0), (1, 0, 1), (0, 1, 2), (-1, 0, 3)]:
-#                     nx, ny = x + dx, y + dy
-#                     idx = self.index(nx, ny)
-#                     if idx != -1 and not cell.walls[wall] and (nx, ny) not in visited:
-#                         queue.append((nx, ny))
-#             return False
-
-#         def upload_image(self, img):
-#             buf = io.BytesIO()
-#             img.save(buf, format="PNG")
-#             buf.seek(0)
-#             files = {"screenshot": ("maze.png", buf, "image/png")}
-#             res = requests.post(UPLOAD_URL, files=files)
-#             return res.json().get("path", None)
-
-#         def post_question(self, img_url, answer):
-#             payload = {
-#                 "question": "Can the man reach the center of the maze?",
-#                 "answer": answer,
-#                 "a": "Yes",
-#                 "b": "No",
-#                 "c": "----",
-#                 "d": "----",
-#                 "language": "English",
-#                 "category": "Maze Logic",
-#                 "difficulty": DIFFICULTY,
-#                 "type": "Mental Ability",
-#                 "image": f"https://backend.stawro.com/stawro/{img_url}",
-#                 "seconds": str(config["seconds"])
-#             }
-#             res = requests.post(POST_URL, json=payload)
-#             if res.status_code == 200:
-#                 print("✅ Question posted successfully!")
-#                 return True
-#             else:
-#                 print("❌ Failed to post question:", res.text)
-#                 return False
-
-#         def run(self):
-#             img = self.draw_maze()
-#             reachable = self.is_goal_reachable()
-#             answer = "No" if self.force_no else ("Yes" if reachable else "No")
-#             img_url = self.upload_image(img)
-#             if img_url:
-#                 print(f"✅ Image uploaded! Answer: {answer}")
-#                 return self.post_question(img_url, answer)
-#             else:
-#                 print("❌ Image upload failed.")
-#                 return False
-
-#     # === MAIN LOOP ===
-#     success_count = 0
-#     for i in range(NUM_QUESTIONS):
-#         print(f"\n--- Generating Maze {i + 1}/{NUM_QUESTIONS} ---")
-#         make_unsolvable = random.random() < 0.5
-#         game = MazeGame(force_no=make_unsolvable)
-#         if game.run():
-#             success_count += 1
-
-#     if success_count == NUM_QUESTIONS:
-#         return True
-#     else:
-#         print(f"✅ {success_count}/{NUM_QUESTIONS} questions posted successfully.")
-#         return False
-
-
 def maze_crt(NUM_QUESTIONS, DIFFICULTY):
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
     POST_URL = "http://192.168.31.44/api/question"
 
     difficulty_config = {
-        "Too Easy": {"size": 9, "seconds": 10},
-        "Easy": {"size": 13, "seconds": 10},
-        "Medium": {"size": 17, "seconds": 17},
-        "Tough": {"size": 21, "seconds": 18},
-        "Too Tough": {"size": 27, "seconds": 26}
+        "Too Easy": {"size": 9, "seconds": 11},
+        "Easy": {"size": 13, "seconds": 11},
+        "Medium": {"size": 17, "seconds": 18},
+        "Tough": {"size": 21, "seconds": 19},
+        "Too Tough": {"size": 27, "seconds": 27}
     }
 
     config = difficulty_config.get(DIFFICULTY, difficulty_config["Medium"])
@@ -1290,7 +1104,7 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
 
         def post_question(self, img_url, answer):
             payload = {
-                "question": "Can the man reach the center of the maze?",
+                "question": "Can the blue reach the red center in the maze?",
                 "answer": answer,
                 "a": "Yes",
                 "b": "No",
@@ -1336,7 +1150,6 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
     else:
         print(f"✅ {success_count}/{NUM_QUESTIONS} questions posted successfully.")
         return False
-
 
 def num_100_crt(num_questions, difficulty):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
@@ -1431,10 +1244,19 @@ def num_100_crt(num_questions, difficulty):
         except Exception as e:
             print(f"❌ Upload error: {e}")
             return None
+        
+    sec = ""
+
+    if difficulty in ['Too Easy', "Easy", "Medium"]:
+        sec = "55" 
+    else:
+        sec = "60"
+        
+    
 
     def post_question(image_path, correct_answer, options):
         payload = {
-            "question": "How many wrong numbers are present in the grid?",
+            "question": "How many wrong numbers are in the table?",
             "answer": str(correct_answer),
             "a": str(options[0]),
             "b": str(options[1]),
@@ -1445,7 +1267,7 @@ def num_100_crt(num_questions, difficulty):
             "difficulty": difficulty,
             "type": "Mental Ability",
             "image": image_path,
-            "seconds": "10"
+            "seconds": sec
         }
         try:
             res = requests.post(POST_ENDPOINT, json=payload)
@@ -1487,11 +1309,11 @@ def numers_crt(num_questions, difficulty):
     IMAGE_PADDING = 15  # Added padding around edges
 
     DIFFICULTY_CONFIG = {
-        "Too Easy": {"option_range": (0, 5), "seconds": 15, "total_numbers": 20},
-        "Easy": {"option_range": (0, 6), "seconds": 12, "total_numbers": 30},
-        "Medium": {"option_range": (0, 8), "seconds": 10, "total_numbers": 40},
-        "Tough": {"option_range": (0, 10), "seconds": 8, "total_numbers": 50},
-        "Too Tough": {"option_range": (0, 12), "seconds": 7, "total_numbers": 60},
+        "Too Easy": {"option_range": (0, 5), "seconds": 9, "total_numbers": 16},
+        "Easy": {"option_range": (0, 6), "seconds": 12, "total_numbers": 24},
+        "Medium": {"option_range": (0, 8), "seconds": 13, "total_numbers": 27},
+        "Tough": {"option_range": (0, 10), "seconds": 16, "total_numbers": 31},
+        "Too Tough": {"option_range": (0, 12), "seconds": 21, "total_numbers": 41},
     }
 
     def generate_question(difficulty):
@@ -1506,8 +1328,12 @@ def numers_crt(num_questions, difficulty):
                 numbers.append(target_number)
                 count += 1
             else:
-                rand_num = random.randint(10, 99)
-                numbers.append(rand_num)
+                # ensure we don't accidentally add the target number
+                while True:
+                    rand_num = random.randint(10, 99)
+                    if rand_num != target_number:
+                        numbers.append(rand_num)
+                        break
 
         include_none = random.random() < 0.4
         options = random.sample(range(config["option_range"][0], config["option_range"][1]), 4)
@@ -1539,15 +1365,34 @@ def numers_crt(num_questions, difficulty):
         draw = ImageDraw.Draw(img)
         font = ImageFont.load_default() if FONT_PATH is None else ImageFont.truetype(FONT_PATH, FONT_SIZE)
 
-        for _ in range(len(data["numbers"])):
-            x = random.randint(IMAGE_PADDING, IMAGE_WIDTH - IMAGE_PADDING - 30)
-            y = random.randint(IMAGE_PADDING, IMAGE_HEIGHT - IMAGE_PADDING - 30)
-            num = random.choice(data["numbers"])
-            draw.text((x, y), str(num), fill=(
-                random.randint(100, 255),
-                random.randint(100, 255),
-                random.randint(100, 255)
-            ), font=font)
+        placed_boxes = []
+        max_attempts = 1000  # Avoid infinite loops
+
+        def is_overlapping(x, y, w, h):
+            for px, py, pw, ph in placed_boxes:
+                if (x < px + pw and x + w > px and y < py + ph and y + h > py):
+                    return True
+            return False
+
+        for num in data["numbers"]:
+            attempts = 0
+            while attempts < max_attempts:
+                text = str(num)
+                bbox = draw.textbbox((0, 0), text, font=font)
+                text_w = bbox[2] - bbox[0]
+                text_h = bbox[3] - bbox[1]
+                x = random.randint(IMAGE_PADDING, IMAGE_WIDTH - IMAGE_PADDING - text_w)
+                y = random.randint(IMAGE_PADDING, IMAGE_HEIGHT - IMAGE_PADDING - text_h)
+
+                if not is_overlapping(x, y, text_w, text_h):
+                    draw.text((x, y), text, fill=(
+                        random.randint(100, 255),
+                        random.randint(100, 255),
+                        random.randint(100, 255)
+                    ), font=font)
+                    placed_boxes.append((x, y, text_w, text_h))
+                    break
+                attempts += 1
 
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
@@ -1716,11 +1561,11 @@ def omr_crt(num_questions, difficulty):
         option_labels = ['a', 'b', 'c', 'd']
 
         difficulty_seconds_map = {
-            "Too Easy": "15",
-            "Easy": "20",
-            "Medium": "25",
-            "Tough": "30",
-            "Too Tough": "35"
+            "Too Easy": "8",
+            "Easy": "14",
+            "Medium": "30",
+            "Tough": "35",
+            "Too Tough": "42"
         }
 
         payload = {
@@ -1801,7 +1646,8 @@ def create_cate_and_qst(expected_group):
     # data = calender_crt(1, "Too Easy")
     # print(f"Status : {data}")
 
-    tough_dif = ['Too Easy', 'Too Easy', 'Easy', 'Easy', 'Medium', 'Medium', "Tough", 'Tough', 'Too Tough', 'Too Tough'] #make add another one 9 category exist
+    # tough_dif = ['Too Easy', 'Too Easy', 'Easy', 'Easy', 'Medium', 'Medium', "Tough", 'Tough', 'Too Tough', 'Too Tough'] #make add another one 9 category exist
+    tough_dif = ['Too Easy', 'Too Easy', 'Easy', 'Easy', 'Easy', 'Easy' ,'Medium', "Medium", "Tough", "Too Tough"]
     
     for i in range(expected_group):
         random.shuffle(cat_grp_ary)

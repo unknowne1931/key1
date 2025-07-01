@@ -1,142 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Load Countdown</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 50px;
+    }
 
-<html><head><title>All‑Market Trade & News Dashboard</title>
-<style>
-body{font-family:Arial;padding:20px;background:#f4f4f4}
-h2{text-align:center}
-.table{width:95%;margin:auto;border-collapse:collapse}
-.table th,td{border:1px solid #ddd;padding:8px;text-align:center}
-.table th{background:#333;color:#fff}
-td:nth-child(3),td:nth-child(4),td:nth-child(5){white-space:nowrap}
-</style></head><body>
-<h2>📊 Trade Risk & News Sentiment</h2><table border="1" class="dataframe table">
-  <thead>
-    <tr style="text-align: right;">
-      <th>Category</th>
-      <th>Symbol</th>
-      <th>Entry</th>
-      <th>Target</th>
-      <th>Stop</th>
-      <th>R/R</th>
-      <th>NewsSent</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Large Cap</td>
-      <td>RELIANCE.NS</td>
-      <td>1466.20</td>
-      <td>1612.82</td>
-      <td>1319.58</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Large Cap</td>
-      <td>TCS.NS</td>
-      <td>3435.70</td>
-      <td>3779.27</td>
-      <td>3092.13</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Large Cap</td>
-      <td>INFY.NS</td>
-      <td>1622.90</td>
-      <td>1785.19</td>
-      <td>1460.61</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Small Cap</td>
-      <td>JAMNAAUTO.NS</td>
-      <td>89.29</td>
-      <td>98.22</td>
-      <td>80.36</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Small Cap</td>
-      <td>NILKAMAL.NS</td>
-      <td>1676.80</td>
-      <td>1844.48</td>
-      <td>1509.12</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>New‑Age Stocks</td>
-      <td>ZOMATO.NS</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>New‑Age Stocks</td>
-      <td>PAYTM.NS</td>
-      <td>871.20</td>
-      <td>958.32</td>
-      <td>784.08</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Commodities</td>
-      <td>CL=F</td>
-      <td>74.04</td>
-      <td>81.44</td>
-      <td>66.64</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Commodities</td>
-      <td>GC=F</td>
-      <td>3384.40</td>
-      <td>3722.84</td>
-      <td>3045.96</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Forex</td>
-      <td>INR=X</td>
-      <td>86.56</td>
-      <td>95.21</td>
-      <td>77.90</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Forex</td>
-      <td>EURINR=X</td>
-      <td>99.73</td>
-      <td>109.70</td>
-      <td>89.76</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Crypto</td>
-      <td>BTC-USD</td>
-      <td>102662.39</td>
-      <td>112928.63</td>
-      <td>92396.15</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-    <tr>
-      <td>Crypto</td>
-      <td>ETH-USD</td>
-      <td>2283.47</td>
-      <td>2511.82</td>
-      <td>2055.12</td>
-      <td>1.0</td>
-      <td>Neutral</td>
-    </tr>
-  </tbody>
-</table></body></html>
+    .container {
+      display: inline-block;
+      position: relative;
+    }
+
+    #quizImage {
+      width: 400px;
+      height: 250px;
+      border: 2px solid #333;
+    }
+
+    #countdown {
+      margin-top: 20px;
+      font-size: 24px;
+      color: #333;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img id="quizImage" src="data:image/jpeg;base64,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" alt="Quiz Image">
+    <div id="countdown">Loading image...</div>
+  </div>
+
+  <script>
+    const image = document.getElementById('quizImage');
+    const countdownEl = document.getElementById('countdown');
+    let countdown = 10; // seconds
+
+    image.onload = () => {
+      countdownEl.textContent = `Time: ${countdown}s`;
+
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(interval);
+          countdownEl.textContent = "⏰ Time's up!";
+        } else {
+          countdownEl.textContent = `Time: ${countdown}s`;
+        }
+      }, 1000);
+    };
+  </script>
+</body>
+</html>

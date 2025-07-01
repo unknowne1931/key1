@@ -95,7 +95,7 @@ def upload_image(image_buffer):
 # ---- Post question ----
 def post_question(correct_answer, options, difficulty, image_url):
     payload = {
-        "question": "Which Images Match?",
+        "question": "Which Pictures Are the Same?",
         "answer": correct_answer,
         "a": options[0],
         "b": options[1],
