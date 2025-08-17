@@ -1,3 +1,5 @@
+# ki1931ck
+
 import os
 import time
 from pymongo import MongoClient
@@ -89,499 +91,134 @@ def stop_start(new_status):
 # --- Configuration ---
 expected_range = 300
 
-# def seT1(one, two, num):
-#     def get_difficulty_settings(level):
-#         settings = {
-#             "Too Easy":     {"common": 6, "extra": 2, "base": 50,  "set_len": 8,  "seconds": 8},
-#             "Easy":         {"common": 5, "extra": 3, "base": 60,  "set_len": 9,  "seconds": 10},
-#             "Medium":       {"common": 4, "extra": 4, "base": 80,  "set_len": 10, "seconds": 12},
-#             "Tough":        {"common": 4, "extra": 5, "base": 100, "set_len": 12, "seconds": 14},
-#             "Too Tough":    {"common": 4, "extra": 8, "base": 150, "set_len": 20, "seconds": 16}
-#         }
-#         return settings.get(level.title(), settings["Medium"])
-
-#     def generate_sets(settings, difficulty):
-#         base_numbers = list(range(1, settings["base"] + 1))
-#         common = random.sample(base_numbers, settings["common"])
-#         used = set(common)
-#         extra_pool = list(set(base_numbers) - used)
-
-#         def noisy_set():
-#             fake_commons = []
-#             if difficulty == "Too Tough":
-#                 fake_commons = random.sample(extra_pool, 2)
-#             items = common + random.sample(extra_pool, settings["extra"]) + fake_commons
-#             return sorted(random.sample(items, min(settings["set_len"], len(items))))
-
-#         return noisy_set(), noisy_set(), noisy_set(), common
-
-#     def generate_options(correct_common, extra_pool, difficulty):
-#         correct = sorted(random.sample(correct_common, min(4, len(correct_common))))
-#         options = [correct]
-
-#         attempts = 0
-#         while len(options) < 4 and attempts < 20:
-#             if difficulty == "Too Tough":
-#                 wrong = sorted(random.sample(correct_common + extra_pool, 4))
-#             else:
-#                 wrong = sorted(random.sample(correct_common, 2) + random.sample(extra_pool, 2))
-#             if wrong not in options:
-#                 options.append(wrong)
-#             attempts += 1
-
-#         random.shuffle(options)
-#         return correct, options
-
-#     def create_image(setA, setB, setC, q_no, difficulty):
-#         img = Image.new('RGB', (420, 280), color=(240, 244, 248))
-#         draw = ImageDraw.Draw(img)
-
-#         try:
-#             title_font = ImageFont.truetype("arialbd.ttf", 18)
-#             set_font = ImageFont.truetype("arial.ttf", 14)
-#             small_font = ImageFont.truetype("arial.ttf", 12)
-#         except:
-#             title_font = ImageFont.load_default()
-#             set_font = ImageFont.load_default()
-#             small_font = ImageFont.load_default()
-
-#         sets = [
-#             (setA, (249, 155, 130), 50),
-#             (setB, (125, 201, 255), 115),
-#             (setC, (142, 224, 149), 180),
-#         ]
-#         for items, color, y in sets:
-#             draw.rounded_rectangle([10, y, 410, y + 45], radius=8, fill=color, outline="black", width=2)
-#             display_text = " ".join(map(str, sorted(items)))
-#             draw.text((20, y + 5), display_text, fill="black", font=set_font)
-
-#         draw.text((280, 260), "Made by staWro", font=small_font, fill="gray")
-
-#         buffer = BytesIO()
-#         img.save(buffer, format="PNG")
-#         buffer.seek(0)
-#         return buffer
-
-#     def upload_image(image_buffer):
-#         files = {'screenshot': ("screenshot.png", image_buffer, "image/png")}
-#         try:
-#             res = requests.post("https://backend.stawro.com/stawro/upload.php", files=files)
-#             if res.status_code == 200 and res.json().get("status") == "success":
-#                 return f"https://backend.stawro.com/stawro/{res.json()['path']}"
-#             else:
-#                 print("❌ Upload failed:", res.text)
-#                 return None
-#         except Exception as e:
-#             print("❌ Upload error:", e)
-#             return None
-
-#     def post_question(correct, options, difficulty, image_url, seconds):
-#         body = {
-#             'qno': num,
-#             "Questio": "Find numbers that are common to all 3 sets.",
-#             "Ans": ", ".join(map(str, correct)),
-#             "a": ", ".join(map(str, options[0])),
-#             "b": ", ".join(map(str, options[1])),
-#             "c": ", ".join(map(str, options[2])),
-#             "d": ", ".join(map(str, options[3])),
-#             "lang": "English",
-#             "sub_lang": "Set_Theory",
-#             "tough": difficulty,
-#             "img": image_url,
-#             "seconds": str(seconds),
-#         }
-
-#         try:
-#             res = requests.post("http://localhost:81/api/question/change", json=body)
-#             if res.ok:
-#                 print(f"✅ Q Posted — {difficulty} ({seconds}s)")
-#                 return True
-#             else:
-#                 print("❌ Error posting:", res.text)
-#                 return False
-#         except Exception as e:
-#             print("❌ Exception posting:", e)
-#             return False
-
-#     # === Main Controller ===
-#     try:
-#         num_questions = int(one)
-#         difficulty = two.strip().title()
-#         settings = get_difficulty_settings(difficulty)
-#         seconds = settings["seconds"]
-
-#         for i in range(1, num_questions + 1):
-#             setA, setB, setC, common = generate_sets(settings, difficulty)
-#             extra_pool = list(set(setA + setB + setC) - set(common))
-#             correct, options = generate_options(common, extra_pool, difficulty)
-#             image_buffer = create_image(setA, setB, setC, i, difficulty)
-#             image_url = upload_image(image_buffer)
-
-#             if not image_url:
-#                 return "No"
-#             if not post_question(correct, options, difficulty, image_url, seconds):
-#                 return "No"
-
-#         return True
-#     except Exception as e:
-#         print("❌ Exception occurred:", e)
-#         return "No"
-
-# def seT(one, two, num):
-#     def get_difficulty_settings(level):
-#         settings = {
-#             "Too Easy": {"common": 6, "extra": 2, "base": 20, "set_len": 5, "seconds": 18},
-#             "Easy": {"common": 5, "extra": 3, "base": 20, "set_len": 7, "seconds": 28},
-#             "Medium": {"common": 4, "extra": 4, "base": 20, "set_len": 9, "seconds": 35},
-#             "Tough": {"common": 4, "extra": 5, "base": 20, "set_len": 12, "seconds": 45},
-#             "Too Tough": {"common": 4, "extra": 8, "base": 20, "set_len": 15, "seconds": 50}
-#         }
-#         return settings.get(level.title(), settings["Medium"])
-
-#     def generate_sets(settings, difficulty):
-#         base_numbers = list(range(1, settings["base"] + 1))
-#         common = random.sample(base_numbers, settings["common"])
-#         used = set(common)
-#         extra_pool = list(set(base_numbers) - used)
-
-#         def build_set():
-#             fake_commons = random.sample(extra_pool, 2) if difficulty == "Too Tough" else []
-#             extras = random.sample(extra_pool, settings["extra"])
-#             items = list(set(common + extras + fake_commons))  # ensure uniqueness
-#             random.shuffle(items)
-#             return items[:settings["set_len"]]
-
-#         # Force common to be in all 3 sets
-#         def enforce_common(s):
-#             # Make sure all common elements are in the set
-#             missing = [x for x in common if x not in s]
-#             if missing:
-#                 s = s[:max(0, settings["set_len"] - len(missing))] + missing
-#             return sorted(s)
-
-#         setA = enforce_common(build_set())
-#         setB = enforce_common(build_set())
-#         setC = enforce_common(build_set())
-
-#         return setA, setB, setC, common
 
 
-#     def generate_options(correct_common, extra_pool, difficulty):
-#         correct = sorted(random.sample(correct_common, min(4, len(correct_common))))
-#         correct_len = len(correct)
-#         options = [correct]
-#         attempts = 0
-
-#         while len(options) < 4 and attempts < 50:
-#             # Try to generate a wrong option with same length as correct
-#             if difficulty == "Too Tough":
-#                 pool = correct_common + extra_pool
-#             else:
-#                 pool = correct_common * 2 + extra_pool * 2
-
-#             wrong = sorted(random.sample(pool, min(correct_len, len(pool))))
-#             if wrong not in options and wrong != correct:
-#                 options.append(wrong)
-#             attempts += 1
-
-#         random.shuffle(options)
-        
-#         # ✅ For debugging: print each option
-#         for idx, opt in enumerate(options):
-#             label = chr(65 + idx)  # A, B, C, D
-#             print(f"  {label}: {opt}")
-
-#         return correct, options
-
-
-
-
-#     def create_image(setA, setB, setC, q_no, difficulty):
-#         img = Image.new('RGB', (420, 280), color=(240, 244, 248))
-#         draw = ImageDraw.Draw(img)
-
-#         try:
-#             title_font = ImageFont.truetype("arialbd.ttf", 18)
-#             set_font = ImageFont.truetype("arial.ttf", 14)
-#             small_font = ImageFont.truetype("arial.ttf", 12)
-#         except:
-#             title_font = set_font = small_font = ImageFont.load_default()
-
-#         sets = [
-#             (setA, (249, 155, 130), 50),
-#             (setB, (125, 201, 255), 115),
-#             (setC, (142, 224, 149), 180),
-#         ]
-#         for items, color, y in sets:
-#             draw.rounded_rectangle([10, y, 410, y + 45], radius=8, fill=color, outline="black", width=2)
-#             display_text = " ".join(map(str, sorted(items)))
-#             draw.text((20, y + 5), display_text, fill="black", font=set_font)
-
-#         draw.text((280, 260), "Made by staWro", font=small_font, fill="gray")
-
-#         buffer = BytesIO()
-#         img.save(buffer, format="PNG")
-#         buffer.seek(0)
-#         return buffer
-
-#     def upload_image(image_buffer):
-#         files = {'screenshot': ("screenshot.png", image_buffer, "image/png")}
-#         try:
-#             res = requests.post("https://backend.stawro.com/stawro/upload.php", files=files)
-#             if res.status_code == 200 and res.json().get("status") == "success":
-#                 return f"https://backend.stawro.com/stawro/{res.json()['path']}"
-#             else:
-#                 print("❌ Upload failed:", res.text)
-#                 return None
-#         except Exception as e:
-#             print("❌ Upload error:", e)
-#             return None
-
-#     def post_question(correct, options, difficulty, image_url, seconds):
-#         body = {
-#             'qno': num,
-#             "Questio": "Find numbers that are common to all 3 sets.",
-#             "Ans": ", ".join(map(str, correct)),
-#             "a": ", ".join(map(str, options[0])),
-#             "b": ", ".join(map(str, options[1])),
-#             "c": ", ".join(map(str, options[2])),
-#             "d": ", ".join(map(str, options[3])),
-#             "lang": "English",
-#             "sub_lang": "Set_Theory",
-#             "tough": difficulty,
-#             "img": image_url,
-#             "seconds": str(seconds),
-#         }
-
-#         try:
-#             res = requests.post("http://localhost:81/api/question/change", json=body)
-#             if res.ok:
-#                 print(f"✅ Q Posted — {difficulty} ({seconds}s)")
-#                 return True
-#             else:
-#                 print("❌ Error posting:", res.text)
-#                 return False
-#         except Exception as e:
-#             print("❌ Exception posting:", e)
-#             return False
-
-#     # === Main Execution ===
-#     try:
-#         num_questions = int(one)
-#         difficulty = two.strip().title()
-#         settings = get_difficulty_settings(difficulty)
-#         seconds = settings["seconds"]
-
-#         for i in range(1, num_questions + 1):
-#             attempts = 0
-#             while attempts < 10:
-#                 setA, setB, setC, _ = generate_sets(settings, difficulty)
-#                 true_common = sorted(list(set(setA) & set(setB) & set(setC)))
-
-#                 if len(true_common) >= 1:
-#                     extra_pool = list(set(setA + setB + setC) - set(true_common))
-#                     correct, options = generate_options(true_common, extra_pool, difficulty)
-#                     image_buffer = create_image(setA, setB, setC, i, difficulty)
-#                     image_url = upload_image(image_buffer)
-
-#                     if not image_url or not post_question(correct, options, difficulty, image_url, seconds):
-#                         return "No"
-#                     break  # break the while loop if successful
-#                 else:
-#                     attempts += 1
-#                     print(f"⚠️ Retry {attempts}: No valid common found.")
-#             else:
-#                 print("❌ Failed to generate valid question after multiple attempts.")
-#                 return "No"
-
-
-#         return True
-
-#     except Exception as e:
-#         print("❌ Exception occurred:", e)
-#         return "No"
-
-#done
-def generate_pattern_mcq_post(num, difficulty, qno):
+def generate_pattern_mcq_post(num, difficulty, qno_start):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
     POST_ENDPOINT = "http://localhost:81/api/question/change"
 
-    get_sec = sec_data.find_one({"category": "Pattern_Lock", "Tough": difficulty}) or {}
+    ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
 
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Pattern_Lock", "Tough": difficulty}) or {}
 
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
 
+    final_sec = 0
 
-    def get_grid_size(difficulty):
-        if difficulty == "Too Tough":
-            return 5
-        elif difficulty == "Tough":
-            return 4
-        else:
-            return 3
-        # return 5 if difficulty == "Too Tough" else 4 if difficulty == "Tough" else 3
+    DIFFICULTY_RANGES = {
+        "Too Easy": (10, 20),
+        "Easy": (20, 40),
+        "Medium": (40, 80),
+        "Tough": (80, 150),
+        "Too Tough": (150, 300)
+    }
 
-    def get_path_length(difficulty):
-        return {
-            "Too Easy": random.randint(2, 5),
-            "Easy": random.randint(4, 7),
-            "Medium": random.randint(7, 9),
-            "Tough": random.randint(10, 13),
-            "Too Tough": random.randint(14, 17)
-        }.get(difficulty, 7)
+    DIFFICULTY_SECONDS = {
+        "Too Easy": "25",
+        "Easy": "25",
+        "Medium": "15",
+        "Tough": "19",
+        "Too Tough": "30"
+    }
 
-    def get_time(difficulty):
-        return "19" if difficulty in ["Tough", "Too Tough"] else "15"
+    def generate_options(correct, difficulty):
+        spread = {
+            "Too Easy": 2,
+            "Easy": 2,
+            "Medium": 4,
+            "Tough": 6,
+            "Too Tough": 6
+        }[difficulty]
+        options = {correct}
+        while len(options) < 4:
+            val = max(0, correct + random.randint(-spread, spread))
+            options.add(val)
+        return random.sample(list(options), 4)
 
-    for qno in range(1, num + 1):
+    if difficulty not in ALLOWED_DIFFICULTIES:
+        raise ValueError(f"Invalid difficulty. Choose from: {ALLOWED_DIFFICULTIES}")
+
+    min_gap, max_gap = DIFFICULTY_RANGES[difficulty]
+    seconds = DIFFICULTY_SECONDS[difficulty]
+
+    all_success = True  # Track overall success
+
+    for i in range(num):
+        qno = str(int(qno_start) + i)
         try:
-            grid_size = get_grid_size(difficulty)
-            total_dots = grid_size * grid_size
-            points = [(x, y) for y in range(grid_size) for x in range(grid_size)]
-            used = set()
+            target_digit = random.randint(0, 9)
+            start = random.randint(1, 100)
+            end = start + random.randint(min_gap, max_gap)
+            correct_answer = sum(1 for n in range(start, end + 1) if str(target_digit) in str(n))
+            options = generate_options(correct_answer, difficulty)
 
-            path_len = get_path_length(difficulty)
-
-            def get_inline_passes(p1, p2):
-                x1, y1 = points[p1]
-                x2, y2 = points[p2]
-                if abs(x1 - x2) % 2 == 0 and abs(y1 - y2) % 2 == 0:
-                    mid_x, mid_y = (x1 + x2) // 2, (y1 + y2) // 2
-                    try:
-                        return points.index((mid_x, mid_y))
-                    except:
-                        return None
-                return None
-
-            indices = list(range(total_dots))
-            random.shuffle(indices)
-            path = [indices.pop()]
-            used.add(path[0])
-
-            while len(path) < path_len and indices:
-                random.shuffle(indices)
-                for next_dot in indices:
-                    if next_dot in used:
-                        continue
-                    pass_through = get_inline_passes(path[-1], next_dot)
-                    if pass_through and pass_through not in used:
-                        path.append(pass_through)
-                        used.add(pass_through)
-                    path.append(next_dot)
-                    used.add(next_dot)
-                    indices.remove(next_dot)
-                    break
-
-            # Generate image
-            width, height = 400, 250
-            padding_x, padding_y = 50, 30
-            spacing_x = (width - 2 * padding_x) // (grid_size - 1)
-            spacing_y = (height - 2 * padding_y) // (grid_size - 1)
-            radius = 8 if grid_size >= 5 else 10
-
-            def get_coords(index):
-                x, y = points[index]
-                return (padding_x + x * spacing_x, padding_y + y * spacing_y)
-
-            img = Image.new("RGB", (width, height), "#000000")
+            img = Image.new("RGB", (400, 250), "white")
             draw = ImageDraw.Draw(img)
+            try:
+                font = ImageFont.truetype("arial.ttf", 120)
+            except:
+                font = ImageFont.load_default()
 
-            for i in range(total_dots):
-                x, y = get_coords(i)
-                fill_color = "#FFFFFF" if i in path else None
-                draw.ellipse((x - radius, y - radius, x + radius, y + radius),
-                             fill=fill_color, outline="#A9A9A9", width=2)
+            bbox = draw.textbbox((0,0), str(target_digit), font=font)
+            text_w = bbox[2] - bbox[0]
+            text_h = bbox[3] - bbox[1]
+            x = (400 - text_w) / 2
+            y = (250 - text_h) / 2
+            draw.text((x, y), str(target_digit), fill=(0,0,0), font=font)
 
-            for i in range(len(path) - 1):
-                x1, y1 = get_coords(path[i])
-                x2, y2 = get_coords(path[i + 1])
-                draw.line((x1, y1, x2, y2), fill="#FFFFFF", width=4)
-
-            # Save image
             buffer = io.BytesIO()
             img.save(buffer, format="WEBP")
             buffer.seek(0)
 
             # Upload image
-            files = {'screenshot': ('pattern.webp', buffer, 'image/webp')}
+            files = {'screenshot': ('digit_count.webp', buffer, 'image/webp')}
             res = requests.post(UPLOAD_ENDPOINT, files=files)
             data = res.json()
             if not (data.get("status") and data.get("path")):
                 print(f"❌ Upload failed for Q{qno}")
+                all_success = False
                 continue
             img_url = f"https://backend.stawro.com/stawro/{data['path']}"
 
-            # Generate options
-            correct = len(path)
-            options = {correct}
-            while len(options) < 4:
-                fake = random.randint(max(3, correct - 3), min(total_dots, correct + 3))
-                options.add(fake)
-            options = list(options)
-            random.shuffle(options)
-
-            # ans = ''
-
-            # if options[0] == correct:
-            #     ans = 'a'
-            # elif options[1] == correct: 
-            #     ans = 'b'
-            # elif options[2] == correct:
-            #     ans = 'c'
-            # else:
-            #     ans = 'd'
-
-            # sec = ""
-
-            if final_sec:
-                if difficulty in ['Tough', "Too Tough"]:
-                    sec = str(final_sec)
-                elif difficulty in ['Medium', "Easy"]:
-                    sec = str(final_sec)
-                else:
-                    sec = "25"
-            else:
-                if difficulty in ['Tough', 'Too Tough']:
-                    sec = "12"
-                else:
-                    sec = "10"
-
-
-
-            # Prepare payload for new API format
             payload = {
                 "qno": qno,
-                "Questio": "How many dots are connected in the pattern?",
-                "Ans": str(correct),
+                "Question": f"How many numbers from {start} to {end} (inclusive) contain the digit '{target_digit}'?",
+                "Ans": str(correct_answer),
                 "a": str(options[0]),
                 "b": str(options[1]),
                 "c": str(options[2]),
                 "d": str(options[3]),
                 "lang": "English",
-                "sub_lang": "Pattern_Lock",
+                "sub_lang" : "Pattern_Lock",
+                # "sub_lang": "Digit_Count",
                 "tough": difficulty,
                 "img": img_url,
-                "seconds" : sec
-                # "seconds": str(final_sec) if final_sec else ("10" if difficulty in ["Tough", "Too Tough"] else "12")
+                "seconds": str(final_sec) if final_sec else seconds
             }
-
 
             post_res = requests.post(POST_ENDPOINT, json=payload)
             if post_res.status_code == 200:
-                print(f"✅ Q{qno} posted ({difficulty})")
+                print(f"✅ Q{qno} posted ({difficulty}) → Ans: {correct_answer}")
             else:
                 print(f"❌ Q{qno} failed: {post_res.status_code}")
+                all_success = False
 
         except Exception as e:
             print(f"❌ Exception in Q{qno}: {e}")
+            all_success = False
+
+    return all_success  # True if all posted, False if any failed
+
 
 # done
 def clock_crt(num_questions, difficulty, num):
-    get_sec = sec_data.find_one({"category": "clock", "Tough": difficulty}) or {}
+    # get_sec = sec_data.find_one({"category": "clock", "Tough": difficulty}) or {}
 
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     def get_random_time(include_seconds=False):
         hour = random.randint(1, 12)
@@ -757,9 +394,11 @@ def corect_code_crt(total, level, num):
     POST_URL = "http://localhost:81/api/question/change"
     CHARS = "abcdefghijklmnopqrstuvwxyz"
 
-    get_sec = sec_data.find_one({"category": "Code Guessing", "Tough": level}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Code Guessing", "Tough": level}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     DIFFICULTY_SETTINGS = {
         "Too Easy": {"code_length": 6, "seconds": 11},
@@ -913,9 +552,11 @@ def img_similar_crt(num, difficulty, qnoo):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
     POST_ENDPOINT = "http://localhost:81/api/question/change"
 
-    get_sec = sec_data.find_one({"category": "similar_images", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "similar_images", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     FINAL_WIDTH = 400
     FINAL_HEIGHT = 250
@@ -1051,9 +692,10 @@ def int_char_mix_crt(num_questions, difficulty, num):
     POST_ENDPOINT = "http://localhost:81/api/question/change"
     FONT_PATH = "arial.ttf"
 
-    get_sec = sec_data.find_one({"category": "Character Count", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Character Count", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    final_sec = 0
 
     type_q = ''
 
@@ -1211,9 +853,11 @@ def leter_count_crt(num_questions, user_input, num):
     IMAGE_HEIGHT = 250
     FONT_PATH = "arial.ttf"
 
-    get_sec = sec_data.find_one({"category": "leter_find", "Tough": user_input}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "leter_find", "Tough": user_input}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     wordBank = [
         "bat", "cat", "dog", "hat", "sun", "bee", "cow", "run", "toy", "fun",
@@ -1364,9 +1008,11 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
     POST_URL = "http://localhost:81/api/question/change"
 
     # Get seconds config from DB
-    get_sec = sec_data.find_one({"category": "Maze Logic", "Tough": DIFFICULTY}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Maze Logic", "Tough": DIFFICULTY}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     # Difficulty config for maze size & default seconds
     difficulty_config = {
@@ -1571,330 +1217,144 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
         print(f"✅ {success_count}/{NUM_QUESTIONS} questions posted successfully.")
         return False
 
-# def num_100_crt(num_questions, difficulty, num):
-#     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-#     POST_ENDPOINT = "http://localhost:81/api/question/change"
-#     FONT_PATH = "arial.ttf"
 
-#     try:
-#         assert difficulty in ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return False
+    return False
 
-#     def get_difficulty_params(difficulty):
-#         if difficulty == "Too Easy":
-#             return random.randint(2, 3), 10
-#         elif difficulty == "Easy":
-#             return random.randint(3, 4), 7
-#         elif difficulty == "Medium":
-#             return random.randint(5, 7), 5
-#         elif difficulty == "Tough":
-#             return random.randint(6, 10), 3
-#         elif difficulty == "Too Tough":
-#             return random.randint(10, 15), 1
-
-#     def generate_question():
-#         correct_series = list(range(1, 101))
-#         display_series = correct_series[:]
-#         wrong_count, confusion_range = get_difficulty_params(difficulty)
-#         wrong_indexes = set()
-
-#         while len(wrong_indexes) < wrong_count:
-#             idx = random.randint(0, 99)
-#             wrong_indexes.add(idx)
-
-#         for idx in wrong_indexes:
-#             while True:
-#                 offset = random.randint(-confusion_range, confusion_range)
-#                 wrong = correct_series[idx] + offset
-#                 if 1 <= wrong <= 100 and wrong != correct_series[idx]:
-#                     display_series[idx] = wrong
-#                     break
-
-#         correct_answer = wrong_count
-#         options = {correct_answer}
-#         while len(options) < 4:
-#             offset = random.randint(-2, 2)
-#             opt = correct_answer + offset
-#             if 1 <= opt <= 100:
-#                 options.add(opt)
-#         options = sorted(list(options))
-#         return display_series, correct_answer, options
-
-#     def draw_grid(display_series):
-#         img_width, img_height = 400, 250
-#         image = Image.new("RGB", (img_width, img_height), "white")
-#         draw = ImageDraw.Draw(image)
-
-#         font_size = 14
-#         try:
-#             font = ImageFont.truetype(FONT_PATH, font_size)
-#         except:
-#             font = ImageFont.load_default()
-
-#         cols = 10
-#         rows = 10
-#         margin = 5
-#         box_width = (img_width - 2 * margin) // cols
-#         box_height = (img_height - 2 * margin) // rows
-
-#         for i, num in enumerate(display_series):
-#             row = i // cols
-#             col = i % cols
-#             x = margin + col * box_width
-#             y = margin + row * box_height
-#             draw.rectangle([x, y, x + box_width - 2, y + box_height - 2], fill="#b1def5", outline="black")
-#             draw.text((x + 8, y + 8), str(num), fill="black", font=font)
-#         return image
-
-#     def upload_image(image):
-#         buffer = io.BytesIO()
-#         image.save(buffer, format="WEBP")
-#         buffer.seek(0)
-#         files = {'screenshot': ('screenshot.webp', buffer, 'image/webp')}
-#         try:
-#             response = requests.post(UPLOAD_ENDPOINT, files=files)
-#             data = response.json()
-#             if data.get("status") and data.get("path"):
-#                 return f"https://backend.stawro.com/stawro/{data['path']}"
-#             else:
-#                 print("❌ Upload failed.")
-#                 return None
-#         except Exception as e:
-#             print(f"❌ Upload error: {e}")
-#             return None
-    
-#     sec = ""
-
-#     if difficulty in ['Too Easy', "Easy", "Medium", "Tough"]:
-#         sec = "55" 
-#     else:
-#         sec = "60"
-    
-
-#     def post_question(image_path, correct_answer, options):
-#         # payload = {
-#         #     "question": "How many wrong numbers are in the table?",
-#         #     "answer": str(correct_answer),
-#         #     "a": str(options[0]),
-#         #     "b": str(options[1]),
-#         #     "c": str(options[2]),
-#         #     "d": str(options[3]),
-#         #     "language": "English",
-#         #     "category": "Counting_100",
-#         #     "difficulty": difficulty,
-#         #     "type": "Mental Ability",
-#         #     "image": image_path,
-#         #     "seconds": "10"
-#         # }
-
-#         payload = {                
-#             "img": image_path,
-#             "Questio": "How many wrong numbers are present in the Table?",
-#             "qno": num,
-#             "a": str(options[0]),
-#             "b": str(options[1]),
-#             "c": str(options[2]),
-#             "d": str(options[3]),
-#             "Ans": str(correct_answer),
-#             "lang": "English",
-#             "tough": difficulty,
-#             "seconds": sec,
-#             "sub_lang": "Counting_100",
-
-#         }
-
-
-#         try:
-#             res = requests.post(POST_ENDPOINT, json=payload)
-#             if res.status_code == 200:
-#                 print("✅ Question posted to database!")
-#                 return True
-#             else:
-#                 print(f"❌ Failed to post question. Status code: {res.status_code}")
-#                 return False
-#         except Exception as e:
-#             print(f"❌ Error posting question: {e}")
-#             return False
-
-#     # === MAIN LOOP ===
-#     success_count = 0
-#     for _ in range(num_questions):
-#         display_series, correct_answer, options = generate_question()
-#         image = draw_grid(display_series)
-#         image_url = upload_image(image)
-#         if image_url:
-#             success = post_question(image_url, correct_answer, options)
-#             if success:
-#                 success_count += 1
-
-#     if success_count == num_questions:
-#         return True
-#     else:
-#         print(f"Only {success_count}/{num_questions} questions were successfully posted.")
-#         return False
-
-
-# done
-def num_100_crt(num_questions, difficulty, num):
-    import random, requests, io
-    from PIL import Image, ImageDraw, ImageFont
-
+def num_100_crt(num, difficulty, start_qno):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
     POST_ENDPOINT = "http://localhost:81/api/question/change"
-    FONT_PATH = "arial.ttf"
 
-    get_sec = sec_data.find_one({"category": "Counting_100", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
 
-    if difficulty not in ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]:
-        print("❌ Invalid difficulty")
-        return False
+    # get_sec = sec_data.find_one({"category": "Counting_100", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
 
-    def get_difficulty_params(diff):
-        if diff == "Too Easy":
-            return random.randint(2, 3), 10
-        elif diff == "Easy":
-            return random.randint(3, 4), 7
-        elif diff == "Medium":
-            return random.randint(5, 7), 5
-        elif diff == "Tough":
-            return random.randint(6, 10), 3
-        elif diff == "Too Tough":
-            return random.randint(10, 15), 1
+    final_sec = 0
 
-    def generate_question():
-        correct_series = list(range(1, 101))
-        display_series = correct_series[:]
-        wrong_count, _ = get_difficulty_params(difficulty)
-        wrong_indexes = set()
+    COLOR_NAMES = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange"]
+    COLOR_RGB = {
+        "Red": (255, 0, 0),
+        "Green": (0, 200, 0),
+        "Blue": (0, 0, 255),
+        "Yellow": (255, 215, 0),
+        "Purple": (128, 0, 128),
+        "Orange": (255, 140, 0)
+    }
 
-        while len(wrong_indexes) < wrong_count:
-            idx = random.randint(0, 99)
-            wrong_indexes.add(idx)
+    DIFFICULTY_SETTINGS = {
+        "Too Easy": (3, 4, 0.8),
+        "Easy": (4, 5, 0.5),
+        "Medium": (5, 6, 0.3),
+        "Tough": (6, 7, 0.2),
+        "Too Tough": (7, 8, 0.15)
+    }
 
-        for idx in wrong_indexes:
-            display_series[idx] = ""  # remove the number (empty box)
-
-        correct_answer = wrong_count
-        options = {correct_answer}
+    def generate_options(correct, difficulty):
+        spread = {
+            "Too Easy": 2,
+            "Easy": 2,
+            "Medium": 4,
+            "Tough": 6,
+            "Too Tough": 6
+        }[difficulty]
+        options = {correct}
         while len(options) < 4:
-            offset = random.randint(-4, 4)
-            opt = correct_answer + offset
-            if 1 <= opt <= 100 and opt != correct_answer:
-                options.add(opt)
+            val = max(0, correct + random.randint(-spread, spread))
+            options.add(val)
+        return random.sample(list(options), 4)
 
-        options_list = list(options)
-        random.shuffle(options_list)
-        return display_series, correct_answer, options_list
+    if difficulty not in ALLOWED_DIFFICULTIES:
+        raise ValueError(f"Invalid difficulty. Choose from: {ALLOWED_DIFFICULTIES}")
 
-    def draw_grid(display_series):
-        img_width, img_height = 400, 250
-        image = Image.new("RGB", (img_width, img_height), "white")
-        draw = ImageDraw.Draw(image)
+    rows, cols, match_ratio = DIFFICULTY_SETTINGS[difficulty]
 
+    all_success = True  # Track if any fail
+
+    for i in range(num):
+        qno = str(int(start_qno) + i)
         try:
-            font = ImageFont.truetype(FONT_PATH, 14)
-        except:
-            font = ImageFont.load_default()
+            img = Image.new("RGB", (400, 250), "white")
+            draw = ImageDraw.Draw(img)
 
-        cols = 10
-        rows = 10
-        margin = 5
-        box_width = (img_width - 2 * margin) // cols
-        box_height = (img_height - 2 * margin) // rows
+            try:
+                font = ImageFont.truetype("arial.ttf", 20)
+            except:
+                font = ImageFont.load_default()
 
-        for i, num in enumerate(display_series):
-            row = i // cols
-            col = i % cols
-            x = margin + col * box_width
-            y = margin + row * box_height
-            draw.rectangle([x, y, x + box_width - 2, y + box_height - 2], fill="#b1def5", outline="black")
-            if str(num).strip():
-                draw.text((x + 8, y + 8), str(num), fill="black", font=font)
+            matches = 0
+            top_margin = 35
+            cell_w = 400 // cols
+            cell_h = (250 - top_margin) // rows
 
-        return image
+            for r in range(rows):
+                for c in range(cols):
+                    word = random.choice(COLOR_NAMES)
+                    if random.random() < match_ratio:
+                        ink_color = COLOR_RGB[word]
+                        matches += 1
+                    else:
+                        ink_color = COLOR_RGB[random.choice([clr for clr in COLOR_NAMES if clr != word])]
 
-    def upload_image(image):
-        buffer = io.BytesIO()
-        image.save(buffer, format="WEBP")
-        buffer.seek(0)
-        files = {'screenshot': ('screenshot.webp', buffer, 'image/webp')}
-        try:
-            res = requests.post(UPLOAD_ENDPOINT, files=files, timeout=10)
+                    bbox = draw.textbbox((0, 0), word, font=font)
+                    text_w = bbox[2] - bbox[0]
+                    text_h = bbox[3] - bbox[1]
+
+                    x = c * cell_w + (cell_w - text_w) / 2
+                    y = r * cell_h + (cell_h - text_h) / 2 + top_margin
+                    draw.text((x, y), word, fill=ink_color, font=font)
+
+            buffer = io.BytesIO()
+            img.save(buffer, format="WEBP")
+            buffer.seek(0)
+
+            files = {'screenshot': ('stroop.webp', buffer, 'image/webp')}
+            res = requests.post(UPLOAD_ENDPOINT, files=files)
             data = res.json()
-            if data.get("status") and data.get("path"):
-                return f"https://backend.stawro.com/stawro/{data['path']}"
-            else:
-                print("❌ Upload failed.")
-                return None
-        except Exception as e:
-            print(f"❌ Upload error: {e}")
-            return None
+            if not (data.get("status") and data.get("path")):
+                print(f"❌ Upload failed for Q{qno}")
+                all_success = False
+                continue
+            img_url = f"https://backend.stawro.com/stawro/{data['path']}"
 
-    def post_question(image_path, correct_answer, options, q_number):
-        sec = ""
+            correct_answer = matches
+            options = generate_options(correct_answer, difficulty)
 
-        if final_sec:
             if difficulty in ['Tough', "Too Tough"]:
-                sec = str(final_sec)
+                sec = "19"
             elif difficulty in ['Medium', "Easy"]:
-                sec = str(final_sec)
-            else:
-                sec = "15"
-        else:
-            if difficulty in ['Tough', 'Too Tough']:
                 sec = "15"
             else:
-                sec = "12"
+                sec = "25"
 
-        payload = {
-            "img": image_path,
-            "Questio": "How many numbers are missing from the Table?",
-            "qno": q_number,
-            "a": str(options[0]),
-            "b": str(options[1]),
-            "c": str(options[2]),
-            "d": str(options[3]),
-            "Ans": str(correct_answer),  # ✅ now sends the actual value, not the letter
-            "lang": "English",
-            "tough": difficulty,
-            "sub_lang": "Counting_100",
-            "seconds": sec
-        }
+            payload = {
+                "qno": qno,
+                "Questio": "Count the entries where the WORD matches the INK COLOR.",
+                "Ans": str(correct_answer),
+                "a": str(options[0]),
+                "b": str(options[1]),
+                "c": str(options[2]),
+                "d": str(options[3]),
+                "lang": "English",
+                "sub_lang": "Counting_100",
+                "tough": difficulty,
+                "img": img_url,
+                "seconds": str(final_sec) if final_sec else sec
+            }
 
-        try:
-            res = requests.post(POST_ENDPOINT, json=payload, timeout=10)
-            if res.status_code == 200:
-                print(f"✅ Q{q_number} posted.")
-                return True
+            post_res = requests.post(POST_ENDPOINT, json=payload)
+            if post_res.status_code == 200:
+                print(f"✅ Q{qno} posted ({difficulty}) → Ans: {correct_answer}")
             else:
-                print(f"❌ Q{q_number} failed. Status: {res.status_code}")
-                return False
+                print(f"❌ Q{qno} failed: {post_res.status_code}")
+                all_success = False
+
         except Exception as e:
-            print(f"❌ Q{q_number} error: {e}")
-            return False
+            print(f"❌ Exception in Q{qno}: {e}")
+            all_success = False
 
-    # MAIN LOOP
-    success_count = 0
-    for i in range(num_questions):
-        print(f"\n📌 Generating Question {num + i}")
-        display_series, correct_answer, options = generate_question()
-        image = draw_grid(display_series)
-        image_url = upload_image(image)
-        if image_url:
-            success = post_question(image_url, correct_answer, options, num + i)
-            if success:
-                success_count += 1
+    return all_success  # True if all succeeded, False if any failed
 
-    if success_count == num_questions:
-        print("🎯 All questions posted successfully.")
-        return True
-    else:
-        print(f"❌ Only {success_count}/{num_questions} questions posted.")
-        return False
 
 # done
 def numers_crt(num_questions, difficulty, num):
@@ -1907,9 +1367,10 @@ def numers_crt(num_questions, difficulty, num):
     FONT_PATH = None  # Use default font
     IMAGE_PADDING = 15  # Added padding around edges
 
-    get_sec = sec_data.find_one({"category": "Counting", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Counting", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    final_sec = 0
 
     DIFFICULTY_CONFIG = {
         "Too Easy": {"option_range": (0, 5), "seconds": 20, "total_numbers": 14},
@@ -2078,9 +1539,12 @@ def OMR_crt(num_questions, difficulty, num):
     POST_URL = "http://localhost:81/api/question/change"
     ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
 
-    get_sec = sec_data.find_one({"category": "OMR Challenge", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "OMR Challenge", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
+
 
     if difficulty not in ALLOWED_DIFFICULTIES:
         print(f"❌ Invalid difficulty level. Allowed: {ALLOWED_DIFFICULTIES}")
@@ -2329,7 +1793,7 @@ while True:
                 tough = data.get("tough", "Unknown")
                 cat = data.get("sub_lang", "Unknown")
 
-                if count > 1:
+                if count > 1 :
                     if tough in ['Too Tough', 'Tough']:
                         print(f'\033[31mQ{qno}: Change to TOUGH (Already tough) — Count: {count}\033[0m')
                         change_qn(qno, tough, cat)

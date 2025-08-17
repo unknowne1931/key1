@@ -10,6 +10,7 @@ os.system('cls')
 MONGODB_URI = os.getenv(
     "MONGODB_URI",
     "mongodb+srv://instasecur24:kick@flutterdata.cgalmbt.mongodb.net/?retryWrites=true&w=majority&appName=flutterdata"
+    # "mongodb+srv://instasecur24:kick@stawroprototypecluster.0xbx0u5.mongodb.net/?retryWrites=true&w=majority&appName=staWroprototypecluster"
 )
 
 client = MongoClient(MONGODB_URI)
@@ -19,7 +20,7 @@ start_stop_db = db["start_stops"]
 qns_stored = db["question datas"]
 
 
-expected_qno = 10
+expected_qno = 300
 
 # ✅ System control function
 def stop_start(new_status):
@@ -68,7 +69,8 @@ for i, dat in enumerate(data_qns,1):
         "b" : dat['b'],
         "c" : dat['c'],
         "d" : dat['d'],
-        "Ans" : ans,
+        "Ans" : dat['answer'],
+        # "Ans" : ans,
         "lang" : dat['language'],
         "tough" : dat['difficulty'],
         "seconds" :dat['seconds'],

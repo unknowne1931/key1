@@ -41,7 +41,7 @@ def calender_crt(total_questions, difficulty_level):
         
     # === CONFIG ===
     API_UPLOAD = "https://backend.stawro.com/stawro/upload.php"
-    API_POST = "http://192.168.31.44/api/question"
+    API_POST = "http://localhost:81/api/question"
     FONT_PATH = "arial.ttf"
     YEAR = 2024
     RETRY_LIMIT = 3
@@ -319,7 +319,7 @@ def clock_crt( num_questions,difficulty):
             return None
 
     def post_question(ans, options, filename, difficulty="Tough", estimated_seconds=10):
-        url = "http://192.168.31.44/api/question"
+        url = "http://localhost:81/api/question"
         body = {
             "question": "Guess the time shown on the clock.",
             "answer": ans,
@@ -374,7 +374,7 @@ def corect_code_crt(total, level):
     
     # Configuration
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://192.168.31.44/api/question"
+    POST_URL = "http://localhost:81/api/question"
     CHARS = "abcdefghijklmnopqrstuvwxyz"
 
     # Difficulty Configs
@@ -521,7 +521,7 @@ def img_similar_crt(num ,difficulty):
     ALL_IMAGES = ["1.png", "2.png", "3.png", "4.png"]  # Ensure these files exist
     LABELS = ["A", "B", "C", "D"]
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://192.168.31.44/api/question"
+    POST_ENDPOINT = "http://localhost:81/api/question"
     DIFFICULTY_SECONDS = {
         "Too Easy": 10,
         "Easy": 15,

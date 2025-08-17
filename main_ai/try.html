@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Code Canvas Challenge</title>
+<style>
+  body { font-family: Arial; text-align: center; padding: 30px; background: #f0f0f0; }
+  canvas { border: 2px solid #333; background: #fff; }
+  .options button { margin: 5px; padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+  #question { font-weight: bold; margin-top: 20px; }
+  #result { font-weight: bold; margin-top: 10px; font-size: 1.2rem; }
+</style>
+</head>
+<body>
+
+<h1>Canvas Code Existence Challenge</h1>
+<canvas id="codeCanvas" width="400" height="250"></canvas>
+<p id="question"></p>
+<div class="options" id="optionsContainer"></div>
+<div id="result"></div>
+
+<script>
+const canvas = document.getElementById("codeCanvas");
+const ctx = canvas.getContext("2d");
+const optionsContainer = document.getElementById("optionsContainer");
+const questionEl = document.getElementById("question");
+const result = document.getElementById("result");
+
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+function generateCodeLines(numLines=10, charsPerLine=25){
+  const lines = [];
+  for(let i=0;i<numLines;i++){
+    let line="";
+    for(let j=0;j<charsPerLine;j++){
+      line += chars[Math.floor(Math.random()*chars.length)];
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+
+function drawCodes(lines){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.textBaseline = "top";
+  for(let i=0;i<lines.length;i++){
+    for(let j=0;j<lines[i].length;j++){
+      const ch = lines[i][j];
+      const x = j*14 + Math.random()*4; // spacing + jitter
+      const y = i*20 + Math.random()*4;
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate((Math.random()-0.5)*0.3); // small rotation
+      ctx.fillStyle = `hsl(${Math.random()*360},70%,50%)`;
+      ctx.font = "14px monospace";
+      ctx.fillText(ch,0,0);
+      ctx.restore();
+    }
+  }
+}
+
+function askQuestion(lines){
+  optionsContainer.innerHTML = "";
+  result.textContent = "";
+
+  // Flatten all characters into a single string
+  const allChars = lines.join('');
+
+  const showExist = Math.random() > 0.3; // 70% chance exists
+  let questionChar;
+
+  if(showExist){
+    // Pick a character that exists
+    questionChar = allChars[Math.floor(Math.random()*allChars.length)];
+  } else {
+    // Pick a character that does NOT exist
+    const unusedChars = chars.split('').filter(c => !allChars.includes(c));
+    questionChar = unusedChars[Math.floor(Math.random()*unusedChars.length)];
+  }
+
+  const correctAnswer = showExist ? "Yes" : "No";
+  questionEl.textContent = `Does the character "${questionChar}" exist in the codes?`;
+
+  const options = ["Yes","No"];
+  options.sort(() => Math.random()-0.5);
+
+  options.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.onclick = ()=>{
+      result.textContent = (opt===correctAnswer) ? `✅ Correct! Answer is ${correctAnswer}` : `❌ Wrong! Correct answer is ${correctAnswer}`;
+    }
+    optionsContainer.appendChild(btn);
+  });
+}
+
+// Main
+const lines = generateCodeLines(15,25); // fill canvas densely
+drawCodes(lines);
+askQuestion(lines);
+</script>
+
+</body>
+</html>

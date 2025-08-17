@@ -406,10 +406,12 @@ def generate_pattern_mcq_post(num, difficulty, qno):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
     POST_ENDPOINT = "http://localhost:81/api/question/change"
 
-    get_sec = sec_data.find_one({"category": "Pattern_Lock", "Tough": difficulty}) or {}
+    # get_sec = sec_data.find_one({"category": "Pattern_Lock", "Tough": difficulty}) or {}
 
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
 
 
@@ -578,10 +580,12 @@ def generate_pattern_mcq_post(num, difficulty, qno):
 
 # done
 def clock_crt(num_questions, difficulty, num):
-    get_sec = sec_data.find_one({"category": "clock", "Tough": difficulty}) or {}
+    # get_sec = sec_data.find_one({"category": "clock", "Tough": difficulty}) or {}
 
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     def get_random_time(include_seconds=False):
         hour = random.randint(1, 12)
@@ -757,9 +761,11 @@ def corect_code_crt(total, level, num):
     POST_URL = "http://localhost:81/api/question/change"
     CHARS = "abcdefghijklmnopqrstuvwxyz"
 
-    get_sec = sec_data.find_one({"category": "Code Guessing", "Tough": level}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Code Guessing", "Tough": level}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     DIFFICULTY_SETTINGS = {
         "Too Easy": {"code_length": 6, "seconds": 11},
@@ -913,9 +919,11 @@ def img_similar_crt(num, difficulty, qnoo):
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
     POST_ENDPOINT = "http://localhost:81/api/question/change"
 
-    get_sec = sec_data.find_one({"category": "similar_images", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "similar_images", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     FINAL_WIDTH = 400
     FINAL_HEIGHT = 250
@@ -1051,9 +1059,11 @@ def int_char_mix_crt(num_questions, difficulty, num):
     POST_ENDPOINT = "http://localhost:81/api/question/change"
     FONT_PATH = "arial.ttf"
 
-    get_sec = sec_data.find_one({"category": "Character Count", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Character Count", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     type_q = ''
 
@@ -1211,9 +1221,11 @@ def leter_count_crt(num_questions, user_input, num):
     IMAGE_HEIGHT = 250
     FONT_PATH = "arial.ttf"
 
-    get_sec = sec_data.find_one({"category": "leter_find", "Tough": user_input}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "leter_find", "Tough": user_input}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     wordBank = [
         "bat", "cat", "dog", "hat", "sun", "bee", "cow", "run", "toy", "fun",
@@ -1364,9 +1376,11 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY, num):
     POST_URL = "http://localhost:81/api/question/change"
 
     # Get seconds config from DB
-    get_sec = sec_data.find_one({"category": "Maze Logic", "Tough": DIFFICULTY}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Maze Logic", "Tough": DIFFICULTY}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     # Difficulty config for maze size & default seconds
     difficulty_config = {
@@ -1745,9 +1759,11 @@ def num_100_crt(num_questions, difficulty, num):
     POST_ENDPOINT = "http://localhost:81/api/question/change"
     FONT_PATH = "arial.ttf"
 
-    get_sec = sec_data.find_one({"category": "Counting_100", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Counting_100", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     if difficulty not in ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]:
         print("❌ Invalid difficulty")
@@ -1907,9 +1923,11 @@ def numers_crt(num_questions, difficulty, num):
     FONT_PATH = None  # Use default font
     IMAGE_PADDING = 15  # Added padding around edges
 
-    get_sec = sec_data.find_one({"category": "Counting", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "Counting", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+
+    final_sec = 0
 
     DIFFICULTY_CONFIG = {
         "Too Easy": {"option_range": (0, 5), "seconds": 20, "total_numbers": 14},
@@ -2078,9 +2096,10 @@ def OMR_crt(num_questions, difficulty, num):
     POST_URL = "http://localhost:81/api/question/change"
     ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
 
-    get_sec = sec_data.find_one({"category": "OMR Challenge", "Tough": difficulty}) or {}
-    seconds_list = get_sec.get('ex_seconds', []) or []
-    final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    # get_sec = sec_data.find_one({"category": "OMR Challenge", "Tough": difficulty}) or {}
+    # seconds_list = get_sec.get('ex_seconds', []) or []
+    # final_sec = sum(seconds_list) / len(seconds_list) if seconds_list else 0
+    final_sec = 0
 
     if difficulty not in ALLOWED_DIFFICULTIES:
         print(f"❌ Invalid difficulty level. Allowed: {ALLOWED_DIFFICULTIES}")
@@ -2377,3 +2396,574 @@ while True:
     print("\033[92mEverything Ok Sir\033[0m")
     time.sleep(5)
     
+
+
+import io
+import random
+import requests
+from PIL import Image, ImageDraw, ImageFont
+
+def generate_digit_count_mcq_post(num, difficulty, qno_start):
+    UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
+    POST_ENDPOINT = "http://localhost:81/api/question/change"
+
+    ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
+
+    # Difficulty ranges for start-end numbers
+    DIFFICULTY_RANGES = {
+        "Too Easy": (10, 20),
+        "Easy": (20, 40),
+        "Medium": (40, 80),
+        "Tough": (80, 150),
+        "Too Tough": (150, 300)
+    }
+
+    # Seconds logic for each difficulty
+    DIFFICULTY_SECONDS = {
+        "Too Easy": "25",
+        "Easy": "25",
+        "Medium": "15",
+        "Tough": "19",
+        "Too Tough": "19"
+    }
+
+    def generate_options(correct, difficulty):
+        spread = {
+            "Too Easy": 2,
+            "Easy": 2,
+            "Medium": 4,
+            "Tough": 6,
+            "Too Tough": 6
+        }[difficulty]
+        options = {correct}
+        while len(options) < 4:
+            val = max(0, correct + random.randint(-spread, spread))
+            options.add(val)
+        return random.sample(list(options), 4)
+
+    if difficulty not in ALLOWED_DIFFICULTIES:
+        raise ValueError(f"Invalid difficulty. Choose from: {ALLOWED_DIFFICULTIES}")
+
+    min_gap, max_gap = DIFFICULTY_RANGES[difficulty]
+    seconds = DIFFICULTY_SECONDS[difficulty]
+
+    for i in range(num):
+        qno = str(int(qno_start) + i)
+        try:
+            # Choose random digit 0-9
+            target_digit = random.randint(0, 9)
+
+            # Choose start and end numbers based on difficulty
+            start = random.randint(1, 100)
+            end = start + random.randint(min_gap, max_gap)
+
+            # Count numbers containing the target digit
+            correct_answer = sum(1 for n in range(start, end + 1) if str(target_digit) in str(n))
+
+            # Generate options
+            options = generate_options(correct_answer, difficulty)
+
+            # Create image
+            img = Image.new("RGB", (400, 250), "white")
+            draw = ImageDraw.Draw(img)
+            try:
+                font = ImageFont.truetype("arial.ttf", 120)
+            except:
+                font = ImageFont.load_default()
+
+            bbox = draw.textbbox((0,0), str(target_digit), font=font)
+            text_w = bbox[2] - bbox[0]
+            text_h = bbox[3] - bbox[1]
+            x = (400 - text_w) / 2
+            y = (250 - text_h) / 2
+            draw.text((x, y), str(target_digit), fill=(0,0,0), font=font)
+
+            # Save to buffer
+            buffer = io.BytesIO()
+            img.save(buffer, format="WEBP")
+            buffer.seek(0)
+
+            # Upload image
+            files = {'screenshot': ('digit_count.webp', buffer, 'image/webp')}
+            res = requests.post(UPLOAD_ENDPOINT, files=files)
+            data = res.json()
+            if not (data.get("status") and data.get("path")):
+                print(f"❌ Upload failed for Q{qno}")
+                continue
+            img_url = f"https://backend.stawro.com/stawro/{data['path']}"
+
+            # Prepare payload
+            payload = {
+                "qno": qno,
+                "Questio": f"How many numbers between {start} and {end} contain the digit '{target_digit}'?",
+                "Ans": str(correct_answer),
+                "a": str(options[0]),
+                "b": str(options[1]),
+                "c": str(options[2]),
+                "d": str(options[3]),
+                "lang": "English",
+                "sub_lang": "Digit_Count",
+                "tough": difficulty,
+                "img": img_url,
+                "seconds": seconds
+            }
+
+            # Post to backend
+            post_res = requests.post(POST_ENDPOINT, json=payload)
+            if post_res.status_code == 200:
+                print(f"✅ Q{qno} posted ({difficulty}) → Ans: {correct_answer}")
+            else:
+                print(f"❌ Q{qno} failed: {post_res.status_code}")
+
+        except Exception as e:
+            print(f"❌ Exception in Q{qno}: {e}")
+
+# Example usage
+if __name__ == "__main__":
+    generate_digit_count_mcq_post(num=1, difficulty="Medium", qno_start=1931)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import io
+# import random
+# import requests
+# from PIL import Image, ImageDraw, ImageFont
+
+# def generate_stroop_mcq_post(num, difficulty, qno):
+#     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
+#     POST_ENDPOINT = "http://localhost:81/api/question/change"
+
+#     ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
+
+#     COLOR_NAMES = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange"]
+#     COLOR_RGB = {
+#         "Red": (255, 0, 0),
+#         "Green": (0, 200, 0),
+#         "Blue": (0, 0, 255),
+#         "Yellow": (255, 215, 0),
+#         "Purple": (128, 0, 128),
+#         "Orange": (255, 140, 0)
+#     }
+
+#     DIFFICULTY_SETTINGS = {
+#         "Too Easy": (3, 4, 0.8),
+#         "Easy": (4, 5, 0.5),
+#         "Medium": (5, 6, 0.3),
+#         "Tough": (6, 7, 0.2),
+#         "Too Tough": (7, 8, 0.15)
+#     }
+
+#     def generate_options(correct, difficulty):
+#         spread = {
+#             "Too Easy": 2,
+#             "Easy": 2,
+#             "Medium": 4,
+#             "Tough": 6,
+#             "Too Tough": 6
+#         }[difficulty]
+#         options = {correct}
+#         while len(options) < 4:
+#             val = max(0, correct + random.randint(-spread, spread))
+#             options.add(val)
+#         return random.sample(list(options), 4)
+
+#     if difficulty not in ALLOWED_DIFFICULTIES:
+#         raise ValueError(f"Invalid difficulty. Choose from: {ALLOWED_DIFFICULTIES}")
+
+#     rows, cols, match_ratio = DIFFICULTY_SETTINGS[difficulty]
+
+#     for q in range(1, num + 1):
+#         try:
+#             img = Image.new("RGB", (400, 250), "white")
+#             draw = ImageDraw.Draw(img)
+
+#             try:
+#                 font = ImageFont.truetype("arial.ttf", 20)
+#             except:
+#                 font = ImageFont.load_default()
+
+#             matches = 0
+#             cell_w = 400 // cols
+#             cell_h = (250 - 40) // rows  # leave space at top
+
+#             for r in range(rows):
+#                 for c in range(cols):
+#                     word = random.choice(COLOR_NAMES)
+#                     if random.random() < match_ratio:
+#                         ink_color = COLOR_RGB[word]
+#                         matches += 1
+#                     else:
+#                         ink_color = COLOR_RGB[random.choice([clr for clr in COLOR_NAMES if clr != word])]
+
+#                     bbox = draw.textbbox((0, 0), word, font=font)
+#                     text_w = bbox[2] - bbox[0]
+#                     text_h = bbox[3] - bbox[1]
+
+#                     x = c * cell_w + (cell_w - text_w) / 2
+#                     y = r * cell_h + (cell_h - text_h) / 2 + 40
+#                     draw.text((x, y), word, fill=ink_color, font=font)
+
+#             # Save to buffer
+#             buffer = io.BytesIO()
+#             img.save(buffer, format="WEBP")
+#             buffer.seek(0)
+
+#             # Upload image
+#             files = {'screenshot': ('stroop.webp', buffer, 'image/webp')}
+#             res = requests.post(UPLOAD_ENDPOINT, files=files)
+#             data = res.json()
+#             if not (data.get("status") and data.get("path")):
+#                 print(f"❌ Upload failed for Q{q}")
+#                 continue
+#             img_url = f"https://backend.stawro.com/stawro/{data['path']}"
+
+#             # Generate options
+#             correct_answer = matches
+#             options = generate_options(correct_answer, difficulty)
+
+#             # Seconds logic (basic)
+#             if difficulty in ['Tough', "Too Tough"]:
+#                 sec = "19"
+#             elif difficulty in ['Medium', "Easy"]:
+#                 sec = "15"
+#             else:
+#                 sec = "25"
+
+#             # Prepare payload
+#             payload = {
+#                 "qno": qno,
+#                 "Questio": "Count the entries where the WORD matches the INK COLOR.",
+#                 "Ans": str(correct_answer),
+#                 "a": str(options[0]),
+#                 "b": str(options[1]),
+#                 "c": str(options[2]),
+#                 "d": str(options[3]),
+#                 "lang": "English",
+#                 "sub_lang": "Stroop_Challenge",
+#                 "tough": difficulty,
+#                 "img": img_url,
+#                 "seconds": sec
+#             }
+
+#             # Post to backend
+#             post_res = requests.post(POST_ENDPOINT, json=payload)
+#             if post_res.status_code == 200:
+#                 print(f"✅ Q{q} posted ({difficulty}) → Ans: {correct_answer}")
+#             else:
+#                 print(f"❌ Q{q} failed: {post_res.status_code}")
+
+#         except Exception as e:
+#             print(f"❌ Exception in Q{q}: {e}")
+
+# # Example run
+# if __name__ == "__main__":
+#     generate_stroop_mcq_post(num=1, difficulty="Too Easy", qno="19311")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import io
+import random
+import requests
+from PIL import Image, ImageDraw, ImageFont
+
+def generate_stroop_mcq_post(num, difficulty, start_qno):
+    UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
+    POST_ENDPOINT = "http://localhost:81/api/question/change"
+
+    ALLOWED_DIFFICULTIES = ["Too Easy", "Easy", "Medium", "Tough", "Too Tough"]
+
+    COLOR_NAMES = ["Red", "Green", "Blue", "Yellow", "Purple", "Orange"]
+    COLOR_RGB = {
+        "Red": (255, 0, 0),
+        "Green": (0, 200, 0),
+        "Blue": (0, 0, 255),
+        "Yellow": (255, 215, 0),
+        "Purple": (128, 0, 128),
+        "Orange": (255, 140, 0)
+    }
+
+    DIFFICULTY_SETTINGS = {
+        "Too Easy": (3, 4, 0.8),
+        "Easy": (4, 5, 0.5),
+        "Medium": (5, 6, 0.3),
+        "Tough": (6, 7, 0.2),
+        "Too Tough": (7, 8, 0.15)
+    }
+
+    def generate_options(correct, difficulty):
+        spread = {
+            "Too Easy": 2,
+            "Easy": 2,
+            "Medium": 4,
+            "Tough": 6,
+            "Too Tough": 6
+        }[difficulty]
+        options = {correct}
+        while len(options) < 4:
+            val = max(0, correct + random.randint(-spread, spread))
+            options.add(val)
+        return random.sample(list(options), 4)
+
+    if difficulty not in ALLOWED_DIFFICULTIES:
+        raise ValueError(f"Invalid difficulty. Choose from: {ALLOWED_DIFFICULTIES}")
+
+    rows, cols, match_ratio = DIFFICULTY_SETTINGS[difficulty]
+
+    for i in range(num):
+        qno = str(int(start_qno) + i)
+        try:
+            img = Image.new("RGB", (400, 250), "white")
+            draw = ImageDraw.Draw(img)
+
+            try:
+                font = ImageFont.truetype("arial.ttf", 20)
+            except:
+                font = ImageFont.load_default()
+
+            matches = 0
+            top_margin = 35
+            cell_w = 400 // cols
+            cell_h = (250 - top_margin) // rows  # leave space at top
+
+            for r in range(rows):
+                for c in range(cols):
+                    word = random.choice(COLOR_NAMES)
+                    if random.random() < match_ratio:
+                        ink_color = COLOR_RGB[word]
+                        matches += 1
+                    else:
+                        ink_color = COLOR_RGB[random.choice([clr for clr in COLOR_NAMES if clr != word])]
+
+                    bbox = draw.textbbox((0, 0), word, font=font)
+                    text_w = bbox[2] - bbox[0]
+                    text_h = bbox[3] - bbox[1]
+
+                    x = c * cell_w + (cell_w - text_w) / 2
+                    y = r * cell_h + (cell_h - text_h) / 2 + top_margin
+                    draw.text((x, y), word, fill=ink_color, font=font)
+
+            # Save to buffer
+            buffer = io.BytesIO()
+            img.save(buffer, format="WEBP")
+            buffer.seek(0)
+
+            # Upload image
+            files = {'screenshot': ('stroop.webp', buffer, 'image/webp')}
+            res = requests.post(UPLOAD_ENDPOINT, files=files)
+            data = res.json()
+            if not (data.get("status") and data.get("path")):
+                print(f"❌ Upload failed for Q{qno}")
+                continue
+            img_url = f"https://backend.stawro.com/stawro/{data['path']}"
+
+            # Generate options
+            correct_answer = matches
+            options = generate_options(correct_answer, difficulty)
+
+            # Seconds logic
+            if difficulty in ['Tough', "Too Tough"]:
+                sec = "19"
+            elif difficulty in ['Medium', "Easy"]:
+                sec = "15"
+            else:
+                sec = "25"
+
+            # Prepare payload
+            payload = {
+                "qno": qno,
+                "Questio": "Count the entries where the WORD matches the INK COLOR.",
+                "Ans": str(correct_answer),
+                "a": str(options[0]),
+                "b": str(options[1]),
+                "c": str(options[2]),
+                "d": str(options[3]),
+                "lang": "English",
+                "sub_lang": "Stroop_Challenge",
+                "tough": difficulty,
+                "img": img_url,
+                "seconds": sec
+            }
+
+            # Post to backend
+            post_res = requests.post(POST_ENDPOINT, json=payload)
+            if post_res.status_code == 200:
+                print(f"✅ Q{qno} posted ({difficulty}) → Ans: {correct_answer}")
+            else:
+                print(f"❌ Q{qno} failed: {post_res.status_code}")
+
+        except Exception as e:
+            print(f"❌ Exception in Q{qno}: {e}")
+
+# Example run
+if __name__ == "__main__":
+    generate_stroop_mcq_post(num=1, difficulty="Too Easy", start_qno="19311")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import io
+import random
+import requests
+from PIL import Image, ImageDraw, ImageFont
+
+# Configuration
+UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
+POST_ENDPOINT = "http://localhost:81/api/question/change"
+
+alphabet = [chr(i) for i in range(97, 123)]  # a-z
+colors = ["red","blue","green","orange","purple","brown","pink","teal"]
+
+difficultySettings = {
+    "Too Easy":  {"mistakes":[1,2], "rotation":5,  "colorCount":2, "letterFraction":0.3},
+    "Easy":      {"mistakes":[2,3], "rotation":10, "colorCount":3, "letterFraction":0.5},
+    "Medium":    {"mistakes":[3,4], "rotation":15, "colorCount":5, "letterFraction":0.7},
+    "Tough":     {"mistakes":[4,5], "rotation":20, "colorCount":6, "letterFraction":0.9},
+    "Too Tough": {"mistakes":[5,6], "rotation":30, "colorCount":8, "letterFraction":1.0}
+}
+
+def generate_alphabet_question( num=1, difficulty="Medium", qno_start=1):
+    for i in range(num):
+        qno = str(int(qno_start) + i)
+        settings = difficultySettings[difficulty]
+        
+        # Container settings
+        width, height = 400, 250
+        letter_size = 24
+        letters_per_row = width // letter_size
+        rows = height // letter_size
+        total_letters = int(letters_per_row * rows * settings["letterFraction"])
+        
+        # Generate sequence
+        sequence = []
+        while len(sequence) < total_letters:
+            sequence += alphabet
+        sequence = sequence[:total_letters]
+        
+        # Decide type: wrong or missing
+        q_type = random.choice(["wrong", "missing"])
+        
+        # Generate mistakes indexes
+        mistake_count = random.randint(settings["mistakes"][0], settings["mistakes"][1])
+        mistake_indexes = random.sample(range(total_letters), mistake_count)
+        
+        # Create image
+        img = Image.new("RGB", (width, height), "white")
+        draw = ImageDraw.Draw(img)
+        try:
+            font = ImageFont.truetype("arial.ttf", 20)
+        except:
+            font = ImageFont.load_default()
+        
+        top_margin = 5
+        cell_w = width // letters_per_row
+        cell_h = (height - top_margin) // rows
+        
+        for idx, letter in enumerate(sequence):
+            if idx in mistake_indexes:
+                if q_type == "wrong":
+                    letter = letter.upper()
+                else:
+                    letter = ""
+            x = (idx % letters_per_row) * cell_w + cell_w//4
+            y = (idx // letters_per_row) * cell_h + top_margin
+            color_idx = random.randint(0, min(settings["colorCount"]-1, len(colors)-1))
+            rot = random.uniform(-settings["rotation"], settings["rotation"])
+            
+            # Draw rotated text
+            temp_img = Image.new("RGBA", (cell_w, cell_h), (255,255,255,0))
+            temp_draw = ImageDraw.Draw(temp_img)
+            temp_draw.text((0,0), letter, font=font, fill=colors[color_idx])
+            rotated = temp_img.rotate(rot, expand=1)
+            img.paste(rotated, (x, y), rotated)
+        
+        # Save image to buffer
+        buffer = io.BytesIO()
+        img.save(buffer, format="WEBP")
+        buffer.seek(0)
+        
+        # Upload image
+        files = {'screenshot': ('alphabet.webp', buffer, 'image/webp')}
+        res = requests.post(UPLOAD_ENDPOINT, files=files)
+        data = res.json()
+        if not (data.get("status") and data.get("path")):
+            print(f"❌ Upload failed for Q{qno}")
+            continue
+        img_url = f"https://backend.stawro.com/stawro/{data['path']}"
+        
+        # Generate options
+        options = [mistake_count]
+        while len(options) < 4:
+            opt = random.randint(0, settings["mistakes"][1]+2)
+            if opt not in options:
+                options.append(opt)
+        random.shuffle(options)
+        
+        # Seconds based on difficulty
+        sec_map = {"Too Easy":25,"Easy":20,"Medium":15,"Tough":12,"Too Tough":10}
+        seconds = sec_map.get(difficulty, 15)
+        
+        # Prepare payload
+        payload = {
+            "qno": qno,
+            "Questio": f"Count the {'WRONG letters (uppercase)' if q_type=='wrong' else 'MISSING letters'} in the sequence.",
+            "Ans": str(mistake_count),
+            "a": str(options[0]),
+            "b": str(options[1]),
+            "c": str(options[2]),
+            "d": str(options[3]),
+            "lang": "English",
+            "sub_lang": "Alphabet_Challenge",
+            "tough": difficulty,
+            "img": img_url,
+            "seconds": str(seconds)
+        }
+        
+        # Post to backend
+        post_res = requests.post(POST_ENDPOINT, json=payload)
+        if post_res.status_code == 200:
+            print(f"✅ Q{qno} posted ({difficulty}) → Ans: {mistake_count}")
+        else:
+            print(f"❌ Q{qno} failed: {post_res.status_code}")
+
+# Example usage
+if __name__ == "__main__":
+    generate_alphabet_question( num=1, difficulty="Too Tough", qno_start=1931)

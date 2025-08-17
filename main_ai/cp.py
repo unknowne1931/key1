@@ -41,7 +41,7 @@ def calender_crt(total_questions, difficulty_level):
         
     # === CONFIG ===
     API_UPLOAD = "https://backend.stawro.com/stawro/upload.php"
-    API_POST = "http://192.168.31.44/api/question"
+    API_POST = "http://localhost:81/api/question"
     FONT_PATH = "arial.ttf"
     YEAR = 2024
     RETRY_LIMIT = 3
@@ -317,7 +317,7 @@ def clock_crt( num_questions,difficulty):
             return None
 
     def post_question(ans, options, filename, difficulty="Tough", estimated_seconds=10):
-        url = "http://192.168.31.44/api/question"
+        url = "http://localhost:81/api/question"
         body = {
             "question": "Guess the time shown on the clock.",
             "answer": ans,
@@ -370,7 +370,7 @@ def corect_code_crt(total, level):
     
     # Configuration
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://192.168.31.44/api/question"
+    POST_URL = "http://localhost:81/api/question"
     CHARS = "abcdefghijklmnopqrstuvwxyz"
 
     # Difficulty Configs
@@ -515,7 +515,7 @@ def img_similar_crt(num ,difficulty):
     ALL_IMAGES = ["./main_ai/1.png", "./main_ai/2.png", "./main_ai/3.png", "./main_ai/4.png"]  # Ensure these files exist
     LABELS = ["A", "B", "C", "D"]
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://192.168.31.44/api/question"
+    POST_ENDPOINT = "http://localhost:81/api/question"
     DIFFICULTY_SECONDS = {
         "Too Easy": 10,
         "Easy": 15,
@@ -655,7 +655,7 @@ def int_char_mix_crt(num_questions, difficulty):
 
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://192.168.31.44/api/question"
+    POST_ENDPOINT = "http://localhost:81/api/question"
     FONT_PATH = "arial.ttf"  # You can change this if needed
 
     # === UTILITY FUNCTIONS ===
@@ -797,7 +797,7 @@ def leter_count_crt(num_questions, user_input):
 
     # === CONFIGURATION ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://192.168.31.44/api/question"
+    POST_ENDPOINT = "http://localhost:81/api/question"
     IMAGE_WIDTH = 400
     IMAGE_HEIGHT = 250
 
@@ -946,7 +946,7 @@ def maze_crt(NUM_QUESTIONS, DIFFICULTY):
     
     # === CONFIG ===
     UPLOAD_URL = "https://backend.stawro.com/stawro/upload.php"
-    POST_URL = "http://192.168.31.44/api/question"
+    POST_URL = "http://localhost:81/api/question"
 
     # DIFFICULTY = input("Enter difficulty (Too Easy, Easy, Medium, Tough, Too Tough): ")
     # NUM_QUESTIONS = int(input("How many questions to generate? "))
@@ -1159,7 +1159,7 @@ def num_100_crt(num_questions, difficulty):
 
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://192.168.31.44/api/question"
+    POST_ENDPOINT = "http://localhost:81/api/question"
     FONT_PATH = "arial.ttf"  # You can change this if needed
 
     # === Ask for user inputs ===
@@ -1293,7 +1293,7 @@ def num_100_crt(num_questions, difficulty):
 def numers_crt(num_questions, difficulty):
     # === CONFIG ===
     UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-    POST_ENDPOINT = "http://192.168.31.44/api/question"
+    POST_ENDPOINT = "http://localhost:81/api/question"
     IMAGE_WIDTH = 400
     IMAGE_HEIGHT = 250
     FONT_SIZE = 22

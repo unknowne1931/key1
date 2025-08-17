@@ -13,7 +13,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 ALL_IMAGES = ["1.png", "2.png", "3.png", "4.png"]  # Ensure these files exist
 LABELS = ["A", "B", "C", "D"]
 UPLOAD_ENDPOINT = "https://backend.stawro.com/stawro/upload.php"
-POST_ENDPOINT = "http://192.168.31.44/api/question"
+POST_ENDPOINT = "http://localhost:81/api/question"
 DIFFICULTY_SECONDS = {
     "Too Easy": 10,
     "Easy": 15,

@@ -2,297 +2,166 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OMR Center-Digit Challenge</title>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <title>Match the Quiz</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #e0eafc, #cfdef3);
-      padding: 30px 10px;
-      text-align: center;
+      font-family: sans-serif;
+      background: #f2f4f7;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       min-height: 100vh;
     }
-
-    h2 {
-      margin-bottom: 30px;
-      font-size: 26px;
-      color: #2b2d42;
-    }
-
-    .omr-container {
-      display: flex;
-      gap: 1px;
-      justify-content: center;
-      border: 1px solid;
-      flex-wrap: wrap;
-      width: 400px;
-      margin-bottom: 40px;
-      margin: auto;
-      padding: 10px;
-    }
-
-    .digit-column {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .digit-label {
-      margin-bottom: 5px;
-      font-weight: bold;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .bubble {
-      width: 20px;
-      height: 20px;
-      border: 1px solid #aaa;
-      border-radius: 50%;
-      margin: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: #555;
-      transition: 0.3s;
+    .quiz-container {
       background: #fff;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
     }
-
-    .filled {
-      background: #282c34;
-      color:#282c34 ;
-      font-weight: bold;
-      box-shadow: 0 0 6px #ff00ccaa, 0 0 10px #333 inset;
-      border: 2px solid #63014f;
+    .clue-box {
+      width: 400px;
+      height: 250px;
+      margin: 0 auto 25px auto;
+      border: 2px dashed #0077aa;
+      background-color: #f9fdff;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-
-    .options {
+    .clue-inner {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 15px;
-      margin-top: 20px;
+      gap: 10px;
     }
-
-    .option-btn {
-      padding: 14px 20px;
-      font-size: 17px;
+    .item {
+      font-size: 18px;
+    }
+    .option {
+      background: #e0f7fa;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
       cursor: pointer;
-      border: none;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 12px;
-      width: 90%;
-      max-width: 420px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: 0.2s;
-      backdrop-filter: blur(8px);
+      transition: 0.3s;
     }
-
-    .option-btn:hover {
-      background-color: #ddeeff;
+    .option:hover {
+      background: #b2ebf2;
     }
-
     .correct {
-      background-color: #28a745 !important;
-      color: white !important;
-      font-weight: bold;
+      background: #c8e6c9 !important;
     }
-
     .wrong {
-      background-color: #dc3545 !important;
-      color: white !important;
-      font-weight: bold;
+      background: #ffcdd2 !important;
     }
-
-    @media (max-width: 600px) {
-      .bubble { width: 20px; height: 20px; font-size: 10px; }
-      .option-btn { font-size: 15px; }
-    }
-
-    .submit_btn {
-      margin: 10px;
-      padding: 10px 20px;
+    .answers {
+      margin-top: 25px;
+      background: #eef6ff;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #a1c4e6;
+      display: none;
       font-size: 16px;
-      cursor: pointer;
-    }
-
-    #previewContainer img {
-      margin-top: 20px;
-      max-width: 100%;
-      height: auto;
-      border: 2px solid #333;
+      text-align: left;
     }
   </style>
 </head>
 <body>
 
-<h2>🎯 OMR Challenge – Spot the Center Difference</h2>
-<div class="omr-container" id="omr-container"></div>
-
-<h3>Select the correct number based on the OMR bubbles:</h3>
-<div class="options" id="options-container"></div>
-
-<button id="btnCapture" class="submit_btn">📸 Capture Screenshot</button>
-<button id="btnUpload" class="submit_btn" disabled>🚀 Upload Screenshot</button>
-
-<div id="previewContainer"></div>
+<div class="quiz-container">
+  <div class="clue-box">
+    <div class="clue-inner" id="question"></div>
+  </div>
+  <div id="options"></div>
+  <div class="answers" id="answers"></div>
+</div>
 
 <script>
-  let capturedBlob = null;
-  let optionsArray = [];
-  let correctAnswer = "";
-  let currentQuestion = "";
+const data = {
+  "Eyes": "2",
+  "Hands": "2",
+  "Fingers": "10",
+  "Car": "4 wheels",
+  "Bike": "2 wheels",
+  "Toes": "10",
+  "Days in a week": "7",
+  "Months in a year": "12",
+  "Alphabets": "26",
+  "Seconds in a minute": "60",
+  "Legs on a spider": "8",
+  "Corners of a square": "4",
+  "Planets in solar system": "8",
+  "Clock hands": "3",
+  "Binary digits": "2",
+  "Teeth in adult": "32",
+  "States in India": "28",
+  "Continents": "7",
+  "Oceans": "5",
+  "Primary colors": "3"
+};
 
-  function generateRandomNumber() {
-    return Math.floor(1000000000 + Math.random() * 8999999999).toString();
+// Select 3 random items
+let keys = Object.keys(data);
+let selected = [];
+while (selected.length < 3) {
+  const item = keys[Math.floor(Math.random() * keys.length)];
+  if (!selected.includes(item)) selected.push(item);
+}
+
+// Clues
+let correctAnswers = [];
+let clueHTML = '';
+selected.forEach((item) => {
+  clueHTML += `<div class="item">${item} : ?</div>`;
+  correctAnswers.push(data[item]);
+});
+document.getElementById("question").innerHTML = clueHTML;
+
+// Options (1 correct + 3 random wrong)
+let options = [correctAnswers];
+while (options.length < 4) {
+  let fake = [];
+  for (let i = 0; i < 3; i++) {
+    const randVal = Object.values(data)[Math.floor(Math.random() * Object.values(data).length)];
+    fake.push(randVal);
   }
+  if (!options.some(o => JSON.stringify(o) === JSON.stringify(fake))) {
+    options.push(fake);
+  }
+}
+options = options.sort(() => Math.random() - 0.5);
+const correctIndex = options.findIndex(o => JSON.stringify(o) === JSON.stringify(correctAnswers));
 
-  function generateCenterChallengeOptions(correct) {
-    const options = [{ value: correct }];
-    const used = new Set([correct]);
-    const centerIndexes = [4, 5]; // 0-based index
-
-    while (options.length < 4) {
-      let arr = correct.split('');
-      let i = centerIndexes[Math.floor(Math.random() * centerIndexes.length)];
-      let original = arr[i];
-      let newDigit = (parseInt(original) + 1 + Math.floor(Math.random() * 8)) % 10;
-      if (newDigit === parseInt(original)) continue;
-      arr[i] = newDigit.toString();
-      let newStr = arr.join('');
-      if (!used.has(newStr)) {
-        used.add(newStr);
-        options.push({ value: newStr });
-      }
+// Show options
+const optionsDiv = document.getElementById("options");
+options.forEach((opt, idx) => {
+  const div = document.createElement("div");
+  div.className = "option";
+  div.innerText = `${String.fromCharCode(65 + idx)}) ${opt[0]}, ${opt[1]}, ${opt[2]}`;
+  div.onclick = () => {
+    document.querySelectorAll(".option").forEach(el => el.onclick = null);
+    if (idx === correctIndex) {
+      div.classList.add("correct");
+    } else {
+      div.classList.add("wrong");
+      document.querySelectorAll(".option")[correctIndex].classList.add("correct");
     }
 
-    return options.sort(() => Math.random() - 0.5);
-  }
-
-  function buildOMR(number) {
-    const container = document.getElementById("omr-container");
-    container.innerHTML = "";
-    number.split("").forEach((digit, index) => {
-      const column = document.createElement("div");
-      column.className = "digit-column";
-      const label = document.createElement("div");
-      label.className = "digit-label";
-      column.appendChild(label);
-      for (let i = 0; i <= 9; i++) {
-        const bubble = document.createElement("div");
-        bubble.className = "bubble";
-        bubble.textContent = i;
-        if (parseInt(digit) === i) {
-          bubble.classList.add("filled");
-        }
-        column.appendChild(bubble);
-      }
-      container.appendChild(column);
-    });
-  }
-
-  function buildOptions(correct, options) {
-    const optionsContainer = document.getElementById("options-container");
-    optionsContainer.innerHTML = "";
-    options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.className = "option-btn";
-      btn.textContent = opt.value;
-      btn.onclick = () => {
-        if (opt.value === correct) {
-          btn.classList.add("correct");
-          alert("✅ Correct!");
-        } else {
-          btn.classList.add("wrong");
-          alert("❌ Wrong!");
-        }
-      };
-      optionsContainer.appendChild(btn);
-    });
-  }
-
-  function post(imagePath) {
-    fetch("http://192.168.31.44/api/question", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        question: "What is the number shown in the OMR sheet?",
-        answer: correctAnswer,
-        a: optionsArray[0] || "",
-        b: optionsArray[1] || "",
-        c: optionsArray[2] || "",
-        d: optionsArray[3] || "",
-        language: "English",
-        category: "OMR Challenge",
-        difficulty: "Medium",
-        type: "Mental Ability",
-        image: `https://backend.stawro.com/stawro/${imagePath}`,
-        seconds: "10"
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert("✅ Question posted successfully!");
-      location.reload();
-    })
-    .catch(err => {
-      console.error("❌ POST Error:", err);
-      alert("❌ Failed to post question.");
-    });
-  }
-
-  document.getElementById("btnCapture").addEventListener("click", () => {
-    const element = document.querySelector(".omr-container");
-    html2canvas(element).then(canvas => {
-      canvas.toBlob(blob => {
-        capturedBlob = blob;
-        const url = URL.createObjectURL(blob);
-        document.getElementById("previewContainer").innerHTML = `<img src="${url}" alt="OMR Preview">`;
-        document.getElementById("btnUpload").disabled = false;
-      }, 'image/png');
-    });
-  });
-
-  document.getElementById("btnUpload").addEventListener("click", () => {
-    if (!capturedBlob) return alert("❌ No screenshot captured!");
-    const formData = new FormData();
-    formData.append("screenshot", capturedBlob, "omr.png");
-
-    fetch("https://backend.stawro.com/stawro/upload.php", {
-      method: "POST",
-      body: formData
-    })
-    .then(res => res.json())
-    .then(res => {
-      if (res.status === "success") {
-        post(res.path);
-      } else {
-        alert("⚠️ Upload failed.");
-      }
-    })
-    .catch(err => {
-      console.error("❌ Upload Error:", err);
-      alert("❌ Upload error.");
-    });
-  });
-
-  // INITIALIZE QUIZ
-  const correctNumber = generateRandomNumber();
-  correctAnswer = correctNumber;
-  const optionList = generateCenterChallengeOptions(correctNumber);
-  optionsArray = optionList.map(o => o.value);
-  buildOMR(correctNumber);
-  buildOptions(correctNumber, optionList);
+    // Show the correct answers
+    const ansDiv = document.getElementById("answers");
+    ansDiv.style.display = "block";
+    ansDiv.innerHTML = `<strong>Correct Answers:</strong><br>
+      ${selected[0]} → ${correctAnswers[0]}<br>
+      ${selected[1]} → ${correctAnswers[1]}<br>
+      ${selected[2]} → ${correctAnswers[2]}`;
+  };
+  optionsDiv.appendChild(div);
+});
 </script>
 
 </body>

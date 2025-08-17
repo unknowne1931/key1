@@ -1,0 +1,26 @@
+.h1_01{
+  font-size: 2rem;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: center;
+}
+
+.h1_01 strong span{
+  color: orangered;
+}
+
+
+.h1_01 strong{
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.input_01_cnt{
+  width: 90%;
+  height: auto;
+  padding: 20px;
+  border: 1px solid white;
+  margin: auto;
+  border-radius: 10px;
+  box-shadow: 4px 4px 8px gray;
+  background: linear-gradient(90deg, rgb(1, 1, 206), rgb(0, 111, 238));
+}
+
